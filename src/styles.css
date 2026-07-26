@@ -1,0 +1,168 @@
+:root {
+
+  --primary: #0f4c81;
+  --primary-light: #2f6da3;
+
+  --background: #f5f7fa;
+  --surface: #ffffff;
+
+  --border: #d9dee7;
+
+  --text: #1f2937;
+  --text-light: #6b7280;
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+  --radius: 10px;
+
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+
+  font-family:
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  background: var(--background);
+  color: var(--text);
+
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+
+  max-width: 1600px;
+
+  margin: auto;
+
+  padding: 30px;
+
+}
+
+.header {
+
+  margin-bottom: 30px;
+
+}
+
+.header h1 {
+
+  color: var(--primary);
+
+  font-size: 2rem;
+
+  margin-bottom: 8px;
+
+}
+
+.header p {
+
+  color: var(--text-light);
+
+}
+
+.content {
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+}
+
+.card {
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  padding: 24px;
+
+  box-shadow: var(--shadow);
+
+}
+
+.card h2 {
+
+  margin-bottom: 16px;
+
+  color: var(--primary);
+
+}
+
+.card p {
+
+  margin-bottom: 10px;
+
+}
+
+button {
+
+  cursor: pointer;
+
+  border: none;
+
+  border-radius: 6px;
+
+  padding: 10px 18px;
+
+  background: var(--primary);
+
+  color: white;
+
+  font-size: 14px;
+
+  transition: 0.2s;
+
+}
+
+button:hover {
+
+  background: var(--primary-light);
+
+}
+
+select {
+
+  padding: 8px 12px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 6px;
+
+  background: white;
+
+}
+
+@media (max-width: 768px) {
+
+  .app {
+
+    padding: 18px;
+
+  }
+
+  .header h1 {
+
+    font-size: 1.6rem;
+
+  }
+
+}
