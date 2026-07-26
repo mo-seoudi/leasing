@@ -1,4 +1,4 @@
-import dashboardData from "./data/leasing-full-truth-data.json";
+import dashboardData from "./data/leasing-data.json";
 
 export default function App() {
   const totalRecords = dashboardData.records.length;
