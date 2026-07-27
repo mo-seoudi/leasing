@@ -9,7 +9,6 @@ export default function DashboardFilters({
   return (
     <div className="card">
 
-      <h2>Filters</h2>
 
       <div className="filters-grid">
 
