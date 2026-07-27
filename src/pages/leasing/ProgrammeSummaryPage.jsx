@@ -2,10 +2,9 @@ import { useMemo, useState } from "react";
 
 import DashboardFilters from "../../components/DashboardFilters";
 import KpiCard from "../../components/KpiCard";
-import MetricSelector from "../../components/MetricSelector";
-import MonthlyTrendChart from "../../components/MonthlyTrendChart";
 import ProgrammeBreakdownChart from "../../components/ProgrammeBreakdownChart";
 import ProgrammeTable from "../../components/ProgrammeTable";
+
 import "./ProgrammeSummaryPage.css";
 
 import {
@@ -13,7 +12,6 @@ import {
   calculateKPIs,
   filterRecords,
   getAvailableProgrammes,
-  getMonthlyTrend,
   getProgrammeBreakdown,
   getTopProgrammes,
   programmeGroups,
@@ -21,12 +19,47 @@ import {
 } from "../../lib/dashboardData";
 
 const metricLabels = {
-  schoolIncome: "School Income",
   totalRevenue: "Total Revenue",
+  schoolIncome: "School Income",
   sales: "Sales",
   commission: "Commission",
   rentalFees: "Rental Fees",
 };
+
+const metricCards = [
+  {
+    key: "totalRevenue",
+    title: "Total Revenue",
+    color: "#2563eb",
+    type: "primary",
+    description: "Sales + Rental Fees",
+  },
+  {
+    key: "schoolIncome",
+    title: "School Income",
+    color: "#0f4c81",
+    type: "primary",
+    description: "Commission + Rental Fees",
+  },
+  {
+    key: "sales",
+    title: "Sales",
+    color: "#7c3aed",
+    type: "secondary",
+  },
+  {
+    key: "commission",
+    title: "Commission",
+    color: "#16a34a",
+    type: "secondary",
+  },
+  {
+    key: "rentalFees",
+    title: "Rental Fees",
+    color: "#d97706",
+    type: "secondary",
+  },
+];
 
 export default function ProgrammeSummaryPage() {
   const [filters, setFilters] = useState({
@@ -37,7 +70,7 @@ export default function ProgrammeSummaryPage() {
   });
 
   const [selectedMetric, setSelectedMetric] =
-    useState("schoolIncome");
+    useState("totalRevenue");
 
   const availableProgrammes = useMemo(
     () => getAvailableProgrammes(filters.programGroup),
@@ -51,11 +84,6 @@ export default function ProgrammeSummaryPage() {
 
   const kpis = useMemo(
     () => calculateKPIs(filteredData),
-    [filteredData]
-  );
-
-  const monthlyData = useMemo(
-    () => getMonthlyTrend(filteredData),
     [filteredData]
   );
 
@@ -99,15 +127,20 @@ export default function ProgrammeSummaryPage() {
   }
 
   const selectedMetricLabel =
-    metricLabels[selectedMetric] ?? "School Income";
+    metricLabels[selectedMetric] ?? "Total Revenue";
+
+  const primaryCards = metricCards.filter(
+    (card) => card.type === "primary"
+  );
+
+  const secondaryCards = metricCards.filter(
+    (card) => card.type === "secondary"
+  );
 
   return (
     <section className="programme-summary-page">
-      <section className="dashboard-toolbar">
-        <MetricSelector
-          value={selectedMetric}
-          onChange={setSelectedMetric}
-        />
+      <div className="filters-section-heading">
+        <h2>Filters</h2>
 
         <button
           type="button"
@@ -116,7 +149,7 @@ export default function ProgrammeSummaryPage() {
         >
           Clear Filters
         </button>
-      </section>
+      </div>
 
       <DashboardFilters
         filters={filters}
@@ -127,45 +160,66 @@ export default function ProgrammeSummaryPage() {
         onChange={handleFilterChange}
       />
 
-      <section className="kpi-grid">
-        <KpiCard
-          title="School Income"
-          value={kpis.schoolIncome}
-          color="#0f4c81"
-        />
+      <section className="metric-card-section">
+        <div className="metric-section-heading">
+          <div>
+            <h2>Financial Summary</h2>
 
-        <KpiCard
-          title="Total Revenue"
-          value={kpis.totalRevenue}
-          color="#2563eb"
-        />
+            <p>
+              Select a financial measure to update the
+              programme analysis below.
+            </p>
+          </div>
 
-        <KpiCard
-          title="Sales"
-          value={kpis.sales}
-          color="#7c3aed"
-        />
+          <span className="selected-metric-label">
+            Displaying: {selectedMetricLabel}
+          </span>
+        </div>
 
-        <KpiCard
-          title="Commission"
-          value={kpis.commission}
-          color="#16a34a"
-        />
+        <div className="primary-kpi-grid">
+          {primaryCards.map((card) => (
+            <button
+              key={card.key}
+              type="button"
+              className={`metric-card-button primary-metric-card ${
+                selectedMetric === card.key ? "selected" : ""
+              }`}
+              onClick={() => setSelectedMetric(card.key)}
+              aria-pressed={selectedMetric === card.key}
+            >
+              <KpiCard
+                title={card.title}
+                value={kpis[card.key]}
+                color={card.color}
+              />
 
-        <KpiCard
-          title="Rental Fees"
-          value={kpis.rentalFees}
-          color="#d97706"
-        />
+              <span className="metric-card-description">
+                {card.description}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="secondary-kpi-grid">
+          {secondaryCards.map((card) => (
+            <button
+              key={card.key}
+              type="button"
+              className={`metric-card-button secondary-metric-card ${
+                selectedMetric === card.key ? "selected" : ""
+              }`}
+              onClick={() => setSelectedMetric(card.key)}
+              aria-pressed={selectedMetric === card.key}
+            >
+              <KpiCard
+                title={card.title}
+                value={kpis[card.key]}
+                color={card.color}
+              />
+            </button>
+          ))}
+        </div>
       </section>
-
-      {false && (
-        <MonthlyTrendChart
-        title={`${selectedMetricLabel} by Month`}
-        data={monthlyData}
-        dataKey={selectedMetric}
-        />
-      )}
 
       <ProgrammeBreakdownChart
         title={`Top Programmes by ${selectedMetricLabel}`}
