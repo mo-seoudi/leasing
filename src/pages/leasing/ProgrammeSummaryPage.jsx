@@ -1,64 +1,33 @@
 export default function ProgrammeSummaryPage() {
   return (
-    <section
-      style={{
-        width: "100%",
-        minWidth: 0,
-      }}
-    >
-      <header
-        style={{
-          marginBottom: "24px",
-        }}
-      >
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "28px",
-            fontWeight: 700,
-            color: "#1f2937",
-          }}
-        >
-          Programme Summary
-        </h1>
-
-        <p
-          style={{
-            margin: "8px 0 0",
-            color: "#667085",
-            fontSize: "14px",
-          }}
-        >
-          Monthly and annual leasing figures by programme and academic year.
-        </p>
-      </header>
-
+    <section className="analysis-page">
       <div
         style={{
           background: "#ffffff",
-          border: "1px solid #e2e8f0",
+          border: "1px solid #e5e7eb",
           borderRadius: "12px",
           padding: "24px",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.06)",
+          boxShadow: "0 1px 2px rgba(16, 24, 40, 0.04)",
         }}
       >
         <h2
           style={{
-            margin: "0 0 8px",
-            fontSize: "18px",
-            color: "#1f2937",
+            margin: "0 0 6px",
+            fontSize: "17px",
+            color: "#111827",
           }}
         >
-          Programme Summary Table
+          Monthly Programme Analysis
         </h2>
 
         <p
           style={{
             margin: 0,
             color: "#667085",
+            fontSize: "13px",
           }}
         >
-          The JSON-driven programme summary table will be added here.
+          The programme and academic-year summary table will appear here.
         </p>
       </div>
     </section>
