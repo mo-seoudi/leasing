@@ -6,6 +6,7 @@ import MetricSelector from "./components/MetricSelector";
 import MonthlyTrendChart from "./components/MonthlyTrendChart";
 import ProgrammeBreakdownChart from "./components/ProgrammeBreakdownChart";
 import ProgrammeTable from "./components/ProgrammeTable";
+import AppRoutes from "./routes/AppRoutes";
 
 import {
   academicYears,
@@ -27,6 +28,9 @@ const metricLabels = {
   rentalFees: "Rental Fees",
 };
 
+export default function App() {
+  return <AppRoutes />;
+}
 export default function App() {
   const [filters, setFilters] = useState({
     school: "",
