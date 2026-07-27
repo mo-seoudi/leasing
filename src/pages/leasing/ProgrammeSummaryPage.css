@@ -282,7 +282,7 @@
   text-transform: uppercase;
 }
 
-/* Formula below main cards */
+/* Formula beneath main cards */
 
 .metric-card-description {
   position: absolute;
@@ -373,6 +373,75 @@
   font-weight: 700;
 }
 
+/* Clickable programme link */
+
+.programme-detail-link {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #175cd3;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.programme-detail-link:hover {
+  color: #004eeb;
+  text-decoration: underline;
+}
+
+.programme-row-arrow {
+  display: inline-block;
+  color: #98a2b3;
+  font-size: 17px;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.programme-row-arrow.open {
+  transform: rotate(90deg);
+  color: #4f46e5;
+}
+
+.programme-summary-page .selected-programme-row {
+  background: #f5f7ff;
+}
+
+.programme-summary-page .selected-programme-row:hover {
+  background: #eef2ff;
+}
+
+/* Expanded detail row */
+
+.programme-expanded-row td {
+  padding: 0 !important;
+  background: #f8faff;
+  border-bottom: 1px solid #c7d2fe;
+}
+
+.programme-expanded-row:hover {
+  background: transparent !important;
+}
+
+.programme-expanded-row .programme-detail-panel {
+  margin: 10px;
+}
+
+.programme-summary-page
+  .programme-expanded-row
+  .programme-detail-table th,
+.programme-summary-page
+  .programme-expanded-row
+  .programme-detail-table td {
+  padding: 10px 11px;
+}
+
 /* Empty state */
 
 .empty-state {
@@ -451,47 +520,4 @@
   .programme-summary-page .table-card {
     padding: 14px;
   }
-}
-.programme-detail-link {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #175cd3;
-  font: inherit;
-  font-weight: 700;
-  text-align: left;
-  cursor: pointer;
-}
-
-.programme-detail-link:hover {
-  color: #004eeb;
-  text-decoration: underline;
-}
-
-.programme-row-arrow {
-  display: inline-block;
-  color: #98a2b3;
-  font-size: 17px;
-  line-height: 1;
-  transition: transform 160ms ease;
-}
-
-.programme-row-arrow.open {
-  transform: rotate(90deg);
-  color: #4f46e5;
-}
-
-.programme-summary-page
-  .selected-programme-row {
-  background: #f5f7ff;
-}
-
-.programme-summary-page
-  .selected-programme-row:hover {
-  background: #eef2ff;
 }
