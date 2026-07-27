@@ -6,6 +6,7 @@ import MetricSelector from "../../components/MetricSelector";
 import MonthlyTrendChart from "../../components/MonthlyTrendChart";
 import ProgrammeBreakdownChart from "../../components/ProgrammeBreakdownChart";
 import ProgrammeTable from "../../components/ProgrammeTable";
+import "./ProgrammeSummaryPage.css";
 
 import {
   academicYears,
