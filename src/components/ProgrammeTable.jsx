@@ -24,8 +24,8 @@ export default function ProgrammeTable({
           <h2>{title}</h2>
 
           <p>
-            Click a programme name to open its monthly or termly
-            financial details.
+            Click a programme name to view its monthly or termly
+            financial breakdown.
           </p>
         </div>
       </div>
@@ -65,7 +65,9 @@ export default function ProgrammeTable({
                           type="button"
                           className="programme-detail-link"
                           onClick={() =>
-                            handleProgrammeClick(item.programme)
+                            handleProgrammeClick(
+                              item.programme
+                            )
                           }
                           aria-expanded={isSelected}
                         >
@@ -78,7 +80,7 @@ export default function ProgrammeTable({
                                 : "programme-row-arrow"
                             }
                           >
-                            ›
+                            ▶
                           </span>
                         </button>
                       </td>
@@ -127,7 +129,7 @@ export default function ProgrammeTable({
         </div>
       ) : (
         <div className="empty-state">
-          No programme data is available for the selected filters.
+          No programme data available for the selected filters.
         </div>
       )}
     </section>
