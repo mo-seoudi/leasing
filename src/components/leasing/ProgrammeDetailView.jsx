@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { formatCurrency } from "../../lib/dashboardData";
+import {
+  academicYears,
+  formatCurrency,
+  schools,
+} from "../../lib/dashboardData";
+
 import "./ProgrammeDetailView.css";
 
 const MONTHS = [
@@ -39,7 +44,11 @@ const TERM_MONTHS = {
     "November",
     "December",
   ],
-  "Term 2": ["January", "February", "March"],
+  "Term 2": [
+    "January",
+    "February",
+    "March",
+  ],
   "Term 3": [
     "April",
     "May",
@@ -79,11 +88,20 @@ const MEASURES = [
 
 function toNumber(value) {
   const number = Number(value);
+
   return Number.isFinite(number) ? number : 0;
 }
 
+function formatDisplayValue(value) {
+  const number = toNumber(value);
+
+  return number === 0 ? "-" : formatCurrency(number);
+}
+
 function normaliseMonth(month) {
-  const value = String(month || "").trim().toLowerCase();
+  const value = String(month || "")
+    .trim()
+    .toLowerCase();
 
   const matches = {
     sep: "September",
@@ -127,8 +145,10 @@ function createEmptyMeasures() {
 function finishMeasures(measures) {
   return {
     ...measures,
+
     totalRevenue:
       measures.sales + measures.rentalFees,
+
     schoolIncome:
       measures.commission + measures.rentalFees,
   };
@@ -154,8 +174,9 @@ function getTermFromMonth(month) {
   const normalisedMonth = normaliseMonth(month);
 
   return (
-    Object.entries(TERM_MONTHS).find(([, months]) =>
-      months.includes(normalisedMonth)
+    Object.entries(TERM_MONTHS).find(
+      ([, months]) =>
+        months.includes(normalisedMonth)
     )?.[0] || "Unallocated"
   );
 }
@@ -165,15 +186,74 @@ export default function ProgrammeDetailView({
   records = [],
   onClose,
 }) {
-  const [viewMode, setViewMode] = useState("monthly");
+  const latestAcademicYear =
+    academicYears[academicYears.length - 1] || "";
 
-  const programmeRecords = useMemo(
-    () =>
-      records.filter(
-        (record) => record.program === programme
+  const [viewMode, setViewMode] =
+    useState("termly");
+
+  const [detailFilters, setDetailFilters] =
+    useState({
+      school: "",
+      academicYear: latestAcademicYear,
+    });
+
+  const availableSchools = useMemo(() => {
+    return [
+      ...new Set(
+        records
+          .filter(
+            (record) =>
+              record.program === programme
+          )
+          .map((record) => record.school)
+          .filter(Boolean)
       ),
-    [records, programme]
-  );
+    ].sort();
+  }, [records, programme]);
+
+  const availableAcademicYears = useMemo(() => {
+    return [
+      ...new Set(
+        records
+          .filter(
+            (record) =>
+              record.program === programme
+          )
+          .map((record) => record.academicYear)
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [records, programme]);
+
+  const programmeRecords = useMemo(() => {
+    return records.filter((record) => {
+      if (record.program !== programme) {
+        return false;
+      }
+
+      if (
+        detailFilters.school &&
+        record.school !== detailFilters.school
+      ) {
+        return false;
+      }
+
+      if (
+        detailFilters.academicYear &&
+        record.academicYear !==
+          detailFilters.academicYear
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    records,
+    programme,
+    detailFilters,
+  ]);
 
   const monthlyData = useMemo(() => {
     const grouped = Object.fromEntries(
@@ -209,8 +289,7 @@ export default function ProgrammeDetailView({
 
     programmeRecords.forEach((record) => {
       const term =
-        record.term &&
-        grouped[record.term]
+        record.term && grouped[record.term]
           ? record.term
           : getTermFromMonth(record.month);
 
@@ -229,7 +308,9 @@ export default function ProgrammeDetailView({
   }, [programmeRecords]);
 
   const displayedPeriods =
-    viewMode === "monthly" ? monthlyData : termlyData;
+    viewMode === "monthly"
+      ? monthlyData
+      : termlyData;
 
   const totals = useMemo(() => {
     const measures = createEmptyMeasures();
@@ -240,6 +321,16 @@ export default function ProgrammeDetailView({
 
     return finishMeasures(measures);
   }, [programmeRecords]);
+
+  function handleDetailFilterChange(
+    name,
+    value
+  ) {
+    setDetailFilters((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
 
   return (
     <section className="programme-detail-panel">
@@ -252,8 +343,8 @@ export default function ProgrammeDetailView({
           <h2>{programme}</h2>
 
           <p>
-            Detailed income figures using the currently
-            selected school and academic-year filters.
+            Detailed income figures by school,
+            academic year, month, or term.
           </p>
         </div>
 
@@ -266,61 +357,154 @@ export default function ProgrammeDetailView({
         </button>
       </header>
 
-      <div className="programme-detail-tabs">
-        <button
-          type="button"
-          className={
-            viewMode === "monthly" ? "active" : ""
-          }
-          onClick={() => setViewMode("monthly")}
-        >
-          Monthly
-        </button>
+      <div className="programme-detail-controls">
+        <div className="programme-detail-filters">
+          <div className="programme-detail-filter">
+            <label htmlFor="detail-school">
+              School
+            </label>
 
-        <button
-          type="button"
-          className={
-            viewMode === "termly" ? "active" : ""
-          }
-          onClick={() => setViewMode("termly")}
-        >
-          Termly
-        </button>
+            <select
+              id="detail-school"
+              value={detailFilters.school}
+              onChange={(event) =>
+                handleDetailFilterChange(
+                  "school",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Schools</option>
+
+              {availableSchools.map((school) => (
+                <option
+                  key={school}
+                  value={school}
+                >
+                  {school}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="programme-detail-filter">
+            <label htmlFor="detail-academic-year">
+              Academic Year
+            </label>
+
+            <select
+              id="detail-academic-year"
+              value={
+                detailFilters.academicYear
+              }
+              onChange={(event) =>
+                handleDetailFilterChange(
+                  "academicYear",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Academic Years</option>
+
+              {availableAcademicYears.map(
+                (academicYear) => (
+                  <option
+                    key={academicYear}
+                    value={academicYear}
+                  >
+                    {academicYear}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div className="programme-detail-tabs">
+          <button
+            type="button"
+            className={
+              viewMode === "termly"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setViewMode("termly")
+            }
+          >
+            Termly
+          </button>
+
+          <button
+            type="button"
+            className={
+              viewMode === "monthly"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setViewMode("monthly")
+            }
+          >
+            Monthly
+          </button>
+        </div>
       </div>
 
       <div className="programme-detail-summary">
         <div className="main-summary">
           <span>Total Revenue</span>
+
           <strong>
-            {formatCurrency(totals.totalRevenue)}
+            {formatDisplayValue(
+              totals.totalRevenue
+            )}
           </strong>
-          <small>Sales + Rental Fees</small>
+
+          <small>
+            Sales + Rental Fees
+          </small>
         </div>
 
         <div className="main-summary">
           <span>School Income</span>
+
           <strong>
-            {formatCurrency(totals.schoolIncome)}
+            {formatDisplayValue(
+              totals.schoolIncome
+            )}
           </strong>
-          <small>Commission + Rental Fees</small>
+
+          <small>
+            Commission + Rental Fees
+          </small>
         </div>
 
         <div>
           <span>Sales</span>
-          <strong>{formatCurrency(totals.sales)}</strong>
+
+          <strong>
+            {formatDisplayValue(totals.sales)}
+          </strong>
         </div>
 
         <div>
           <span>Commission</span>
+
           <strong>
-            {formatCurrency(totals.commission)}
+            {formatDisplayValue(
+              totals.commission
+            )}
           </strong>
         </div>
 
         <div>
           <span>Rental Fees</span>
+
           <strong>
-            {formatCurrency(totals.rentalFees)}
+            {formatDisplayValue(
+              totals.rentalFees
+            )}
           </strong>
         </div>
       </div>
@@ -353,18 +537,22 @@ export default function ProgrammeDetailView({
               >
                 <th>{measure.label}</th>
 
-                {displayedPeriods.map((period) => (
-                  <td
-                    key={`${measure.key}-${period.period}`}
-                  >
-                    {formatCurrency(
-                      period[measure.key]
-                    )}
-                  </td>
-                ))}
+                {displayedPeriods.map(
+                  (period) => (
+                    <td
+                      key={`${measure.key}-${period.period}`}
+                    >
+                      {formatDisplayValue(
+                        period[measure.key]
+                      )}
+                    </td>
+                  )
+                )}
 
                 <td className="detail-total-cell">
-                  {formatCurrency(totals[measure.key])}
+                  {formatDisplayValue(
+                    totals[measure.key]
+                  )}
                 </td>
               </tr>
             ))}
