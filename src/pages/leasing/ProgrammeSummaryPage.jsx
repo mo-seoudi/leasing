@@ -159,11 +159,13 @@ export default function ProgrammeSummaryPage() {
         />
       </section>
 
-      <MonthlyTrendChart
+      {false && (
+        <MonthlyTrendChart
         title={`${selectedMetricLabel} by Month`}
         data={monthlyData}
         dataKey={selectedMetric}
-      />
+        />
+      )}
 
       <ProgrammeBreakdownChart
         title={`Top Programmes by ${selectedMetricLabel}`}
