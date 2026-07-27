@@ -239,7 +239,17 @@ export default function ProgrammeSummaryPage() {
       <ProgrammeTable
         title="Programme Details"
         data={programmeData}
+        selectedProgramme={selectedProgrammeDetail}
+        onProgrammeClick={handleProgrammeDetailClick}
       />
+      {selectedProgrammeDetail && (
+        <ProgrammeDetailView
+            programme={selectedProgrammeDetail}
+            records={filteredData}
+            onClose={() => setSelectedProgrammeDetail("")}
+          />
+      )}
+
     </section>
   );
 }
