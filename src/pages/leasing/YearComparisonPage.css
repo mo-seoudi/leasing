@@ -1,0 +1,212 @@
+.year-comparison-page {
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.comparison-filter-card,
+.year-summary-card,
+.year-chart-card {
+  margin-bottom: 18px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.comparison-filter-heading,
+.year-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.comparison-filter-heading h2,
+.year-card-heading h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.comparison-filter-heading p,
+.year-card-heading p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+}
+
+.comparison-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.comparison-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comparison-filter label {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.comparison-filter select {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.comparison-filter select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.year-count {
+  padding: 5px 9px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #f9fafb;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.year-table-scroll {
+  overflow-x: auto;
+}
+
+.year-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.year-comparison-table th,
+.year-comparison-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.year-comparison-table thead th {
+  background: #f8fafc;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.year-comparison-table th:first-child {
+  text-align: left;
+}
+
+.year-comparison-table tbody th {
+  color: #344054;
+  font-weight: 700;
+}
+
+.year-comparison-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.revenue-cell {
+  color: #1679a7;
+  font-weight: 700;
+}
+
+.income-cell {
+  color: #d85f1b;
+  font-weight: 700;
+}
+
+.growth-value {
+  display: inline-flex;
+  min-width: 54px;
+  justify-content: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.growth-value.positive {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.growth-value.negative {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.growth-value.neutral {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.year-chart-container {
+  width: 100%;
+  height: 390px;
+}
+
+.empty-state {
+  padding: 36px 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+.secondary-button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #b9c2d0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #f8fafc;
+}
+
+@media (max-width: 900px) {
+  .comparison-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .comparison-filter-heading,
+  .year-card-heading {
+    flex-direction: column;
+  }
+
+  .secondary-button {
+    width: 100%;
+  }
+
+  .year-chart-container {
+    height: 330px;
+  }
+}
