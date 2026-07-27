@@ -1,10 +1,15 @@
+import { Fragment } from "react";
+
 import { formatCurrency } from "../lib/dashboardData";
+import ProgrammeDetailView from "./leasing/ProgrammeDetailView";
 
 export default function ProgrammeTable({
   data = [],
+  records = [],
   title = "Programme Details",
   selectedProgramme = "",
   onProgrammeClick,
+  onCloseProgramme,
 }) {
   function handleProgrammeClick(programme) {
     if (typeof onProgrammeClick === "function") {
@@ -19,8 +24,8 @@ export default function ProgrammeTable({
           <h2>{title}</h2>
 
           <p>
-            Click a programme name to open its monthly or
-            termly financial details.
+            Click a programme name to open its monthly or termly
+            financial details.
           </p>
         </div>
       </div>
@@ -34,18 +39,10 @@ export default function ProgrammeTable({
                 <th>Group</th>
                 <th>Provider</th>
                 <th className="number-cell">Sales</th>
-                <th className="number-cell">
-                  Commission
-                </th>
-                <th className="number-cell">
-                  Rental Fees
-                </th>
-                <th className="number-cell">
-                  Total Revenue
-                </th>
-                <th className="number-cell">
-                  School Income
-                </th>
+                <th className="number-cell">Commission</th>
+                <th className="number-cell">Rental Fees</th>
+                <th className="number-cell">Total Revenue</th>
+                <th className="number-cell">School Income</th>
               </tr>
             </thead>
 
@@ -55,67 +52,74 @@ export default function ProgrammeTable({
                   selectedProgramme === item.programme;
 
                 return (
-                  <tr
-                    key={item.programme}
-                    className={
-                      isSelected
-                        ? "selected-programme-row"
-                        : ""
-                    }
-                  >
-                    <td className="programme-name">
-                      <button
-                        type="button"
-                        className="programme-detail-link"
-                        onClick={() =>
-                          handleProgrammeClick(
-                            item.programme
-                          )
-                        }
-                        aria-expanded={isSelected}
-                      >
-                        <span>{item.programme}</span>
-
-                        <span
-                          className={
-                            isSelected
-                              ? "programme-row-arrow open"
-                              : "programme-row-arrow"
+                  <Fragment key={item.programme}>
+                    <tr
+                      className={
+                        isSelected
+                          ? "selected-programme-row"
+                          : ""
+                      }
+                    >
+                      <td className="programme-name">
+                        <button
+                          type="button"
+                          className="programme-detail-link"
+                          onClick={() =>
+                            handleProgrammeClick(item.programme)
                           }
+                          aria-expanded={isSelected}
                         >
-                          ›
-                        </span>
-                      </button>
-                    </td>
+                          <span>{item.programme}</span>
 
-                    <td>{item.programGroup || "—"}</td>
+                          <span
+                            className={
+                              isSelected
+                                ? "programme-row-arrow open"
+                                : "programme-row-arrow"
+                            }
+                          >
+                            ›
+                          </span>
+                        </button>
+                      </td>
 
-                    <td>{item.provider || "—"}</td>
+                      <td>{item.programGroup || "—"}</td>
 
-                    <td className="number-cell">
-                      {formatCurrency(item.sales)}
-                    </td>
+                      <td>{item.provider || "—"}</td>
 
-                    <td className="number-cell">
-                      {formatCurrency(item.commission)}
-                    </td>
+                      <td className="number-cell">
+                        {formatCurrency(item.sales)}
+                      </td>
 
-                    <td className="number-cell">
-                      {formatCurrency(item.rentalFees)}
-                    </td>
+                      <td className="number-cell">
+                        {formatCurrency(item.commission)}
+                      </td>
 
-                    <td className="number-cell">
-                      {formatCurrency(
-                        item.totalRevenue
-                      )}
-                    </td>
+                      <td className="number-cell">
+                        {formatCurrency(item.rentalFees)}
+                      </td>
 
-                    <td className="number-cell school-income-cell">
-                      {formatCurrency(
-                        item.schoolIncome
-                      )}
-                    </td>
-                  </tr>
+                      <td className="number-cell">
+                        {formatCurrency(item.totalRevenue)}
+                      </td>
+
+                      <td className="number-cell school-income-cell">
+                        {formatCurrency(item.schoolIncome)}
+                      </td>
+                    </tr>
+
+                    {isSelected && (
+                      <tr className="programme-expanded-row">
+                        <td colSpan={8}>
+                          <ProgrammeDetailView
+                            programme={item.programme}
+                            records={records}
+                            onClose={onCloseProgramme}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
@@ -123,8 +127,7 @@ export default function ProgrammeTable({
         </div>
       ) : (
         <div className="empty-state">
-          No programme data is available for the selected
-          filters.
+          No programme data is available for the selected filters.
         </div>
       )}
     </section>
