@@ -4,7 +4,6 @@ import DashboardFilters from "../../components/DashboardFilters";
 import KpiCard from "../../components/KpiCard";
 import ProgrammeBreakdownChart from "../../components/ProgrammeBreakdownChart";
 import ProgrammeTable from "../../components/ProgrammeTable";
-import ProgrammeDetailView from "../../components/leasing/ProgrammeDetailView";
 
 import "./ProgrammeSummaryPage.css";
 
@@ -122,7 +121,6 @@ export default function ProgrammeSummaryPage() {
       return updatedFilters;
     });
 
-    // Close any open programme details when filters change.
     setSelectedProgrammeDetail("");
   }
 
@@ -259,21 +257,15 @@ export default function ProgrammeSummaryPage() {
       <ProgrammeTable
         title="Programme Details"
         data={programmeData}
+        records={filteredData}
         selectedProgramme={selectedProgrammeDetail}
         onProgrammeClick={
           handleProgrammeDetailClick
         }
+        onCloseProgramme={() =>
+          setSelectedProgrammeDetail("")
+        }
       />
-
-      {selectedProgrammeDetail && (
-        <ProgrammeDetailView
-          programme={selectedProgrammeDetail}
-          records={filteredData}
-          onClose={() =>
-            setSelectedProgrammeDetail("")
-          }
-        />
-      )}
     </section>
   );
 }
