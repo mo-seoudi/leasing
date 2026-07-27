@@ -141,11 +141,11 @@ function PercentagePieChart({
 }
 
 export default function ProgrammeComparisonPage() {
-  const defaultAcademicYear =
+  const latestAcademicYear =
     academicYears[academicYears.length - 1] || "";
 
   const [filters, setFilters] = useState({
-    academicYear: defaultAcademicYear,
+    academicYear: latestAcademicYear,
     school: "",
     programGroup: "",
   });
@@ -256,11 +256,14 @@ export default function ProgrammeComparisonPage() {
 
   function clearFilters() {
     setFilters({
-      academicYear: defaultAcademicYear,
+      academicYear: latestAcademicYear,
       school: "",
       programGroup: "",
     });
   }
+
+  const selectedPeriodLabel =
+    filters.academicYear || "All Time";
 
   return (
     <section className="programme-comparison-page">
@@ -271,7 +274,7 @@ export default function ProgrammeComparisonPage() {
 
             <p>
               Compare programme revenue and school income
-              within one academic year.
+              within one academic year or across all years.
             </p>
           </div>
 
@@ -300,6 +303,8 @@ export default function ProgrammeComparisonPage() {
                 )
               }
             >
+              <option value="">All Time</option>
+
               {academicYears.map((academicYear) => (
                 <option
                   key={academicYear}
@@ -384,10 +389,8 @@ export default function ProgrammeComparisonPage() {
         </div>
 
         <div>
-          <span>Selected Year</span>
-          <strong>
-            {filters.academicYear || "All Years"}
-          </strong>
+          <span>Selected Period</span>
+          <strong>{selectedPeriodLabel}</strong>
         </div>
       </section>
 
@@ -520,8 +523,8 @@ export default function ProgrammeComparisonPage() {
             <h2>Programme Revenue Comparison</h2>
 
             <p>
-              Total Revenue and School Income for the
-              selected academic year.
+              Total Revenue and School Income for{" "}
+              {selectedPeriodLabel}.
             </p>
           </div>
 
@@ -586,14 +589,14 @@ export default function ProgrammeComparisonPage() {
       <div className="programme-pie-grid">
         <PercentagePieChart
           title="% of Total Leasing Revenue"
-          description="Each programme’s share of total revenue."
+          description={`Each programme’s share of revenue for ${selectedPeriodLabel}.`}
           data={programmeData}
           dataKey="revenueShare"
         />
 
         <PercentagePieChart
           title="% of Total Leasing School Income"
-          description="Each programme’s share of commission and rental fees."
+          description={`Each programme’s share of commission and rental fees for ${selectedPeriodLabel}.`}
           data={programmeData}
           dataKey="incomeShare"
         />
