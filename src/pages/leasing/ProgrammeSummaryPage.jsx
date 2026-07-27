@@ -4,6 +4,7 @@ import DashboardFilters from "../../components/DashboardFilters";
 import KpiCard from "../../components/KpiCard";
 import ProgrammeBreakdownChart from "../../components/ProgrammeBreakdownChart";
 import ProgrammeTable from "../../components/ProgrammeTable";
+import ProgrammeDetailView from "../../components/leasing/ProgrammeDetailView";
 
 import "./ProgrammeSummaryPage.css";
 
