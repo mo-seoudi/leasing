@@ -19,6 +19,9 @@ import {
   schools,
 } from "../../lib/dashboardData";
 
+const [selectedProgrammeDetail, setSelectedProgrammeDetail] =
+  useState("");
+
 const metricLabels = {
   totalRevenue: "Total Revenue",
   schoolIncome: "School Income",
@@ -118,6 +121,11 @@ export default function ProgrammeSummaryPage() {
     });
   }
 
+  function handleProgrammeDetailClick(programme) {
+  setSelectedProgrammeDetail((current) =>
+    current === programme ? "" : programme
+  );
+}
   function clearFilters() {
     setFilters({
       school: "",
