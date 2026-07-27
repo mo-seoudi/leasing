@@ -452,3 +452,46 @@
     padding: 14px;
   }
 }
+.programme-detail-link {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #175cd3;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.programme-detail-link:hover {
+  color: #004eeb;
+  text-decoration: underline;
+}
+
+.programme-row-arrow {
+  display: inline-block;
+  color: #98a2b3;
+  font-size: 17px;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.programme-row-arrow.open {
+  transform: rotate(90deg);
+  color: #4f46e5;
+}
+
+.programme-summary-page
+  .selected-programme-row {
+  background: #f5f7ff;
+}
+
+.programme-summary-page
+  .selected-programme-row:hover {
+  background: #eef2ff;
+}
