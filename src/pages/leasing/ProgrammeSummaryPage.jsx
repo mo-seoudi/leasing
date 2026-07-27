@@ -19,9 +19,6 @@ import {
   schools,
 } from "../../lib/dashboardData";
 
-const [selectedProgrammeDetail, setSelectedProgrammeDetail] =
-  useState("");
-
 const metricLabels = {
   totalRevenue: "Total Revenue",
   schoolIncome: "School Income",
@@ -76,6 +73,11 @@ export default function ProgrammeSummaryPage() {
   const [selectedMetric, setSelectedMetric] =
     useState("totalRevenue");
 
+  const [
+    selectedProgrammeDetail,
+    setSelectedProgrammeDetail,
+  ] = useState("");
+
   const availableProgrammes = useMemo(
     () => getAvailableProgrammes(filters.programGroup),
     [filters.programGroup]
@@ -119,13 +121,17 @@ export default function ProgrammeSummaryPage() {
 
       return updatedFilters;
     });
+
+    // Close any open programme details when filters change.
+    setSelectedProgrammeDetail("");
   }
 
   function handleProgrammeDetailClick(programme) {
-  setSelectedProgrammeDetail((current) =>
-    current === programme ? "" : programme
-  );
-}
+    setSelectedProgrammeDetail((current) =>
+      current === programme ? "" : programme
+    );
+  }
+
   function clearFilters() {
     setFilters({
       school: "",
@@ -133,6 +139,8 @@ export default function ProgrammeSummaryPage() {
       programGroup: "",
       program: "",
     });
+
+    setSelectedProgrammeDetail("");
   }
 
   const selectedMetricLabel =
@@ -191,10 +199,16 @@ export default function ProgrammeSummaryPage() {
               key={card.key}
               type="button"
               className={`metric-card-button primary-metric-card ${
-                selectedMetric === card.key ? "selected" : ""
+                selectedMetric === card.key
+                  ? "selected"
+                  : ""
               }`}
-              onClick={() => setSelectedMetric(card.key)}
-              aria-pressed={selectedMetric === card.key}
+              onClick={() =>
+                setSelectedMetric(card.key)
+              }
+              aria-pressed={
+                selectedMetric === card.key
+              }
             >
               <KpiCard
                 title={card.title}
@@ -215,10 +229,16 @@ export default function ProgrammeSummaryPage() {
               key={card.key}
               type="button"
               className={`metric-card-button secondary-metric-card ${
-                selectedMetric === card.key ? "selected" : ""
+                selectedMetric === card.key
+                  ? "selected"
+                  : ""
               }`}
-              onClick={() => setSelectedMetric(card.key)}
-              aria-pressed={selectedMetric === card.key}
+              onClick={() =>
+                setSelectedMetric(card.key)
+              }
+              aria-pressed={
+                selectedMetric === card.key
+              }
             >
               <KpiCard
                 title={card.title}
@@ -240,16 +260,20 @@ export default function ProgrammeSummaryPage() {
         title="Programme Details"
         data={programmeData}
         selectedProgramme={selectedProgrammeDetail}
-        onProgrammeClick={handleProgrammeDetailClick}
+        onProgrammeClick={
+          handleProgrammeDetailClick
+        }
       />
+
       {selectedProgrammeDetail && (
         <ProgrammeDetailView
-            programme={selectedProgrammeDetail}
-            records={filteredData}
-            onClose={() => setSelectedProgrammeDetail("")}
-          />
+          programme={selectedProgrammeDetail}
+          records={filteredData}
+          onClose={() =>
+            setSelectedProgrammeDetail("")
+          }
+        />
       )}
-
     </section>
   );
 }
