@@ -1,10 +1,6 @@
 import { useMemo, useState } from "react";
-import {
-  academicYears,
-  formatCurrency,
-  schools,
-} from "../../lib/dashboardData";
 
+import { formatCurrency } from "../../lib/dashboardData";
 import "./ProgrammeDetailView.css";
 
 const MONTHS = [
@@ -99,19 +95,62 @@ function formatDisplayValue(value) {
 }
 
 function normaliseMonth(month) {
-  const value = String(month || "")
-    .trim()
-    .toLowerCase();
+  if (!month) {
+    return "";
+  }
 
-  const matches = {
-    sep: "September",
-    september: "September",
-    oct: "October",
-    october: "October",
-    nov: "November",
-    november: "November",
-    dec: "December",
-    december: "December",
+  const rawValue = String(month).trim();
+
+  // Handles ISO dates such as "2025-09-01".
+  const isoDateMatch = rawValue.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (isoDateMatch) {
+    const monthNumber = Number(isoDateMatch[2]);
+
+    const monthsByNumber = {
+      1: "January",
+      2: "February",
+      3: "March",
+      4: "April",
+      5: "May",
+      6: "June",
+      7: "July",
+      8: "August",
+      9: "September",
+      10: "October",
+      11: "November",
+      12: "December",
+    };
+
+    return monthsByNumber[monthNumber] || "";
+  }
+
+  // Handles other valid date strings.
+  const parsedDate = new Date(rawValue);
+
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ][parsedDate.getUTCMonth()];
+  }
+
+  // Handles month names and abbreviations.
+  const value = rawValue.toLowerCase();
+
+  const monthNames = {
     jan: "January",
     january: "January",
     feb: "February",
@@ -127,9 +166,18 @@ function normaliseMonth(month) {
     july: "July",
     aug: "August",
     august: "August",
+    sep: "September",
+    sept: "September",
+    september: "September",
+    oct: "October",
+    october: "October",
+    nov: "November",
+    november: "November",
+    dec: "December",
+    december: "December",
   };
 
-  return matches[value] || month;
+  return monthNames[value] || "";
 }
 
 function createEmptyMeasures() {
@@ -145,10 +193,8 @@ function createEmptyMeasures() {
 function finishMeasures(measures) {
   return {
     ...measures,
-
     totalRevenue:
       measures.sales + measures.rentalFees,
-
     schoolIncome:
       measures.commission + measures.rentalFees,
   };
@@ -157,16 +203,21 @@ function finishMeasures(measures) {
 function addRecord(measures, record) {
   const amount = toNumber(record.amount);
 
-  if (record.incomeType === "Sales") {
-    measures.sales += amount;
-  }
+  switch (record.incomeType) {
+    case "Sales":
+      measures.sales += amount;
+      break;
 
-  if (record.incomeType === "Commission") {
-    measures.commission += amount;
-  }
+    case "Commission":
+      measures.commission += amount;
+      break;
 
-  if (record.incomeType === "Rental Fees") {
-    measures.rentalFees += amount;
+    case "Rental Fees":
+      measures.rentalFees += amount;
+      break;
+
+    default:
+      break;
   }
 }
 
@@ -181,79 +232,100 @@ function getTermFromMonth(month) {
   );
 }
 
+function getLatestAcademicYear(years) {
+  if (years.length === 0) {
+    return "";
+  }
+
+  return [...years].sort((a, b) =>
+    String(a).localeCompare(String(b))
+  )[years.length - 1];
+}
+
 export default function ProgrammeDetailView({
   programme,
   records = [],
   onClose,
 }) {
-  const latestAcademicYear =
-    academicYears[academicYears.length - 1] || "";
+  const programmeSourceRecords = useMemo(
+    () =>
+      records.filter(
+        (record) => record.program === programme
+      ),
+    [records, programme]
+  );
+
+  const availableSchools = useMemo(
+    () =>
+      [
+        ...new Set(
+          programmeSourceRecords
+            .map((record) => record.school)
+            .filter(Boolean)
+        ),
+      ].sort((a, b) =>
+        String(a).localeCompare(String(b))
+      ),
+    [programmeSourceRecords]
+  );
+
+  const availableAcademicYears = useMemo(
+    () =>
+      [
+        ...new Set(
+          programmeSourceRecords
+            .map((record) => record.academicYear)
+            .filter(Boolean)
+        ),
+      ].sort((a, b) =>
+        String(a).localeCompare(String(b))
+      ),
+    [programmeSourceRecords]
+  );
+
+  const latestAcademicYear = useMemo(
+    () =>
+      getLatestAcademicYear(
+        availableAcademicYears
+      ),
+    [availableAcademicYears]
+  );
 
   const [viewMode, setViewMode] =
     useState("termly");
 
   const [detailFilters, setDetailFilters] =
-    useState({
+    useState(() => ({
       school: "",
       academicYear: latestAcademicYear,
-    });
+    }));
 
-  const availableSchools = useMemo(() => {
-    return [
-      ...new Set(
-        records
-          .filter(
-            (record) =>
-              record.program === programme
-          )
-          .map((record) => record.school)
-          .filter(Boolean)
-      ),
-    ].sort();
-  }, [records, programme]);
+  const programmeRecords = useMemo(
+    () =>
+      programmeSourceRecords.filter((record) => {
+        if (
+          detailFilters.school &&
+          record.school !== detailFilters.school
+        ) {
+          return false;
+        }
 
-  const availableAcademicYears = useMemo(() => {
-    return [
-      ...new Set(
-        records
-          .filter(
-            (record) =>
-              record.program === programme
-          )
-          .map((record) => record.academicYear)
-          .filter(Boolean)
-      ),
-    ].sort();
-  }, [records, programme]);
+        if (
+          detailFilters.academicYear &&
+          record.academicYear !==
+            detailFilters.academicYear
+        ) {
+          return false;
+        }
 
-  const programmeRecords = useMemo(() => {
-    return records.filter((record) => {
-      if (record.program !== programme) {
-        return false;
-      }
-
-      if (
-        detailFilters.school &&
-        record.school !== detailFilters.school
-      ) {
-        return false;
-      }
-
-      if (
-        detailFilters.academicYear &&
-        record.academicYear !==
-          detailFilters.academicYear
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [
-    records,
-    programme,
-    detailFilters,
-  ]);
+        return true;
+      }),
+    [
+      programmeSourceRecords,
+      detailFilters.school,
+      detailFilters.academicYear,
+    ]
+  );
 
   const monthlyData = useMemo(() => {
     const grouped = Object.fromEntries(
@@ -266,7 +338,7 @@ export default function ProgrammeDetailView({
     programmeRecords.forEach((record) => {
       const month = normaliseMonth(record.month);
 
-      if (!grouped[month]) {
+      if (!month || !grouped[month]) {
         return;
       }
 
@@ -288,23 +360,25 @@ export default function ProgrammeDetailView({
     };
 
     programmeRecords.forEach((record) => {
-      const term =
+      const recordTerm =
         record.term && grouped[record.term]
           ? record.term
           : getTermFromMonth(record.month);
 
-      if (!grouped[term]) {
+      if (!grouped[recordTerm]) {
         return;
       }
 
-      addRecord(grouped[term], record);
+      addRecord(grouped[recordTerm], record);
     });
 
-    return Object.keys(grouped).map((term) => ({
-      period: term,
-      label: term,
-      ...finishMeasures(grouped[term]),
-    }));
+    return Object.entries(grouped).map(
+      ([term, measures]) => ({
+        period: term,
+        label: term,
+        ...finishMeasures(measures),
+      })
+    );
   }, [programmeRecords]);
 
   const displayedPeriods =
@@ -394,9 +468,7 @@ export default function ProgrammeDetailView({
 
             <select
               id="detail-academic-year"
-              value={
-                detailFilters.academicYear
-              }
+              value={detailFilters.academicYear}
               onChange={(event) =>
                 handleDetailFilterChange(
                   "academicYear",
@@ -404,7 +476,9 @@ export default function ProgrammeDetailView({
                 )
               }
             >
-              <option value="">All Academic Years</option>
+              <option value="">
+                All Academic Years
+              </option>
 
               {availableAcademicYears.map(
                 (academicYear) => (
@@ -461,9 +535,7 @@ export default function ProgrammeDetailView({
             )}
           </strong>
 
-          <small>
-            Sales + Rental Fees
-          </small>
+          <small>Sales + Rental Fees</small>
         </div>
 
         <div className="main-summary">
