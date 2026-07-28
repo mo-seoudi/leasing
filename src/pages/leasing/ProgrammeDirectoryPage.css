@@ -5,11 +5,9 @@
 }
 
 /*
- * The main filter card and summary cards reuse styles from:
- * ProgrammeComparisonPage.css
+ * The filter card and KPI strip reuse the existing styles from
+ * ProgrammeComparisonPage.css.
  */
-
-/* Four controls across the filter row */
 
 .directory-comparison-filter-grid {
   grid-template-columns:
@@ -18,8 +16,6 @@
     minmax(170px, 1fr)
     minmax(190px, 0.9fr);
 }
-
-/* Search field */
 
 .directory-search-filter input {
   width: 100%;
@@ -44,10 +40,9 @@
 
 .directory-search-filter input:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.12);
 }
-
-/* Directory content card */
 
 .directory-table-card {
   margin-bottom: 18px;
@@ -56,10 +51,9 @@
   background: #ffffff;
   border: 1px solid #e4e7ec;
   border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.06);
 }
-
-/* Header */
 
 .directory-table-heading {
   display: flex;
@@ -89,11 +83,6 @@
   line-height: 1.5;
 }
 
-/*
- * The group tabs sit before the view icons.
- * The view icons remain fixed at the far right.
- */
-
 .directory-header-controls {
   display: flex;
   flex-shrink: 0;
@@ -101,8 +90,6 @@
   justify-content: flex-end;
   gap: 10px;
 }
-
-/* Aggregate tabs */
 
 .directory-aggregate-tabs {
   display: inline-flex;
@@ -132,7 +119,8 @@
     box-shadow 160ms ease;
 }
 
-.directory-aggregate-tabs button:hover:not(:disabled) {
+.directory-aggregate-tabs
+  button:hover:not(:disabled) {
   border-color: #98a2b3;
   background: #f8fafc;
   color: #344054;
@@ -142,7 +130,8 @@
   border-color: #818cf8;
   background: #eef2ff;
   color: #4338ca;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  box-shadow:
+    0 0 0 2px rgba(99, 102, 241, 0.1);
 }
 
 .directory-aggregate-tabs button:disabled {
@@ -150,8 +139,10 @@
   cursor: not-allowed;
 }
 
-.directory-aggregate-tabs button:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.18);
+.directory-aggregate-tabs
+  button:focus-visible {
+  outline:
+    3px solid rgba(99, 102, 241, 0.18);
   outline-offset: 2px;
 }
 
@@ -169,8 +160,6 @@
   transform: rotate(90deg);
   color: #4f46e5;
 }
-
-/* View icons */
 
 .directory-view-toggle {
   display: inline-flex;
@@ -210,11 +199,13 @@
 .directory-view-toggle button.active {
   background: #ffffff;
   color: #344054;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.12);
 }
 
 .directory-view-toggle button:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline:
+    3px solid rgba(99, 102, 241, 0.18);
   outline-offset: 2px;
 }
 
@@ -228,28 +219,24 @@
   stroke-linejoin: round;
 }
 
-/* Aggregate detail panel */
-
 .directory-aggregate-detail {
   margin-bottom: 18px;
 }
 
-.directory-aggregate-detail .programme-detail-panel {
+.directory-aggregate-detail
+  .programme-detail-panel {
   margin: 0;
 }
-
-/* Chart view */
 
 .directory-chart-container {
   width: 100%;
   height: 440px;
 }
 
-/* Pie view */
-
 .directory-pie-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -284,14 +271,10 @@
   height: 390px;
 }
 
-/* Table scrolling */
-
 .directory-table-scroll {
   width: 100%;
   overflow-x: auto;
 }
-
-/* Comparison-style table */
 
 .directory-comparison-table {
   width: 100%;
@@ -316,9 +299,12 @@
   text-align: right;
 }
 
-.directory-comparison-table thead th:first-child,
-.directory-comparison-table thead th:nth-child(2),
-.directory-comparison-table thead th:nth-child(3) {
+.directory-comparison-table
+  thead th:first-child,
+.directory-comparison-table
+  thead th:nth-child(2),
+.directory-comparison-table
+  thead th:nth-child(3) {
   text-align: left;
 }
 
@@ -333,8 +319,10 @@
   text-align: right;
 }
 
-.directory-comparison-table tbody td:nth-child(2),
-.directory-comparison-table tbody td:nth-child(3) {
+.directory-comparison-table
+  tbody td:nth-child(2),
+.directory-comparison-table
+  tbody td:nth-child(3) {
   text-align: left;
 }
 
@@ -345,8 +333,6 @@
 .directory-comparison-table tbody tr:hover {
   background: #f9fafb;
 }
-
-/* Programme expand button */
 
 .directory-programme-button {
   display: flex;
@@ -371,7 +357,8 @@
 }
 
 .directory-programme-button:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline:
+    3px solid rgba(99, 102, 241, 0.18);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -391,8 +378,6 @@
   color: #4f46e5;
 }
 
-/* Financial values */
-
 .directory-revenue-value {
   color: #1679a7 !important;
   font-weight: 700;
@@ -402,8 +387,6 @@
   color: #d85f1b !important;
   font-weight: 700;
 }
-
-/* Percentage bars */
 
 .directory-percentage-cell {
   display: flex;
@@ -442,8 +425,6 @@
   background: #e97832;
 }
 
-/* Selected programme */
-
 .directory-selected-row {
   background: #f5f7ff;
 }
@@ -452,7 +433,10 @@
   background: #eef2ff !important;
 }
 
-/* Expanded programme detail */
+/*
+ * The expanded individual programme uses the exact
+ * ProgrammeDetailView component used by Programme Summary.
+ */
 
 .directory-expanded-row td {
   padding: 0 !important;
@@ -465,16 +449,16 @@
   background: transparent !important;
 }
 
-.directory-expanded-row .programme-detail-panel {
+.directory-expanded-row
+  .programme-detail-panel {
   margin: 10px;
 }
 
 .directory-expanded-row
-  .programme-detail-table
-  th:not(:first-child),
+  .programme-detail-table th,
 .directory-expanded-row
-  .programme-detail-table
-  td {
+  .programme-detail-table td {
+  padding: 10px 11px;
   text-align: center;
 }
 
@@ -484,8 +468,6 @@
   text-align: left;
 }
 
-/* Empty state */
-
 .directory-empty-state {
   padding: 36px 20px;
   border: 1px dashed #d0d5dd;
@@ -494,8 +476,6 @@
   font-size: 13px;
   text-align: center;
 }
-
-/* Smaller desktop */
 
 @media (max-width: 1300px) {
   .directory-table-heading {
@@ -508,14 +488,10 @@
   }
 }
 
-/* Tablet */
-
 @media (max-width: 1100px) {
   .directory-comparison-filter-grid {
-    grid-template-columns: repeat(
-      2,
-      minmax(180px, 1fr)
-    );
+    grid-template-columns:
+      repeat(2, minmax(180px, 1fr));
   }
 
   .directory-header-controls {
@@ -525,7 +501,8 @@
 
   .directory-aggregate-tabs {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns:
+      repeat(3, 1fr);
   }
 
   .directory-aggregate-tabs button {
@@ -540,8 +517,6 @@
     grid-template-columns: 1fr;
   }
 }
-
-/* Mobile */
 
 @media (max-width: 700px) {
   .directory-comparison-filter-grid {
