@@ -1,162 +1,341 @@
-.programme-directory-page {
-  width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
+import { useMemo, useState } from "react";
+
+import ProgrammeDirectoryTable from "../../components/ProgrammeDirectoryTable";
+
+import {
+  academicYears,
+  filterRecords,
+  formatCurrency,
+  getProgrammeBreakdown,
+  programmeGroups,
+  schools,
+} from "../../lib/dashboardData";
+
+import "./ProgrammeDirectoryPage.css";
+
+function toNumber(value) {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number : 0;
 }
 
-.directory-filter-card {
-  margin-bottom: 18px;
-  padding: 18px;
-  background: #ffffff;
-  border: 1px solid #e4e7ec;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
-}
+export default function ProgrammeDirectoryPage() {
+  const latestAcademicYear =
+    academicYears[academicYears.length - 1] || "";
 
-.directory-filter-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 16px;
-}
+  const [filters, setFilters] = useState({
+    academicYear: latestAcademicYear,
+    school: "",
+    programGroup: "",
+    searchText: "",
+  });
 
-.directory-filter-heading h2 {
-  margin: 0;
-  color: #101828;
-  font-size: 17px;
-  font-weight: 700;
-}
+  const [
+    selectedProgrammeDetail,
+    setSelectedProgrammeDetail,
+  ] = useState("");
 
-.directory-filter-heading p {
-  margin: 5px 0 0;
-  color: #667085;
-  font-size: 12px;
-  line-height: 1.5;
-}
+  /*
+   * All records are passed to the expanded detail panel.
+   * This allows the inner School and Academic Year filters
+   * to remain independent from the directory filters.
+   */
+  const allRecords = useMemo(
+    () => filterRecords({}),
+    []
+  );
 
-.directory-filter-grid {
-  display: grid;
-  grid-template-columns:
-    minmax(240px, 2fr)
-    minmax(180px, 1fr)
-    minmax(120px, 0.45fr);
-  align-items: end;
-  gap: 14px;
-}
+  /*
+   * These records follow the main directory filters.
+   */
+  const filteredRecords = useMemo(
+    () =>
+      filterRecords({
+        academicYear: filters.academicYear,
+        school: filters.school,
+        programGroup: filters.programGroup,
+      }),
+    [
+      filters.academicYear,
+      filters.school,
+      filters.programGroup,
+    ]
+  );
 
-.directory-filter {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 6px;
-}
+  const programmeData = useMemo(() => {
+    const breakdown =
+      getProgrammeBreakdown(filteredRecords);
 
-.directory-filter label {
-  color: #344054;
-  font-size: 12px;
-  font-weight: 600;
-}
+    const totalRevenue = breakdown.reduce(
+      (total, item) =>
+        total + toNumber(item.totalRevenue),
+      0
+    );
 
-.directory-filter input,
-.directory-filter select {
-  width: 100%;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid #d0d5dd;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #101828;
-  font: inherit;
-  font-size: 13px;
-  outline: none;
-}
+    const totalSchoolIncome = breakdown.reduce(
+      (total, item) =>
+        total + toNumber(item.schoolIncome),
+      0
+    );
 
-.directory-filter input {
-  padding-right: 34px;
-}
+    const searchValue = filters.searchText
+      .trim()
+      .toLowerCase();
 
-.directory-filter input::placeholder {
-  color: #98a2b3;
-}
+    return breakdown
+      .map((item) => ({
+        ...item,
 
-.directory-filter input:focus,
-.directory-filter select:focus {
-  border-color: #667eea;
-  box-shadow:
-    0 0 0 3px
-    rgba(102, 126, 234, 0.12);
-}
+        revenueShare:
+          totalRevenue > 0
+            ? (toNumber(item.totalRevenue) /
+                totalRevenue) *
+              100
+            : 0,
 
-.directory-result-count {
-  display: flex;
-  min-height: 38px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 12px;
-  border: 1px solid #e4e7ec;
-  border-radius: 7px;
-  background: #f9fafb;
-}
+        incomeShare:
+          totalSchoolIncome > 0
+            ? (toNumber(item.schoolIncome) /
+                totalSchoolIncome) *
+              100
+            : 0,
+      }))
+      .filter((item) => {
+        if (!searchValue) {
+          return true;
+        }
 
-.directory-result-count span {
-  color: #667085;
-  font-size: 11px;
-  font-weight: 600;
-}
+        const programme = String(
+          item.programme || ""
+        ).toLowerCase();
 
-.directory-result-count strong {
-  color: #101828;
-  font-size: 16px;
-  font-weight: 750;
-}
+        const provider = String(
+          item.provider || ""
+        ).toLowerCase();
 
-/* Keep the directory table visually compact */
+        return (
+          programme.includes(searchValue) ||
+          provider.includes(searchValue)
+        );
+      })
+      .sort(
+        (a, b) =>
+          toNumber(b.totalRevenue) -
+          toNumber(a.totalRevenue)
+      );
+  }, [filteredRecords, filters.searchText]);
 
-.programme-directory-page .table-card {
-  margin-bottom: 18px;
-}
+  const totals = useMemo(
+    () =>
+      programmeData.reduce(
+        (result, item) => ({
+          totalRevenue:
+            result.totalRevenue +
+            toNumber(item.totalRevenue),
 
-.programme-directory-page .programme-table tbody tr {
-  transition: background 140ms ease;
-}
+          schoolIncome:
+            result.schoolIncome +
+            toNumber(item.schoolIncome),
+        }),
+        {
+          totalRevenue: 0,
+          schoolIncome: 0,
+        }
+      ),
+    [programmeData]
+  );
 
-.programme-directory-page
-  .programme-expanded-row
-  td {
-  background: #f8faff;
-}
+  function handleFilterChange(name, value) {
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }));
 
-/* Tablet */
-
-@media (max-width: 950px) {
-  .directory-filter-grid {
-    grid-template-columns: repeat(2, 1fr);
+    setSelectedProgrammeDetail("");
   }
 
-  .directory-result-count {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Mobile */
-
-@media (max-width: 650px) {
-  .directory-filter-heading {
-    flex-direction: column;
+  function handleProgrammeClick(programme) {
+    setSelectedProgrammeDetail((current) =>
+      current === programme ? "" : programme
+    );
   }
 
-  .directory-filter-heading
-    .secondary-button {
-    width: 100%;
+  function clearFilters() {
+    setFilters({
+      academicYear: latestAcademicYear,
+      school: "",
+      programGroup: "",
+      searchText: "",
+    });
+
+    setSelectedProgrammeDetail("");
   }
 
-  .directory-filter-grid {
-    grid-template-columns: 1fr;
-  }
+  const selectedPeriodLabel =
+    filters.academicYear || "All Time";
 
-  .directory-result-count {
-    grid-column: auto;
-  }
+  return (
+    <section className="programme-directory-page">
+      <section className="directory-filter-card">
+        <div className="directory-filter-heading">
+          <div>
+            <h2>Directory Filters</h2>
+
+            <p>
+              Compare programme performance and expand any
+              programme to view its detailed monthly or
+              termly figures.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="directory-clear-button"
+            onClick={clearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        <div className="directory-filter-grid">
+          <div className="directory-filter">
+            <label htmlFor="directory-academic-year">
+              Academic Year
+            </label>
+
+            <select
+              id="directory-academic-year"
+              value={filters.academicYear}
+              onChange={(event) =>
+                handleFilterChange(
+                  "academicYear",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Time</option>
+
+              {academicYears.map((academicYear) => (
+                <option
+                  key={academicYear}
+                  value={academicYear}
+                >
+                  {academicYear}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="directory-filter">
+            <label htmlFor="directory-school">
+              School
+            </label>
+
+            <select
+              id="directory-school"
+              value={filters.school}
+              onChange={(event) =>
+                handleFilterChange(
+                  "school",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Schools</option>
+
+              {schools.map((school) => (
+                <option key={school} value={school}>
+                  {school}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="directory-filter">
+            <label htmlFor="directory-programme-group">
+              Programme Group
+            </label>
+
+            <select
+              id="directory-programme-group"
+              value={filters.programGroup}
+              onChange={(event) =>
+                handleFilterChange(
+                  "programGroup",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Groups</option>
+
+              {programmeGroups.map((group) => (
+                <option key={group} value={group}>
+                  {group}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="directory-filter directory-search-filter">
+            <label htmlFor="directory-search">
+              Search
+            </label>
+
+            <input
+              id="directory-search"
+              type="search"
+              value={filters.searchText}
+              placeholder="Programme or provider"
+              onChange={(event) =>
+                handleFilterChange(
+                  "searchText",
+                  event.target.value
+                )
+              }
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="directory-summary-strip">
+        <div>
+          <span>Total Revenue</span>
+
+          <strong>
+            {formatCurrency(totals.totalRevenue)}
+          </strong>
+        </div>
+
+        <div>
+          <span>School Income</span>
+
+          <strong>
+            {formatCurrency(totals.schoolIncome)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Programmes</span>
+
+          <strong>{programmeData.length}</strong>
+        </div>
+
+        <div>
+          <span>Selected Period</span>
+
+          <strong>{selectedPeriodLabel}</strong>
+        </div>
+      </section>
+
+      <ProgrammeDirectoryTable
+        data={programmeData}
+        records={allRecords}
+        selectedProgramme={selectedProgrammeDetail}
+        onProgrammeClick={handleProgrammeClick}
+        onCloseProgramme={() =>
+          setSelectedProgrammeDetail("")
+        }
+      />
+    </section>
+  );
 }
