@@ -1,80 +1,168 @@
 import { useMemo, useState } from "react";
 
-import ProgrammeTable from "../../components/ProgrammeTable";
+import ProgrammeDirectoryTable from "../../components/ProgrammeDirectoryTable";
 
 import {
+  academicYears,
   filterRecords,
+  formatCurrency,
   getProgrammeBreakdown,
+  programmeGroups,
+  schools,
 } from "../../lib/dashboardData";
 
-import "./ProgrammeSummaryPage.css";
+import "./ProgrammeComparisonPage.css";
 import "./ProgrammeDirectoryPage.css";
 
+function toNumber(value) {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number : 0;
+}
+
 export default function ProgrammeDirectoryPage() {
+  const latestAcademicYear =
+    academicYears[academicYears.length - 1] || "";
+
+  const [filters, setFilters] = useState({
+    academicYear: latestAcademicYear,
+    school: "",
+    programGroup: "",
+    searchText: "",
+  });
+
   const [
     selectedProgrammeDetail,
     setSelectedProgrammeDetail,
   ] = useState("");
 
-  const [searchText, setSearchText] = useState("");
-  const [selectedGroup, setSelectedGroup] =
-    useState("");
-
   /*
-   * The directory initially uses all records.
-   * The School and Academic Year selections remain independent
-   * inside each expanded programme detail panel.
+   * All records are passed to the expanded programme panel.
+   * Its internal School and Academic Year filters therefore
+   * remain independent from the outer page filters.
    */
   const allRecords = useMemo(
     () => filterRecords({}),
     []
   );
 
-  const allProgrammeData = useMemo(
-    () => getProgrammeBreakdown(allRecords),
-    [allRecords]
-  );
-
-  const programmeGroups = useMemo(
+  /*
+   * The collapsed directory rows follow the page filters.
+   */
+  const filteredRecords = useMemo(
     () =>
-      [
-        ...new Set(
-          allProgrammeData
-            .map((item) => item.programGroup)
-            .filter(Boolean)
-        ),
-      ].sort((a, b) =>
-        String(a).localeCompare(String(b))
-      ),
-    [allProgrammeData]
+      filterRecords({
+        academicYear: filters.academicYear,
+        school: filters.school,
+        programGroup: filters.programGroup,
+      }),
+    [
+      filters.academicYear,
+      filters.school,
+      filters.programGroup,
+    ]
   );
 
-  const displayedProgrammeData = useMemo(() => {
-    const normalisedSearch = searchText
+  const programmeData = useMemo(() => {
+    const breakdown =
+      getProgrammeBreakdown(filteredRecords);
+
+    const searchValue = filters.searchText
       .trim()
       .toLowerCase();
 
-    return allProgrammeData.filter((item) => {
-      const matchesGroup =
-        !selectedGroup ||
-        item.programGroup === selectedGroup;
+    const searchFilteredBreakdown = breakdown.filter(
+      (item) => {
+        if (!searchValue) {
+          return true;
+        }
 
-      const matchesSearch =
-        !normalisedSearch ||
-        String(item.programme || "")
-          .toLowerCase()
-          .includes(normalisedSearch) ||
-        String(item.provider || "")
-          .toLowerCase()
-          .includes(normalisedSearch);
+        const programmeName = String(
+          item.programme || ""
+        ).toLowerCase();
 
-      return matchesGroup && matchesSearch;
-    });
-  }, [
-    allProgrammeData,
-    searchText,
-    selectedGroup,
-  ]);
+        const providerName = String(
+          item.provider || ""
+        ).toLowerCase();
+
+        return (
+          programmeName.includes(searchValue) ||
+          providerName.includes(searchValue)
+        );
+      }
+    );
+
+    /*
+     * Percentages are calculated from the currently visible
+     * programmes, including the Search filter.
+     */
+    const totalRevenue =
+      searchFilteredBreakdown.reduce(
+        (total, item) =>
+          total + toNumber(item.totalRevenue),
+        0
+      );
+
+    const totalSchoolIncome =
+      searchFilteredBreakdown.reduce(
+        (total, item) =>
+          total + toNumber(item.schoolIncome),
+        0
+      );
+
+    return searchFilteredBreakdown
+      .map((item) => ({
+        ...item,
+
+        revenueShare:
+          totalRevenue > 0
+            ? (toNumber(item.totalRevenue) /
+                totalRevenue) *
+              100
+            : 0,
+
+        incomeShare:
+          totalSchoolIncome > 0
+            ? (toNumber(item.schoolIncome) /
+                totalSchoolIncome) *
+              100
+            : 0,
+      }))
+      .sort(
+        (a, b) =>
+          toNumber(b.totalRevenue) -
+          toNumber(a.totalRevenue)
+      );
+  }, [filteredRecords, filters.searchText]);
+
+  const totals = useMemo(
+    () =>
+      programmeData.reduce(
+        (result, item) => ({
+          totalRevenue:
+            result.totalRevenue +
+            toNumber(item.totalRevenue),
+
+          schoolIncome:
+            result.schoolIncome +
+            toNumber(item.schoolIncome),
+        }),
+        {
+          totalRevenue: 0,
+          schoolIncome: 0,
+        }
+      ),
+    [programmeData]
+  );
+
+  function handleFilterChange(name, value) {
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
+    setSelectedProgrammeDetail("");
+  }
 
   function handleProgrammeClick(programme) {
     setSelectedProgrammeDetail((current) =>
@@ -82,65 +170,110 @@ export default function ProgrammeDirectoryPage() {
     );
   }
 
-  function clearDirectoryFilters() {
-    setSearchText("");
-    setSelectedGroup("");
+  function clearFilters() {
+    setFilters({
+      academicYear: latestAcademicYear,
+      school: "",
+      programGroup: "",
+      searchText: "",
+    });
+
     setSelectedProgrammeDetail("");
   }
 
+  const selectedPeriodLabel =
+    filters.academicYear || "All Time";
+
   return (
-    <section className="programme-summary-page programme-directory-page">
-      <section className="directory-filter-card">
-        <div className="directory-filter-heading">
+    <section className="programme-comparison-page programme-directory-page">
+      <section className="programme-filter-card">
+        <div className="programme-card-heading programme-filter-heading">
           <div>
-            <h2>Programmes & Academies</h2>
+            <h2>Directory Filters</h2>
 
             <p>
-              Browse all leasing programmes and open any
-              programme to view its detailed monthly or
-              termly figures.
+              Compare programmes and expand any row to view
+              its detailed monthly or termly figures.
             </p>
           </div>
 
           <button
             type="button"
             className="secondary-button"
-            onClick={clearDirectoryFilters}
+            onClick={clearFilters}
           >
             Clear Filters
           </button>
         </div>
 
-        <div className="directory-filter-grid">
-          <div className="directory-filter">
-            <label htmlFor="directory-search">
-              Search
+        <div className="programme-filter-grid directory-comparison-filter-grid">
+          <div className="programme-filter">
+            <label htmlFor="directory-academic-year">
+              Academic Year
             </label>
 
-            <input
-              id="directory-search"
-              type="search"
-              value={searchText}
-              placeholder="Search programme or provider"
-              onChange={(event) => {
-                setSearchText(event.target.value);
-                setSelectedProgrammeDetail("");
-              }}
-            />
+            <select
+              id="directory-academic-year"
+              value={filters.academicYear}
+              onChange={(event) =>
+                handleFilterChange(
+                  "academicYear",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Time</option>
+
+              {academicYears.map((academicYear) => (
+                <option
+                  key={academicYear}
+                  value={academicYear}
+                >
+                  {academicYear}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="directory-filter">
-            <label htmlFor="directory-group">
+          <div className="programme-filter">
+            <label htmlFor="directory-school">
+              School
+            </label>
+
+            <select
+              id="directory-school"
+              value={filters.school}
+              onChange={(event) =>
+                handleFilterChange(
+                  "school",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">All Schools</option>
+
+              {schools.map((school) => (
+                <option key={school} value={school}>
+                  {school}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="programme-filter">
+            <label htmlFor="directory-programme-group">
               Programme Group
             </label>
 
             <select
-              id="directory-group"
-              value={selectedGroup}
-              onChange={(event) => {
-                setSelectedGroup(event.target.value);
-                setSelectedProgrammeDetail("");
-              }}
+              id="directory-programme-group"
+              value={filters.programGroup}
+              onChange={(event) =>
+                handleFilterChange(
+                  "programGroup",
+                  event.target.value
+                )
+              }
             >
               <option value="">All Groups</option>
 
@@ -152,19 +285,59 @@ export default function ProgrammeDirectoryPage() {
             </select>
           </div>
 
-          <div className="directory-result-count">
-            <span>Programmes</span>
+          <div className="programme-filter directory-search-filter">
+            <label htmlFor="directory-search">
+              Search
+            </label>
 
-            <strong>
-              {displayedProgrammeData.length}
-            </strong>
+            <input
+              id="directory-search"
+              type="search"
+              value={filters.searchText}
+              placeholder="Programme or provider"
+              onChange={(event) =>
+                handleFilterChange(
+                  "searchText",
+                  event.target.value
+                )
+              }
+            />
           </div>
         </div>
       </section>
 
-      <ProgrammeTable
-        title="Programme Directory"
-        data={displayedProgrammeData}
+      <section className="programme-summary-strip">
+        <div>
+          <span>Total Revenue</span>
+
+          <strong>
+            {formatCurrency(totals.totalRevenue)}
+          </strong>
+        </div>
+
+        <div>
+          <span>School Income</span>
+
+          <strong>
+            {formatCurrency(totals.schoolIncome)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Programmes</span>
+
+          <strong>{programmeData.length}</strong>
+        </div>
+
+        <div>
+          <span>Selected Period</span>
+
+          <strong>{selectedPeriodLabel}</strong>
+        </div>
+      </section>
+
+      <ProgrammeDirectoryTable
+        data={programmeData}
         records={allRecords}
         selectedProgramme={selectedProgrammeDetail}
         onProgrammeClick={handleProgrammeClick}
