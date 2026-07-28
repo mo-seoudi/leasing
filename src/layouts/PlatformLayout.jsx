@@ -8,6 +8,11 @@ const leasingLinks = [
     path: "/leasing/summary",
   },
   {
+    label: "Programme Directory",
+    path: "/leasing/programmes",
+  },
+  
+  {
     label: "Year-on-Year Comparison",
     path: "/leasing/year-comparison",
   },
@@ -105,6 +110,13 @@ function getPageDetails(pathname) {
     return {
       section: "Leasing",
       title: "Programme Comparison",
+    };
+  }
+
+    if (pathname === "/leasing/programmes") {
+    return {
+      section: "Leasing",
+      title: "Programme Directory",
     };
   }
 
