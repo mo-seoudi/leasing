@@ -40,11 +40,13 @@ const TERM_MONTHS = {
     "November",
     "December",
   ],
+
   "Term 2": [
     "January",
     "February",
     "March",
   ],
+
   "Term 3": [
     "April",
     "May",
@@ -91,7 +93,9 @@ function toNumber(value) {
 function formatDisplayValue(value) {
   const number = toNumber(value);
 
-  return number === 0 ? "-" : formatCurrency(number);
+  return number === 0
+    ? "-"
+    : formatCurrency(number);
 }
 
 function normaliseMonth(month) {
@@ -101,7 +105,6 @@ function normaliseMonth(month) {
 
   const rawValue = String(month).trim();
 
-  // Handles ISO dates such as "2025-09-01".
   const isoDateMatch = rawValue.match(
     /^(\d{4})-(\d{2})-(\d{2})$/
   );
@@ -127,7 +130,6 @@ function normaliseMonth(month) {
     return monthsByNumber[monthNumber] || "";
   }
 
-  // Handles other valid date strings.
   const parsedDate = new Date(rawValue);
 
   if (!Number.isNaN(parsedDate.getTime())) {
@@ -147,7 +149,6 @@ function normaliseMonth(month) {
     ][parsedDate.getUTCMonth()];
   }
 
-  // Handles month names and abbreviations.
   const value = rawValue.toLowerCase();
 
   const monthNames = {
@@ -193,8 +194,10 @@ function createEmptyMeasures() {
 function finishMeasures(measures) {
   return {
     ...measures,
+
     totalRevenue:
       measures.sales + measures.rentalFees,
+
     schoolIncome:
       measures.commission + measures.rentalFees,
   };
@@ -237,50 +240,70 @@ function getLatestAcademicYear(years) {
     return "";
   }
 
-  return [...years].sort((a, b) =>
+  const sortedYears = [...years].sort((a, b) =>
     String(a).localeCompare(String(b))
-  )[years.length - 1];
+  );
+
+  return sortedYears[sortedYears.length - 1];
 }
 
 export default function ProgrammeDetailView({
-  programme,
+  programme = "",
+  title = "",
   records = [],
+  detailRecords,
   onClose,
 }) {
-  const programmeSourceRecords = useMemo(
-    () =>
-      records.filter(
-        (record) => record.program === programme
-      ),
-    [records, programme]
-  );
+  const detailTitle =
+    title || programme || "Financial Details";
+
+  /*
+   * For aggregate details, prepared records are supplied
+   * directly through detailRecords.
+   *
+   * For individual programmes, the component filters the
+   * full records collection using the programme name.
+   */
+  const sourceRecords = useMemo(() => {
+    if (Array.isArray(detailRecords)) {
+      return detailRecords;
+    }
+
+    if (!programme) {
+      return records;
+    }
+
+    return records.filter(
+      (record) => record.program === programme
+    );
+  }, [detailRecords, records, programme]);
 
   const availableSchools = useMemo(
     () =>
       [
         ...new Set(
-          programmeSourceRecords
+          sourceRecords
             .map((record) => record.school)
             .filter(Boolean)
         ),
       ].sort((a, b) =>
         String(a).localeCompare(String(b))
       ),
-    [programmeSourceRecords]
+    [sourceRecords]
   );
 
   const availableAcademicYears = useMemo(
     () =>
       [
         ...new Set(
-          programmeSourceRecords
+          sourceRecords
             .map((record) => record.academicYear)
             .filter(Boolean)
         ),
       ].sort((a, b) =>
         String(a).localeCompare(String(b))
       ),
-    [programmeSourceRecords]
+    [sourceRecords]
   );
 
   const latestAcademicYear = useMemo(
@@ -300,9 +323,9 @@ export default function ProgrammeDetailView({
       academicYear: latestAcademicYear,
     }));
 
-  const programmeRecords = useMemo(
+  const displayedRecords = useMemo(
     () =>
-      programmeSourceRecords.filter((record) => {
+      sourceRecords.filter((record) => {
         if (
           detailFilters.school &&
           record.school !== detailFilters.school
@@ -321,7 +344,7 @@ export default function ProgrammeDetailView({
         return true;
       }),
     [
-      programmeSourceRecords,
+      sourceRecords,
       detailFilters.school,
       detailFilters.academicYear,
     ]
@@ -335,7 +358,7 @@ export default function ProgrammeDetailView({
       ])
     );
 
-    programmeRecords.forEach((record) => {
+    displayedRecords.forEach((record) => {
       const month = normaliseMonth(record.month);
 
       if (!month || !grouped[month]) {
@@ -350,7 +373,7 @@ export default function ProgrammeDetailView({
       label: MONTH_LABELS[month],
       ...finishMeasures(grouped[month]),
     }));
-  }, [programmeRecords]);
+  }, [displayedRecords]);
 
   const termlyData = useMemo(() => {
     const grouped = {
@@ -359,7 +382,7 @@ export default function ProgrammeDetailView({
       "Term 3": createEmptyMeasures(),
     };
 
-    programmeRecords.forEach((record) => {
+    displayedRecords.forEach((record) => {
       const recordTerm =
         record.term && grouped[record.term]
           ? record.term
@@ -379,7 +402,7 @@ export default function ProgrammeDetailView({
         ...finishMeasures(measures),
       })
     );
-  }, [programmeRecords]);
+  }, [displayedRecords]);
 
   const displayedPeriods =
     viewMode === "monthly"
@@ -389,17 +412,14 @@ export default function ProgrammeDetailView({
   const totals = useMemo(() => {
     const measures = createEmptyMeasures();
 
-    programmeRecords.forEach((record) => {
+    displayedRecords.forEach((record) => {
       addRecord(measures, record);
     });
 
     return finishMeasures(measures);
-  }, [programmeRecords]);
+  }, [displayedRecords]);
 
-  function handleDetailFilterChange(
-    name,
-    value
-  ) {
+  function handleDetailFilterChange(name, value) {
     setDetailFilters((current) => ({
       ...current,
       [name]: value,
@@ -411,10 +431,10 @@ export default function ProgrammeDetailView({
       <header className="programme-detail-header">
         <div>
           <span className="programme-detail-eyebrow">
-            Programme details
+            Financial details
           </span>
 
-          <h2>{programme}</h2>
+          <h2>{detailTitle}</h2>
 
           <p>
             Detailed income figures by school,
@@ -434,12 +454,12 @@ export default function ProgrammeDetailView({
       <div className="programme-detail-controls">
         <div className="programme-detail-filters">
           <div className="programme-detail-filter">
-            <label htmlFor="detail-school">
+            <label htmlFor={`detail-school-${detailTitle}`}>
               School
             </label>
 
             <select
-              id="detail-school"
+              id={`detail-school-${detailTitle}`}
               value={detailFilters.school}
               onChange={(event) =>
                 handleDetailFilterChange(
@@ -462,12 +482,14 @@ export default function ProgrammeDetailView({
           </div>
 
           <div className="programme-detail-filter">
-            <label htmlFor="detail-academic-year">
+            <label
+              htmlFor={`detail-academic-year-${detailTitle}`}
+            >
               Academic Year
             </label>
 
             <select
-              id="detail-academic-year"
+              id={`detail-academic-year-${detailTitle}`}
               value={detailFilters.academicYear}
               onChange={(event) =>
                 handleDetailFilterChange(
@@ -633,4 +655,4 @@ export default function ProgrammeDetailView({
       </div>
     </section>
   );
-}
+}  
