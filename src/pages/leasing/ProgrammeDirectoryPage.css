@@ -59,7 +59,7 @@
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
 }
 
-/* Directory heading and view toggle */
+/* Header */
 
 .directory-table-heading {
   display: flex;
@@ -67,6 +67,11 @@
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 16px;
+}
+
+.directory-title-block {
+  min-width: 220px;
+  flex: 1;
 }
 
 .directory-table-heading h2 {
@@ -77,11 +82,95 @@
 }
 
 .directory-table-heading p {
+  max-width: 620px;
   margin: 5px 0 0;
   color: #667085;
   font-size: 12px;
   line-height: 1.5;
 }
+
+/*
+ * The group tabs sit before the view icons.
+ * The view icons remain fixed at the far right.
+ */
+
+.directory-header-controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Aggregate tabs */
+
+.directory-aggregate-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.directory-aggregate-tabs button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475467;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.directory-aggregate-tabs button:hover:not(:disabled) {
+  border-color: #98a2b3;
+  background: #f8fafc;
+  color: #344054;
+}
+
+.directory-aggregate-tabs button.active {
+  border-color: #818cf8;
+  background: #eef2ff;
+  color: #4338ca;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.directory-aggregate-tabs button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.directory-aggregate-tabs button:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline-offset: 2px;
+}
+
+.directory-aggregate-arrow {
+  display: inline-block;
+  color: #98a2b3;
+  font-size: 8px;
+  line-height: 1;
+  transition:
+    transform 160ms ease,
+    color 160ms ease;
+}
+
+.directory-aggregate-arrow.open {
+  transform: rotate(90deg);
+  color: #4f46e5;
+}
+
+/* View icons */
 
 .directory-view-toggle {
   display: inline-flex;
@@ -99,13 +188,13 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 6px 9px;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: #667085;
   font: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -130,8 +219,8 @@
 }
 
 .directory-view-toggle svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -139,11 +228,60 @@
   stroke-linejoin: round;
 }
 
+/* Aggregate detail panel */
+
+.directory-aggregate-detail {
+  margin-bottom: 18px;
+}
+
+.directory-aggregate-detail .programme-detail-panel {
+  margin: 0;
+}
+
 /* Chart view */
 
 .directory-chart-container {
   width: 100%;
   height: 440px;
+}
+
+/* Pie view */
+
+.directory-pie-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.directory-pie-card {
+  min-width: 0;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+}
+
+.directory-pie-heading {
+  margin-bottom: 8px;
+}
+
+.directory-pie-heading h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.directory-pie-heading p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.directory-pie-container {
+  width: 100%;
+  height: 390px;
 }
 
 /* Table scrolling */
@@ -304,7 +442,7 @@
   background: #e97832;
 }
 
-/* Selected row */
+/* Selected programme */
 
 .directory-selected-row {
   background: #f5f7ff;
@@ -314,7 +452,7 @@
   background: #eef2ff !important;
 }
 
-/* Expanded detail row */
+/* Expanded programme detail */
 
 .directory-expanded-row td {
   padding: 0 !important;
@@ -357,6 +495,19 @@
   text-align: center;
 }
 
+/* Smaller desktop */
+
+@media (max-width: 1300px) {
+  .directory-table-heading {
+    flex-wrap: wrap;
+  }
+
+  .directory-header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 /* Tablet */
 
 @media (max-width: 1100px) {
@@ -365,6 +516,28 @@
       2,
       minmax(180px, 1fr)
     );
+  }
+
+  .directory-header-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .directory-aggregate-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .directory-aggregate-tabs button {
+    justify-content: center;
+  }
+
+  .directory-view-toggle {
+    align-self: flex-end;
+  }
+
+  .directory-pie-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -383,6 +556,14 @@
     flex-direction: column;
   }
 
+  .directory-header-controls {
+    width: 100%;
+  }
+
+  .directory-aggregate-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .directory-view-toggle {
     width: 100%;
   }
@@ -393,6 +574,10 @@
 
   .directory-chart-container {
     height: 390px;
+  }
+
+  .directory-pie-container {
+    height: 350px;
   }
 
   .directory-table-heading h2 {
