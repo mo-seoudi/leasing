@@ -1,5 +1,16 @@
 import { Fragment } from "react";
 
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import { formatCurrency } from "../lib/dashboardData";
 import ProgrammeDetailView from "./leasing/ProgrammeDetailView";
 
@@ -23,16 +34,60 @@ function formatPercentage(value) {
   return `${number.toFixed(0)}%`;
 }
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(toNumber(value));
+}
+
+function TableIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect
+        x="3"
+        y="4"
+        width="18"
+        height="16"
+        rx="2"
+      />
+
+      <path d="M3 9h18" />
+      <path d="M3 14h18" />
+      <path d="M9 4v16" />
+    </svg>
+  );
+}
+
+function ChartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 20V10" />
+      <path d="M10 20V4" />
+      <path d="M16 20v-7" />
+      <path d="M22 20H2" />
+    </svg>
+  );
+}
+
 export default function ProgrammeDirectoryTable({
   data = [],
   records = [],
   selectedProgramme = "",
   onProgrammeClick,
   onCloseProgramme,
+  viewMode = "table",
+  onViewModeChange,
 }) {
   function handleProgrammeClick(programme) {
     if (typeof onProgrammeClick === "function") {
       onProgrammeClick(programme);
+    }
+  }
+
+  function handleViewModeChange(mode) {
+    if (typeof onViewModeChange === "function") {
+      onViewModeChange(mode);
     }
   }
 
@@ -44,16 +99,108 @@ export default function ProgrammeDirectoryTable({
 
           <p>
             Revenue, school income and contribution to total
-            leasing performance. Click a programme to open its
-            detailed analysis.
+            leasing performance. Expand a programme in Table
+            view to open its detailed analysis.
           </p>
+        </div>
+
+        <div
+          className="directory-view-toggle"
+          role="group"
+          aria-label="Programme directory view"
+        >
+          <button
+            type="button"
+            className={
+              viewMode === "table" ? "active" : ""
+            }
+            onClick={() =>
+              handleViewModeChange("table")
+            }
+            aria-pressed={viewMode === "table"}
+            title="Table view"
+          >
+            <TableIcon />
+            <span>Table</span>
+          </button>
+
+          <button
+            type="button"
+            className={
+              viewMode === "chart" ? "active" : ""
+            }
+            onClick={() =>
+              handleViewModeChange("chart")
+            }
+            aria-pressed={viewMode === "chart"}
+            title="Chart view"
+          >
+            <ChartIcon />
+            <span>Chart</span>
+          </button>
         </div>
       </div>
 
       {data.length === 0 ? (
         <div className="directory-empty-state">
-          No programme records are available for the selected
-          filters.
+          No programme records are available for the
+          selected filters.
+        </div>
+      ) : viewMode === "chart" ? (
+        <div className="directory-chart-container">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data.slice(0, 20)}
+              margin={{
+                top: 15,
+                right: 20,
+                bottom: 85,
+                left: 20,
+              }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+              />
+
+              <XAxis
+                dataKey="programme"
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                height={100}
+                tick={{ fontSize: 10 }}
+              />
+
+              <YAxis
+                tick={{ fontSize: 11 }}
+                tickFormatter={formatCompactNumber}
+              />
+
+              <Tooltip
+                formatter={(value, name) => [
+                  formatCurrency(value),
+                  name,
+                ]}
+              />
+
+              <Legend />
+
+              <Bar
+                dataKey="totalRevenue"
+                name="Total Revenue"
+                fill="#1679a7"
+                radius={[4, 4, 0, 0]}
+              />
+
+              <Bar
+                dataKey="schoolIncome"
+                name="School Income"
+                fill="#e97832"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       ) : (
         <div className="directory-table-scroll">
