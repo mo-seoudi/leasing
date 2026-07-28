@@ -36,19 +36,13 @@ export default function ProgrammeDirectoryPage() {
     setSelectedProgrammeDetail,
   ] = useState("");
 
-  /*
-   * All records are passed to the expanded programme panel.
-   * Its internal School and Academic Year filters therefore
-   * remain independent from the outer page filters.
-   */
+  const [viewMode, setViewMode] = useState("table");
+
   const allRecords = useMemo(
     () => filterRecords({}),
     []
   );
 
-  /*
-   * The collapsed directory rows follow the page filters.
-   */
   const filteredRecords = useMemo(
     () =>
       filterRecords({
@@ -71,7 +65,7 @@ export default function ProgrammeDirectoryPage() {
       .trim()
       .toLowerCase();
 
-    const searchFilteredBreakdown = breakdown.filter(
+    const visibleProgrammes = breakdown.filter(
       (item) => {
         if (!searchValue) {
           return true;
@@ -92,25 +86,19 @@ export default function ProgrammeDirectoryPage() {
       }
     );
 
-    /*
-     * Percentages are calculated from the currently visible
-     * programmes, including the Search filter.
-     */
-    const totalRevenue =
-      searchFilteredBreakdown.reduce(
-        (total, item) =>
-          total + toNumber(item.totalRevenue),
-        0
-      );
+    const totalRevenue = visibleProgrammes.reduce(
+      (total, item) =>
+        total + toNumber(item.totalRevenue),
+      0
+    );
 
-    const totalSchoolIncome =
-      searchFilteredBreakdown.reduce(
-        (total, item) =>
-          total + toNumber(item.schoolIncome),
-        0
-      );
+    const totalSchoolIncome = visibleProgrammes.reduce(
+      (total, item) =>
+        total + toNumber(item.schoolIncome),
+      0
+    );
 
-    return searchFilteredBreakdown
+    return visibleProgrammes
       .map((item) => ({
         ...item,
 
@@ -170,6 +158,14 @@ export default function ProgrammeDirectoryPage() {
     );
   }
 
+  function handleViewModeChange(mode) {
+    setViewMode(mode);
+
+    if (mode === "chart") {
+      setSelectedProgrammeDetail("");
+    }
+  }
+
   function clearFilters() {
     setFilters({
       academicYear: latestAcademicYear,
@@ -179,6 +175,7 @@ export default function ProgrammeDirectoryPage() {
     });
 
     setSelectedProgrammeDetail("");
+    setViewMode("table");
   }
 
   const selectedPeriodLabel =
@@ -193,7 +190,7 @@ export default function ProgrammeDirectoryPage() {
 
             <p>
               Compare programmes and expand any row to view
-              its detailed monthly or termly figures.
+              detailed monthly or termly figures.
             </p>
           </div>
 
@@ -344,6 +341,8 @@ export default function ProgrammeDirectoryPage() {
         onCloseProgramme={() =>
           setSelectedProgrammeDetail("")
         }
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
       />
     </section>
   );
