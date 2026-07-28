@@ -5,16 +5,8 @@
 }
 
 /*
- * The top filter card, filter labels, selects, buttons,
- * and summary cards are inherited from:
- *
+ * The main filter card and summary cards reuse styles from:
  * ProgrammeComparisonPage.css
- *
- * This file only adds:
- * - the fourth Search control
- * - Programme Directory table styling
- * - expandable-row styling
- * - responsive adjustments
  */
 
 /* Four controls across the filter row */
@@ -55,7 +47,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
 }
 
-/* Programme Directory table card */
+/* Directory content card */
 
 .directory-table-card {
   margin-bottom: 18px;
@@ -67,7 +59,13 @@
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
 }
 
+/* Directory heading and view toggle */
+
 .directory-table-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
   margin-bottom: 16px;
 }
 
@@ -85,6 +83,69 @@
   line-height: 1.5;
 }
 
+.directory-view-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #f2f4f7;
+}
+
+.directory-view-toggle button {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.directory-view-toggle button:hover {
+  color: #344054;
+}
+
+.directory-view-toggle button.active {
+  background: #ffffff;
+  color: #344054;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+}
+
+.directory-view-toggle button:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline-offset: 2px;
+}
+
+.directory-view-toggle svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Chart view */
+
+.directory-chart-container {
+  width: 100%;
+  height: 440px;
+}
+
 /* Table scrolling */
 
 .directory-table-scroll {
@@ -92,7 +153,7 @@
   overflow-x: auto;
 }
 
-/* Comparison-style directory table */
+/* Comparison-style table */
 
 .directory-comparison-table {
   width: 100%;
@@ -204,7 +265,7 @@
   font-weight: 700;
 }
 
-/* Percentage cells */
+/* Percentage bars */
 
 .directory-percentage-cell {
   display: flex;
@@ -243,7 +304,7 @@
   background: #e97832;
 }
 
-/* Selected programme row */
+/* Selected row */
 
 .directory-selected-row {
   background: #f5f7ff;
@@ -269,11 +330,6 @@
 .directory-expanded-row .programme-detail-panel {
   margin: 10px;
 }
-
-/*
- * Preserve centred financial figures inside
- * ProgrammeDetailView while keeping Measure labels left aligned.
- */
 
 .directory-expanded-row
   .programme-detail-table
@@ -321,6 +377,22 @@
 
   .directory-table-card {
     padding: 14px;
+  }
+
+  .directory-table-heading {
+    flex-direction: column;
+  }
+
+  .directory-view-toggle {
+    width: 100%;
+  }
+
+  .directory-view-toggle button {
+    flex: 1;
+  }
+
+  .directory-chart-container {
+    height: 390px;
   }
 
   .directory-table-heading h2 {
