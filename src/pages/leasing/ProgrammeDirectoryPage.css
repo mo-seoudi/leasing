@@ -5,16 +5,19 @@
 }
 
 /*
- * ProgrammeComparisonPage.css defines:
- * - programme-filter-card
- * - programme-filter-heading
- * - programme-filter-grid
- * - programme-filter
- * - programme-summary-strip
- * - secondary-button
+ * The top filter card, filter labels, selects, buttons,
+ * and summary cards are inherited from:
+ *
+ * ProgrammeComparisonPage.css
+ *
+ * This file only adds:
+ * - the fourth Search control
+ * - Programme Directory table styling
+ * - expandable-row styling
+ * - responsive adjustments
  */
 
-/* Four controls instead of the comparison page's three */
+/* Four controls across the filter row */
 
 .directory-comparison-filter-grid {
   grid-template-columns:
@@ -23,6 +26,8 @@
     minmax(170px, 1fr)
     minmax(190px, 0.9fr);
 }
+
+/* Search field */
 
 .directory-search-filter input {
   width: 100%;
@@ -41,10 +46,262 @@
   color: #98a2b3;
 }
 
+.directory-search-filter input:hover {
+  border-color: #b8c0cc;
+}
+
 .directory-search-filter input:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
 }
+
+/* Programme Directory table card */
+
+.directory-table-card {
+  margin-bottom: 18px;
+  padding: 18px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.directory-table-heading {
+  margin-bottom: 16px;
+}
+
+.directory-table-heading h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.directory-table-heading p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Table scrolling */
+
+.directory-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Comparison-style directory table */
+
+.directory-comparison-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.directory-comparison-table th,
+.directory-comparison-table td {
+  padding: 11px 13px;
+  border-bottom: 1px solid #eaecf0;
+  white-space: nowrap;
+}
+
+.directory-comparison-table thead th {
+  background: #f8fafc;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.directory-comparison-table thead th:first-child,
+.directory-comparison-table thead th:nth-child(2),
+.directory-comparison-table thead th:nth-child(3) {
+  text-align: left;
+}
+
+.directory-comparison-table tbody th {
+  color: #344054;
+  font-weight: 700;
+  text-align: left;
+}
+
+.directory-comparison-table tbody td {
+  color: #344054;
+  text-align: right;
+}
+
+.directory-comparison-table tbody td:nth-child(2),
+.directory-comparison-table tbody td:nth-child(3) {
+  text-align: left;
+}
+
+.directory-comparison-table tbody tr {
+  transition: background 140ms ease;
+}
+
+.directory-comparison-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Programme expand button */
+
+.directory-programme-button {
+  display: flex;
+  width: 100%;
+  min-width: 165px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #175cd3;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.directory-programme-button:hover {
+  color: #004eeb;
+  text-decoration: underline;
+}
+
+.directory-programme-button:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.directory-row-arrow {
+  display: inline-block;
+  color: #98a2b3;
+  font-size: 12px;
+  line-height: 1;
+  transition:
+    transform 160ms ease,
+    color 160ms ease;
+}
+
+.directory-row-arrow.open {
+  transform: rotate(90deg);
+  color: #4f46e5;
+}
+
+/* Financial values */
+
+.directory-revenue-value {
+  color: #1679a7 !important;
+  font-weight: 700;
+}
+
+.directory-income-value {
+  color: #d85f1b !important;
+  font-weight: 700;
+}
+
+/* Percentage cells */
+
+.directory-percentage-cell {
+  display: flex;
+  min-width: 115px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.directory-percentage-cell > span {
+  width: 34px;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.directory-percentage-track {
+  width: 65px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eaecf0;
+}
+
+.directory-percentage-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.directory-revenue-fill {
+  background: #1679a7;
+}
+
+.directory-income-fill {
+  background: #e97832;
+}
+
+/* Selected programme row */
+
+.directory-selected-row {
+  background: #f5f7ff;
+}
+
+.directory-selected-row:hover {
+  background: #eef2ff !important;
+}
+
+/* Expanded detail row */
+
+.directory-expanded-row td {
+  padding: 0 !important;
+  background: #f8faff;
+  border-bottom: 1px solid #c7d2fe;
+  text-align: left !important;
+}
+
+.directory-expanded-row:hover {
+  background: transparent !important;
+}
+
+.directory-expanded-row .programme-detail-panel {
+  margin: 10px;
+}
+
+/*
+ * Preserve centred financial figures inside
+ * ProgrammeDetailView while keeping Measure labels left aligned.
+ */
+
+.directory-expanded-row
+  .programme-detail-table
+  th:not(:first-child),
+.directory-expanded-row
+  .programme-detail-table
+  td {
+  text-align: center;
+}
+
+.directory-expanded-row
+  .programme-detail-table
+  th:first-child {
+  text-align: left;
+}
+
+/* Empty state */
+
+.directory-empty-state {
+  padding: 36px 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Tablet */
 
 @media (max-width: 1100px) {
   .directory-comparison-filter-grid {
@@ -55,8 +312,22 @@
   }
 }
 
+/* Mobile */
+
 @media (max-width: 700px) {
   .directory-comparison-filter-grid {
     grid-template-columns: 1fr;
+  }
+
+  .directory-table-card {
+    padding: 14px;
+  }
+
+  .directory-table-heading h2 {
+    font-size: 16px;
+  }
+
+  .directory-table-heading p {
+    font-size: 11px;
   }
 }
