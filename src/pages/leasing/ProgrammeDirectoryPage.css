@@ -9,54 +9,13 @@
  * ProgrammeComparisonPage.css.
  */
 
-/*
- * Keep the filter row and KPI row on the same five-column grid
- * so the cards align perfectly beneath their related controls.
- */
-.directory-comparison-filter-grid,
-.programme-directory-page .programme-summary-strip {
-  display: grid;
+.directory-comparison-filter-grid {
   grid-template-columns:
     minmax(140px, 1fr)
     minmax(140px, 1fr)
     minmax(160px, 1fr)
     minmax(170px, 1fr)
     minmax(180px, 0.9fr);
-  gap: 10px;
-}
-
-/*
- * KPI alignment:
- * Total Revenue      → Academic Year
- * School Income      → School
- * Programmes         → Programme
- * Selected Period    → Search
- *
- * Column 3 remains intentionally empty beneath Programme Group.
- */
-.programme-directory-page
-  .programme-summary-strip > div:nth-child(1) {
-  grid-column: 1;
-}
-
-.programme-directory-page
-  .programme-summary-strip > div:nth-child(2) {
-  grid-column: 2;
-}
-
-.programme-directory-page
-  .programme-summary-strip > div:nth-child(3) {
-  grid-column: 4;
-}
-
-.programme-directory-page
-  .programme-summary-strip > div:nth-child(4) {
-  grid-column: 5;
-}
-
-.programme-directory-page
-  .programme-summary-strip > div {
-  min-width: 0;
 }
 
 .directory-search-filter input {
@@ -531,16 +490,9 @@
 }
 
 @media (max-width: 1100px) {
-  .directory-comparison-filter-grid,
-  .programme-directory-page
-    .programme-summary-strip {
+  .directory-comparison-filter-grid {
     grid-template-columns:
       repeat(2, minmax(180px, 1fr));
-  }
-
-  .programme-directory-page
-    .programme-summary-strip > div {
-    grid-column: auto;
   }
 
   .directory-header-controls {
@@ -568,15 +520,8 @@
 }
 
 @media (max-width: 700px) {
-  .directory-comparison-filter-grid,
-  .programme-directory-page
-    .programme-summary-strip {
+  .directory-comparison-filter-grid {
     grid-template-columns: 1fr;
-  }
-
-  .programme-directory-page
-    .programme-summary-strip > div {
-    grid-column: auto;
   }
 
   .directory-table-card {
