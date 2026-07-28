@@ -20,6 +20,7 @@ import {
   academicYears,
   filterRecords,
   formatCurrency,
+  getAvailableProgrammes,
   getProgrammeBreakdown,
   programmeGroups,
   schools,
@@ -209,6 +210,7 @@ export default function ProgrammeDirectoryPage() {
     academicYear: latestAcademicYear,
     school: "",
     programGroup: "",
+    program: "",
     searchText: "",
   });
 
@@ -223,6 +225,14 @@ export default function ProgrammeDirectoryPage() {
   ] = useState("");
 
   const [viewMode, setViewMode] = useState("table");
+
+  const availableProgrammes = useMemo(
+    () =>
+      getAvailableProgrammes(
+        filters.programGroup
+      ),
+    [filters.programGroup]
+  );
 
   /*
    * Full dataset used by the working ProgrammeDetailView.
@@ -244,11 +254,13 @@ export default function ProgrammeDirectoryPage() {
         academicYear: filters.academicYear,
         school: filters.school,
         programGroup: filters.programGroup,
+        program: filters.program,
       }),
     [
       filters.academicYear,
       filters.school,
       filters.programGroup,
+      filters.program,
     ]
   );
 
@@ -383,10 +395,18 @@ export default function ProgrammeDirectoryPage() {
   );
 
   function handleFilterChange(name, value) {
-    setFilters((current) => ({
-      ...current,
-      [name]: value,
-    }));
+    setFilters((current) => {
+      const updatedFilters = {
+        ...current,
+        [name]: value,
+      };
+
+      if (name === "programGroup") {
+        updatedFilters.program = "";
+      }
+
+      return updatedFilters;
+    });
 
     setSelectedProgrammeDetail("");
     setSelectedAggregateDetail("");
@@ -423,6 +443,7 @@ export default function ProgrammeDirectoryPage() {
       academicYear: latestAcademicYear,
       school: "",
       programGroup: "",
+      program: "",
       searchText: "",
     });
 
@@ -539,6 +560,38 @@ export default function ProgrammeDirectoryPage() {
                   {group}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="programme-filter">
+            <label htmlFor="directory-programme">
+              Programme
+            </label>
+
+            <select
+              id="directory-programme"
+              value={filters.program}
+              onChange={(event) =>
+                handleFilterChange(
+                  "program",
+                  event.target.value
+                )
+              }
+            >
+              <option value="">
+                All Programmes
+              </option>
+
+              {availableProgrammes.map(
+                (programme) => (
+                  <option
+                    key={programme}
+                    value={programme}
+                  >
+                    {programme}
+                  </option>
+                )
+              )}
             </select>
           </div>
 
