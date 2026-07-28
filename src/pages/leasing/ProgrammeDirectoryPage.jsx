@@ -31,18 +31,29 @@ export default function ProgrammeDirectoryPage() {
     searchText: "",
   });
 
-  const [
-    selectedProgrammeDetail,
-    setSelectedProgrammeDetail,
-  ] = useState("");
+  const [selectedProgrammeDetail, setSelectedProgrammeDetail] =
+    useState("");
+
+  const [selectedAggregateDetail, setSelectedAggregateDetail] =
+    useState("");
 
   const [viewMode, setViewMode] = useState("table");
 
-  const allRecords = useMemo(
-    () => filterRecords({}),
-    []
-  );
+  /*
+   * Complete leasing dataset.
+   *
+   * This is passed to individual programme detail panels,
+   * allowing their internal School and Academic Year filters
+   * to remain independent from the page filters.
+   */
+  const allRecords = useMemo(() => filterRecords({}), []);
 
+  /*
+   * Records controlled by the outer page filters.
+   *
+   * Search is deliberately excluded here because it should
+   * only filter displayed programmes, not group totals.
+   */
   const filteredRecords = useMemo(
     () =>
       filterRecords({
@@ -150,18 +161,33 @@ export default function ProgrammeDirectoryPage() {
     }));
 
     setSelectedProgrammeDetail("");
+    setSelectedAggregateDetail("");
   }
 
   function handleProgrammeClick(programme) {
+    setSelectedAggregateDetail("");
+
     setSelectedProgrammeDetail((current) =>
       current === programme ? "" : programme
+    );
+  }
+
+  function handleAggregateClick(aggregateKey) {
+    setSelectedProgrammeDetail("");
+
+    setSelectedAggregateDetail((current) =>
+      current === aggregateKey ? "" : aggregateKey
     );
   }
 
   function handleViewModeChange(mode) {
     setViewMode(mode);
 
-    if (mode === "chart") {
+    /*
+     * Individual programmes can only expand in Table view.
+     * The aggregate tabs remain available in every view.
+     */
+    if (mode !== "table") {
       setSelectedProgrammeDetail("");
     }
   }
@@ -175,6 +201,7 @@ export default function ProgrammeDirectoryPage() {
     });
 
     setSelectedProgrammeDetail("");
+    setSelectedAggregateDetail("");
     setViewMode("table");
   }
 
@@ -189,8 +216,9 @@ export default function ProgrammeDirectoryPage() {
             <h2>Directory Filters</h2>
 
             <p>
-              Compare programmes and expand any row to view
-              detailed monthly or termly figures.
+              Compare programmes and expand any programme or
+              programme group to view detailed monthly or
+              termly figures.
             </p>
           </div>
 
@@ -335,11 +363,17 @@ export default function ProgrammeDirectoryPage() {
 
       <ProgrammeDirectoryTable
         data={programmeData}
-        records={allRecords}
+        allRecords={allRecords}
+        filteredRecords={filteredRecords}
         selectedProgramme={selectedProgrammeDetail}
+        selectedAggregate={selectedAggregateDetail}
         onProgrammeClick={handleProgrammeClick}
+        onAggregateClick={handleAggregateClick}
         onCloseProgramme={() =>
           setSelectedProgrammeDetail("")
+        }
+        onCloseAggregate={() =>
+          setSelectedAggregateDetail("")
         }
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
