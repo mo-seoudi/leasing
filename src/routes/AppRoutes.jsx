@@ -43,7 +43,7 @@ export default function AppRoutes() {
         <Route
           path="leasing/programmes"
           element={<ProgrammeDirectoryPage />}
-        />      
+        />
 
         <Route path="settings" element={<SettingsPage />} />
       </Route>
