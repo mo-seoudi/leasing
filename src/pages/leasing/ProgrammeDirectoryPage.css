@@ -11,10 +11,11 @@
 
 .directory-comparison-filter-grid {
   grid-template-columns:
-    minmax(150px, 1fr)
-    minmax(150px, 1fr)
+    minmax(140px, 1fr)
+    minmax(140px, 1fr)
+    minmax(160px, 1fr)
     minmax(170px, 1fr)
-    minmax(190px, 0.9fr);
+    minmax(180px, 0.9fr);
 }
 
 .directory-search-filter input {
