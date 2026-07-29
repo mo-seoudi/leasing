@@ -14,20 +14,12 @@ const SIDEBAR_STORAGE_KEY =
 
 const leasingLinks = [
   {
-    label: "Programme Summary",
-    path: "/leasing/summary",
-  },
-  {
     label: "Programme Directory",
     path: "/leasing/programmes",
   },
   {
     label: "Year-on-Year Comparison",
     path: "/leasing/year-comparison",
-  },
-  {
-    label: "Programme Comparison",
-    path: "/leasing/program-comparison",
   },
 ];
 
@@ -147,13 +139,6 @@ function getPageDetails(pathname) {
     };
   }
 
-  if (pathname === "/leasing/summary") {
-    return {
-      section: "Leasing",
-      title: "Programme Summary",
-    };
-  }
-
   if (pathname === "/leasing/programmes") {
     return {
       section: "Leasing",
@@ -168,16 +153,6 @@ function getPageDetails(pathname) {
     return {
       section: "Leasing",
       title: "Year-on-Year Comparison",
-    };
-  }
-
-  if (
-    pathname ===
-    "/leasing/program-comparison"
-  ) {
-    return {
-      section: "Leasing",
-      title: "Programme Comparison",
     };
   }
 
