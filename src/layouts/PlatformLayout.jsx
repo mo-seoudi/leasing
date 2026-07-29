@@ -2,24 +2,14 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import "./PlatformLayout.css";
 
+const LAPTOP_BREAKPOINT = 1450;
+const SIDEBAR_STORAGE_KEY = "commercial-operations-sidebar-collapsed";
+
 const leasingLinks = [
-  {
-    label: "Programme Summary",
-    path: "/leasing/summary",
-  },
-  {
-    label: "Programme Directory",
-    path: "/leasing/programmes",
-  },
-  
-  {
-    label: "Year-on-Year Comparison",
-    path: "/leasing/year-comparison",
-  },
-  {
-    label: "Programme Comparison",
-    path: "/leasing/program-comparison",
-  },
+  { label: "Programme Summary", path: "/leasing/summary" },
+  { label: "Programme Directory", path: "/leasing/programmes" },
+  { label: "Year-on-Year Comparison", path: "/leasing/year-comparison" },
+  { label: "Programme Comparison", path: "/leasing/program-comparison" },
 ];
 
 function DashboardIcon() {
@@ -72,6 +62,14 @@ function CloseIcon() {
   );
 }
 
+function CollapseIcon({ collapsed }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d={collapsed ? "m9 6 6 6-6 6" : "m15 6-6 6 6 6"} />
+    </svg>
+  );
+}
+
 function ChevronIcon({ open }) {
   return (
     <svg
@@ -85,74 +83,62 @@ function ChevronIcon({ open }) {
 }
 
 function getPageDetails(pathname) {
-  if (pathname === "/dashboard") {
-    return {
-      section: "Overview",
-      title: "Dashboard",
-    };
-  }
+  if (pathname === "/dashboard") return { section: "Overview", title: "Dashboard" };
+  if (pathname === "/leasing/summary") return { section: "Leasing", title: "Programme Summary" };
+  if (pathname === "/leasing/programmes") return { section: "Leasing", title: "Programme Directory" };
+  if (pathname === "/leasing/year-comparison") return { section: "Leasing", title: "Year-on-Year Comparison" };
+  if (pathname === "/leasing/program-comparison") return { section: "Leasing", title: "Programme Comparison" };
+  if (pathname === "/settings") return { section: "Administration", title: "Settings" };
+  return { section: "Commercial Operations", title: "Platform" };
+}
 
-  if (pathname === "/leasing/summary") {
-    return {
-      section: "Leasing",
-      title: "Programme Summary",
-    };
-  }
+function getInitialCollapsedState() {
+  if (typeof window === "undefined") return false;
 
-  if (pathname === "/leasing/year-comparison") {
-    return {
-      section: "Leasing",
-      title: "Year-on-Year Comparison",
-    };
-  }
+  const storedValue = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+  if (storedValue !== null) return storedValue === "true";
 
-  if (pathname === "/leasing/program-comparison") {
-    return {
-      section: "Leasing",
-      title: "Programme Comparison",
-    };
-  }
-
-    if (pathname === "/leasing/programmes") {
-    return {
-      section: "Leasing",
-      title: "Programme Directory",
-    };
-  }
-
-  if (pathname === "/settings") {
-    return {
-      section: "Administration",
-      title: "Settings",
-    };
-  }
-
-  return {
-    section: "Commercial Operations",
-    title: "Platform",
-  };
+  return window.innerWidth <= LAPTOP_BREAKPOINT && window.innerWidth > 900;
 }
 
 export default function PlatformLayout() {
   const location = useLocation();
-
   const isLeasingRoute = location.pathname.startsWith("/leasing");
 
   const [leasingOpen, setLeasingOpen] = useState(isLeasingRoute);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(getInitialCollapsedState);
 
   const pageDetails = getPageDetails(location.pathname);
 
   useEffect(() => {
-    if (isLeasingRoute) {
-      setLeasingOpen(true);
-    }
-
+    if (isLeasingRoute) setLeasingOpen(true);
     setMobileOpen(false);
   }, [isLeasingRoute, location.pathname]);
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      SIDEBAR_STORAGE_KEY,
+      String(sidebarCollapsed),
+    );
+  }, [sidebarCollapsed]);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => !current);
+  };
+
+  const handleLeasingToggle = () => {
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      setLeasingOpen(true);
+      return;
+    }
+
+    setLeasingOpen((current) => !current);
+  };
+
   return (
-    <div className="platform-layout">
+    <div className={`platform-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       {mobileOpen && (
         <button
           type="button"
@@ -162,9 +148,7 @@ export default function PlatformLayout() {
         />
       )}
 
-      <aside
-        className={`platform-sidebar ${mobileOpen ? "mobile-open" : ""}`}
-      >
+      <aside className={`platform-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
         <div className="sidebar-brand">
           <div className="brand-mark">CO</div>
 
@@ -172,6 +156,16 @@ export default function PlatformLayout() {
             <strong>Commercial Operations</strong>
             <span>Analytics Platform</span>
           </div>
+
+          <button
+            type="button"
+            className="sidebar-collapse-button"
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={toggleSidebar}
+          >
+            <CollapseIcon collapsed={sidebarCollapsed} />
+          </button>
 
           <button
             type="button"
@@ -189,15 +183,11 @@ export default function PlatformLayout() {
 
             <NavLink
               to="/dashboard"
-              className={({ isActive }) =>
-                `navigation-link ${isActive ? "active" : ""}`
-              }
+              title={sidebarCollapsed ? "Dashboard" : undefined}
+              className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}
             >
-              <span className="navigation-icon">
-                <DashboardIcon />
-              </span>
-
-              <span>Dashboard</span>
+              <span className="navigation-icon"><DashboardIcon /></span>
+              <span className="navigation-text">Dashboard</span>
             </NavLink>
           </div>
 
@@ -206,32 +196,25 @@ export default function PlatformLayout() {
 
             <button
               type="button"
-              className={`navigation-link navigation-parent ${
-                isLeasingRoute ? "module-active" : ""
-              }`}
-              onClick={() => setLeasingOpen((current) => !current)}
-              aria-expanded={leasingOpen}
+              className={`navigation-link navigation-parent ${isLeasingRoute ? "module-active" : ""}`}
+              onClick={handleLeasingToggle}
+              aria-expanded={!sidebarCollapsed && leasingOpen}
+              title={sidebarCollapsed ? "Leasing" : undefined}
             >
               <span className="navigation-link-content">
-                <span className="navigation-icon">
-                  <RevenueIcon />
-                </span>
-
-                <span>Leasing</span>
+                <span className="navigation-icon"><RevenueIcon /></span>
+                <span className="navigation-text">Leasing</span>
               </span>
-
               <ChevronIcon open={leasingOpen} />
             </button>
 
-            {leasingOpen && (
+            {!sidebarCollapsed && leasingOpen && (
               <div className="navigation-submenu">
                 {leasingLinks.map((link) => (
                   <NavLink
                     key={link.path}
                     to={link.path}
-                    className={({ isActive }) =>
-                      `submenu-link ${isActive ? "active" : ""}`
-                    }
+                    className={({ isActive }) => `submenu-link ${isActive ? "active" : ""}`}
                   >
                     <span className="submenu-dot" />
                     <span>{link.label}</span>
@@ -240,18 +223,16 @@ export default function PlatformLayout() {
               </div>
             )}
 
-            <div className="future-module">
-              <span>Catering</span>
+            <div className="future-module" title={sidebarCollapsed ? "Catering — Soon" : undefined}>
+              <span className="future-module-name">Catering</span>
               <span className="status-badge">Soon</span>
             </div>
-
-            <div className="future-module">
-              <span>Uniform</span>
+            <div className="future-module" title={sidebarCollapsed ? "Uniform — Soon" : undefined}>
+              <span className="future-module-name">Uniform</span>
               <span className="status-badge">Soon</span>
             </div>
-
-            <div className="future-module">
-              <span>Transport</span>
+            <div className="future-module" title={sidebarCollapsed ? "Transport — Soon" : undefined}>
+              <span className="future-module-name">Transport</span>
               <span className="status-badge">Soon</span>
             </div>
           </div>
@@ -261,22 +242,17 @@ export default function PlatformLayout() {
 
             <NavLink
               to="/settings"
-              className={({ isActive }) =>
-                `navigation-link ${isActive ? "active" : ""}`
-              }
+              title={sidebarCollapsed ? "Settings" : undefined}
+              className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}
             >
-              <span className="navigation-icon">
-                <SettingsIcon />
-              </span>
-
-              <span>Settings</span>
+              <span className="navigation-icon"><SettingsIcon /></span>
+              <span className="navigation-text">Settings</span>
             </NavLink>
           </div>
         </nav>
 
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" title={sidebarCollapsed ? "Mohammed Seoudi" : undefined}>
           <div className="user-avatar">MS</div>
-
           <div className="user-details">
             <strong>Mohammed Seoudi</strong>
             <span>Commercial Operations</span>
@@ -296,13 +272,22 @@ export default function PlatformLayout() {
               <MenuIcon />
             </button>
 
+            <button
+              type="button"
+              className="header-sidebar-toggle"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={toggleSidebar}
+            >
+              <CollapseIcon collapsed={sidebarCollapsed} />
+            </button>
+
             <div>
               <div className="breadcrumb">
                 <span>Commercial Operations</span>
                 <span className="breadcrumb-divider">/</span>
                 <span>{pageDetails.section}</span>
               </div>
-
               <h1>{pageDetails.title}</h1>
             </div>
           </div>
