@@ -1,4 +1,9 @@
-import { Fragment, useMemo, useState } from "react";
+import {
+  Fragment,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   Bar,
@@ -226,6 +231,8 @@ export default function ProgrammeDirectoryPage() {
 
   const [viewMode, setViewMode] = useState("table");
 
+  const directoryTableScrollRef = useRef(null);
+
   const availableProgrammes = useMemo(
     () =>
       getAvailableProgrammes(
@@ -436,6 +443,28 @@ export default function ProgrammeDirectoryPage() {
     if (mode !== "table") {
       setSelectedProgrammeDetail("");
     }
+  }
+
+  function scrollDirectoryTable(direction) {
+    const scrollContainer =
+      directoryTableScrollRef.current;
+
+    if (!scrollContainer) {
+      return;
+    }
+
+    const scrollAmount = Math.max(
+      280,
+      scrollContainer.clientWidth * 0.65
+    );
+
+    scrollContainer.scrollBy({
+      left:
+        direction === "left"
+          ? -scrollAmount
+          : scrollAmount,
+      behavior: "smooth",
+    });
   }
 
   function clearFilters() {
@@ -864,8 +893,12 @@ export default function ProgrammeDirectoryPage() {
             />
           </div>
         ) : (
-          <div className="directory-table-scroll">
-            <table className="directory-comparison-table">
+          <div className="directory-table-area">
+            <div
+              ref={directoryTableScrollRef}
+              className="directory-table-scroll"
+            >
+              <table className="directory-comparison-table">
               <thead>
                 <tr>
                   <th>Programme</th>
@@ -1012,7 +1045,41 @@ export default function ProgrammeDirectoryPage() {
                   );
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
+
+            <div
+              className="directory-horizontal-controls"
+              aria-label="Programme table horizontal navigation"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  scrollDirectoryTable("left")
+                }
+                aria-label="Scroll programme table left"
+                title="Scroll table left"
+              >
+                <span aria-hidden="true">←</span>
+                <span>Left</span>
+              </button>
+
+              <span className="directory-scroll-hint">
+                Scroll to view additional columns
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  scrollDirectoryTable("right")
+                }
+                aria-label="Scroll programme table right"
+                title="Scroll table right"
+              >
+                <span>Right</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
           </div>
         )}
       </section>
