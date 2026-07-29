@@ -439,7 +439,7 @@
  * ProgrammeDetailView component used by Programme Summary.
  */
 
-.directory-expanded-row td {
+.directory-expanded-row > td {
   padding: 0 !important;
   background: #f8faff;
   border-bottom: 1px solid #c7d2fe;
@@ -467,6 +467,12 @@
   .programme-detail-table
   th:first-child {
   text-align: left !important;
+}
+
+.directory-expanded-row
+  .programme-detail-table
+  .detail-total-cell {
+  text-align: center !important;
 }
 
 .directory-empty-state {
