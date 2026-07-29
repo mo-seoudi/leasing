@@ -1,8 +1,6 @@
 import {
   Fragment,
-  useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -232,14 +230,6 @@ export default function ProgrammeDirectoryPage() {
 
   const [viewMode, setViewMode] = useState("table");
 
-  const directoryTableScrollRef = useRef(null);
-
-  const [canScrollLeft, setCanScrollLeft] =
-    useState(false);
-
-  const [canScrollRight, setCanScrollRight] =
-    useState(false);
-
   const availableProgrammes = useMemo(
     () =>
       getAvailableProgrammes(
@@ -408,94 +398,6 @@ export default function ProgrammeDirectoryPage() {
     [aggregateTabs, selectedAggregateDetail]
   );
 
-  function updateTableScrollButtons() {
-    const scrollContainer =
-      directoryTableScrollRef.current;
-
-    if (!scrollContainer) {
-      setCanScrollLeft(false);
-      setCanScrollRight(false);
-      return;
-    }
-
-    const maximumScrollLeft =
-      scrollContainer.scrollWidth -
-      scrollContainer.clientWidth;
-
-    setCanScrollLeft(
-      scrollContainer.scrollLeft > 4
-    );
-
-    setCanScrollRight(
-      maximumScrollLeft > 4 &&
-        scrollContainer.scrollLeft <
-          maximumScrollLeft - 4
-    );
-  }
-
-  useEffect(() => {
-    const scrollContainer =
-      directoryTableScrollRef.current;
-
-    if (
-      viewMode !== "table" ||
-      !scrollContainer
-    ) {
-      setCanScrollLeft(false);
-      setCanScrollRight(false);
-      return undefined;
-    }
-
-    const handleScroll = () => {
-      updateTableScrollButtons();
-    };
-
-    const resizeObserver =
-      new ResizeObserver(() => {
-        updateTableScrollButtons();
-      });
-
-    updateTableScrollButtons();
-
-    scrollContainer.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true }
-    );
-
-    resizeObserver.observe(scrollContainer);
-
-    const table =
-      scrollContainer.querySelector("table");
-
-    if (table) {
-      resizeObserver.observe(table);
-    }
-
-    window.addEventListener(
-      "resize",
-      updateTableScrollButtons
-    );
-
-    return () => {
-      scrollContainer.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-
-      resizeObserver.disconnect();
-
-      window.removeEventListener(
-        "resize",
-        updateTableScrollButtons
-      );
-    };
-  }, [
-    viewMode,
-    programmeData,
-    selectedProgrammeDetail,
-  ]);
-
   function handleFilterChange(name, value) {
     setFilters((current) => {
       const updatedFilters = {
@@ -538,28 +440,6 @@ export default function ProgrammeDirectoryPage() {
     if (mode !== "table") {
       setSelectedProgrammeDetail("");
     }
-  }
-
-  function scrollDirectoryTable(direction) {
-    const scrollContainer =
-      directoryTableScrollRef.current;
-
-    if (!scrollContainer) {
-      return;
-    }
-
-    const scrollAmount = Math.max(
-      280,
-      scrollContainer.clientWidth * 0.65
-    );
-
-    scrollContainer.scrollBy({
-      left:
-        direction === "left"
-          ? -scrollAmount
-          : scrollAmount,
-      behavior: "smooth",
-    });
   }
 
   function clearFilters() {
@@ -988,26 +868,8 @@ export default function ProgrammeDirectoryPage() {
             />
           </div>
         ) : (
-          <div className="directory-table-shell">
-            {canScrollLeft && (
-              <button
-                type="button"
-                className="directory-scroll-arrow directory-scroll-arrow-left"
-                onClick={() =>
-                  scrollDirectoryTable("left")
-                }
-                aria-label="Scroll programme table left"
-                title="Scroll table left"
-              >
-                ‹
-              </button>
-            )}
-
-            <div
-              ref={directoryTableScrollRef}
-              className="directory-table-scroll"
-            >
-              <table className="directory-comparison-table">
+          <div className="directory-table-scroll">
+            <table className="directory-comparison-table">
               <thead>
                 <tr>
                   <th>Programme</th>
@@ -1154,22 +1016,7 @@ export default function ProgrammeDirectoryPage() {
                   );
                 })}
               </tbody>
-              </table>
-            </div>
-
-            {canScrollRight && (
-              <button
-                type="button"
-                className="directory-scroll-arrow directory-scroll-arrow-right"
-                onClick={() =>
-                  scrollDirectoryTable("right")
-                }
-                aria-label="Scroll programme table right"
-                title="Scroll table right"
-              >
-                ›
-              </button>
-            )}
+            </table>
           </div>
         )}
       </section>
