@@ -1,10 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import PlatformLayout from "../layouts/PlatformLayout";
-import ProgrammeSummaryPage from "../pages/leasing/ProgrammeSummaryPage";
-import YearComparisonPage from "../pages/leasing/YearComparisonPage";
-import ProgrammeComparisonPage from "../pages/leasing/ProgrammeComparisonPage";
 import ProgrammeDirectoryPage from "../pages/leasing/ProgrammeDirectoryPage";
+import YearComparisonPage from "../pages/leasing/YearComparisonPage";
 
 function DashboardPage() {
   return <h1>Commercial Operations Dashboard</h1>;
@@ -18,16 +16,17 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<PlatformLayout />}>
+        {/* Programme Directory is the default landing page */}
         <Route
           index
-          element={<Navigate to="/leasing/summary" replace />}
+          element={<Navigate to="/leasing/programmes" replace />}
         />
 
         <Route path="dashboard" element={<DashboardPage />} />
 
         <Route
-          path="leasing/summary"
-          element={<ProgrammeSummaryPage />}
+          path="leasing/programmes"
+          element={<ProgrammeDirectoryPage />}
         />
 
         <Route
@@ -35,14 +34,15 @@ export default function AppRoutes() {
           element={<YearComparisonPage />}
         />
 
+        {/* Redirect retired pages to Programme Directory */}
         <Route
-          path="leasing/program-comparison"
-          element={<ProgrammeComparisonPage />}
+          path="leasing/summary"
+          element={<Navigate to="/leasing/programmes" replace />}
         />
 
         <Route
-          path="leasing/programmes"
-          element={<ProgrammeDirectoryPage />}
+          path="leasing/program-comparison"
+          element={<Navigate to="/leasing/programmes" replace />}
         />
 
         <Route path="settings" element={<SettingsPage />} />
@@ -50,7 +50,7 @@ export default function AppRoutes() {
 
       <Route
         path="*"
-        element={<Navigate to="/leasing/summary" replace />}
+        element={<Navigate to="/leasing/programmes" replace />}
       />
     </Routes>
   );
