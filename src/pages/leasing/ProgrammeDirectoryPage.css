@@ -443,7 +443,7 @@
   padding: 0 !important;
   background: #f8faff;
   border-bottom: 1px solid #c7d2fe;
-  text-align: left;
+  text-align: left !important;
 }
 
 .directory-expanded-row:hover {
@@ -453,8 +453,50 @@
 .directory-expanded-row
   .programme-detail-panel {
   margin: 10px;
+  text-align: left !important;
 }
 
+/*
+ * Keep every heading, label and summary value in the expanded
+ * ProgrammeDetailView aligned to the left.
+ */
+.directory-expanded-row
+  .programme-detail-header,
+.directory-expanded-row
+  .programme-detail-header > div,
+.directory-expanded-row
+  .programme-detail-eyebrow,
+.directory-expanded-row
+  .programme-detail-header h2,
+.directory-expanded-row
+  .programme-detail-header p,
+.directory-expanded-row
+  .programme-detail-controls,
+.directory-expanded-row
+  .programme-detail-filters,
+.directory-expanded-row
+  .programme-detail-filter,
+.directory-expanded-row
+  .programme-detail-filter label,
+.directory-expanded-row
+  .programme-detail-filter select,
+.directory-expanded-row
+  .programme-detail-summary,
+.directory-expanded-row
+  .programme-detail-summary > div,
+.directory-expanded-row
+  .programme-detail-summary span,
+.directory-expanded-row
+  .programme-detail-summary strong,
+.directory-expanded-row
+  .programme-detail-summary small {
+  text-align: left !important;
+}
+
+/*
+ * Only the period amounts inside the actual detail table are centred.
+ * The first Measure column remains left aligned.
+ */
 .directory-expanded-row
   .programme-detail-table th,
 .directory-expanded-row
