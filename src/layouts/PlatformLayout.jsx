@@ -588,9 +588,7 @@ export default function PlatformLayout() {
               </h1>
             </div>
           </div>
-
-          <div className="header-actions">
-           
+          <div className="header-actions" />
         </header>
 
         <main className="platform-content">
