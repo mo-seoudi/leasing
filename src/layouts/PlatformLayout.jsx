@@ -589,14 +589,7 @@ export default function PlatformLayout() {
             </div>
           </div>
 
-          <div className="header-actions">
-            <div className="environment-pill">
-              <span className="environment-dot" />
 
-              Live data
-            </div>
-          </div>
-        </header>
 
         <main className="platform-content">
           <Outlet />
