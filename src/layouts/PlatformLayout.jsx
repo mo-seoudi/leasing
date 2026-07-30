@@ -589,7 +589,14 @@ export default function PlatformLayout() {
             </div>
           </div>
 
+          <div className="header-actions">
+            <div className="environment-pill">
+              <span className="environment-dot" />
 
+              Cognita
+            </div>
+          </div>
+        </header>
 
         <main className="platform-content">
           <Outlet />
