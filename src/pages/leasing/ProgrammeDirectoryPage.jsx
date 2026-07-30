@@ -30,7 +30,7 @@ import {
   schools,
 } from "../../lib/dashboardData";
 
-
+import "./ProgrammeDirectoryPage.css";
 
 const PIE_COLORS = [
   "#2563eb",
