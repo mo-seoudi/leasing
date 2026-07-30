@@ -30,8 +30,7 @@ import {
   schools,
 } from "../../lib/dashboardData";
 
-import "./ProgrammeComparisonPage.css";
-import "./ProgrammeDirectoryPage.css";
+
 
 const PIE_COLORS = [
   "#2563eb",
