@@ -457,14 +457,7 @@ function ProviderDetailModal({
                 </dd>
               </div>
 
-              <div>
-                <dt>Deposit</dt>
-                <dd>
-                  {formatProviderAmount(
-                    contract.deposit
-                  )}
-                </dd>
-              </div>
+
             </dl>
           </section>
         </div>
