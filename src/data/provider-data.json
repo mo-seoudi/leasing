@@ -1,0 +1,522 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0.0",
+    "generatedAt": "2026-07-31",
+    "currency": "AED",
+    "lookupKey": "Provider name used in leasing-data.json programCatalog"
+  },
+  "providers": {
+    "Inspiratus Consulting LLC": {
+      "name": "Inspiratus Consulting LLC",
+      "contactPerson": "",
+      "email": "",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Abu Dhabi Championship"
+      ],
+      "contract": {
+        "status": "Cancelled",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": null,
+        "rentalFees": "AED 94,380 fixed fee",
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "The Overlord Academy": {
+      "name": "The Overlord Academy",
+      "contactPerson": "Rez Dinari",
+      "email": "rez@theoverlordacademy.com",
+      "phone": "+971 58 651 2235",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Cadet Club"
+      ],
+      "contract": {
+        "status": "No Active Contract",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": null,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Gulf Star / Evolve": {
+      "name": "Evolve Academy (Budo Juku Sports Consultancy LLC)",
+      "contactPerson": "Hawk Kider / Ewan",
+      "email": "evolve-academy@outlook.com",
+      "phone": "+971 58 576 7012",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Camps"
+      ],
+      "contract": {
+        "status": "Active",
+        "startDate": "",
+        "expiryDate": "2026-08-26",
+        "noticePeriod": "",
+        "commissionRate": 0.3,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Rose"
+        ]
+      }
+    },
+    "Chinese Language Institute": {
+      "name": "Chinese Language Institute Middle East (CLIME)",
+      "contactPerson": "Luxin Wein",
+      "email": "clime@cli-me.com",
+      "phone": "+971 54 566 6159",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Chinese"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.2,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Alliance Francaise": {
+      "name": "Alliance Française Abu Dhabi",
+      "contactPerson": "Asma Mahjoub",
+      "email": "admincourses@afabudhabi.org",
+      "phone": "+971 50 604 5457",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "French"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.2,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Gulf Sports Media LLC": {
+      "name": "Gulf Sports Media LLC",
+      "contactPerson": "",
+      "email": "",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Jr. NBA"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": null,
+        "rentalFees": "AED 162,990 fixed programme fee",
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Four Notes": {
+      "name": "Four Notes",
+      "contactPerson": "Uros Todic",
+      "email": "u.todic@fournotes.ae",
+      "phone": "+971 50 167 4678",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Music"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.1,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Techway": {
+      "name": "Techway",
+      "contactPerson": "Mariem Elkis Sanad",
+      "email": "mariemalkis@gmail.com",
+      "phone": "+971 54 323 1991",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Robotics"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.25,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Badminton Academy": {
+      "name": "Day Light Sports Academy L.L.C - O.P.",
+      "contactPerson": "Sobers Fernandez",
+      "email": "contactus@daylightsports.com",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Badminton Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Termly",
+        "deposit": 0,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Basketball Academy": {
+      "name": "RnB Sports Managemen",
+      "contactPerson": "Robert Ferriere",
+      "email": "robert.ferriere@reptonabudhabi.org",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Basketball Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Termly",
+        "deposit": 0,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Peak Sports": {
+      "name": "Peak Sports Academy – LLC",
+      "contactPerson": "Manikantan Nair",
+      "email": "coachmani1983@gmail.com",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Cricket Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Termly",
+        "deposit": 0,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Gulf Multi Sport": {
+      "name": "Gulf Multi Sports",
+      "contactPerson": "Oliver Chaffe",
+      "email": "olly@gulfmultisport.com",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Cycling Academy"
+      ],
+      "contract": {
+        "status": "No Active Contract",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.3,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Fitness Academy": {
+      "name": "Fitness Academy",
+      "contactPerson": "",
+      "email": "",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Fitness Academy"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": null,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Proactive Soccer School": {
+      "name": "Proactive Soccer School LTD",
+      "contactPerson": "Sarah March",
+      "email": "Operations@passabudhabi.com",
+      "phone": "",
+      "companyNumber": "MC11489",
+      "address": "Masdar City, Abu Dhabi",
+      "programmes": [
+        "Football Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": "Swimming Pool: AED 440; Dojo Room 3rd Floor: AED 250; Tennis Court: AED 145; Gym 1: AED 330; Gym 2: AED 330; Gym 3: AED 440; Classrooms: AED 155",
+        "revenueCollection": "School",
+        "invoiceFrequency": "Termly",
+        "deposit": 0,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Champs Gymnastics": {
+      "name": "Champs Gymnastics Academy",
+      "contactPerson": "Sameh Zeair",
+      "email": "samehzeair6@gmail.com",
+      "phone": "+971 52 795 2335",
+      "companyNumber": "",
+      "address": "Link Investments Building, MBZ City, Abu Dhabi",
+      "programmes": [
+        "Gymnastics Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Monthly",
+        "deposit": 0,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Prototype Fitness": {
+      "name": "Prototype Fitness Sports Academy",
+      "contactPerson": "Kealan Barron",
+      "email": "kealan.barron@reptonabudhabi.org",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Jiu Jitsu Academy"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0.2,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Enrich ME": {
+      "name": "Enrich ME",
+      "contactPerson": "",
+      "email": "",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Netball Academy"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": 0,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry"
+        ]
+      }
+    },
+    "Neptune Swimming Club": {
+      "name": "Neptune Swimming Academy",
+      "contactPerson": "Jan Naylor",
+      "email": "jan.naylor@neptuneswimmingclub.com",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Swimming Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Termly",
+        "deposit": 0,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Global Sports RS": {
+      "name": "Global Sports Recreation Services LLC",
+      "contactPerson": "Sasa Ljumic",
+      "email": "Sasaljumic@hotmail.com",
+      "phone": "",
+      "companyNumber": "",
+      "address": "Dar Al Salam Building, Office 14, Liwa Street, Corniche, Abu Dhabi",
+      "programmes": [
+        "Tennis Academy"
+      ],
+      "contract": {
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
+        "noticePeriod": "30 days",
+        "commissionRate": 0.3,
+        "rentalFees": 0,
+        "revenueCollection": "School",
+        "invoiceFrequency": "Monthly",
+        "deposit": 10000,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    },
+    "Rio Volleyball": {
+      "name": "Rio Volleyball",
+      "contactPerson": "",
+      "email": "",
+      "phone": "",
+      "companyNumber": "",
+      "address": "",
+      "programmes": [
+        "Volleyball Academy"
+      ],
+      "contract": {
+        "status": "Not Recorded",
+        "startDate": "",
+        "expiryDate": "",
+        "noticePeriod": "",
+        "commissionRate": null,
+        "rentalFees": null,
+        "revenueCollection": "",
+        "invoiceFrequency": "",
+        "deposit": null,
+        "schools": [
+          "Fry",
+          "Rose"
+        ]
+      }
+    }
+  }
+}
