@@ -25,7 +25,6 @@
         "rentalFees": "AED 94,380 fixed fee",
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry"
         ]
@@ -50,7 +49,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -76,7 +74,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Rose"
         ]
@@ -101,7 +98,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -127,7 +123,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -153,7 +148,6 @@
         "rentalFees": "AED 162,990 fixed programme fee",
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry"
         ]
@@ -178,7 +172,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry"
         ]
@@ -203,7 +196,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -229,7 +221,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Termly",
-        "deposit": 0,
         "schools": [
           "Fry"
         ]
@@ -254,7 +245,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Termly",
-        "deposit": 0,
         "schools": [
           "Fry"
         ]
@@ -279,7 +269,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Termly",
-        "deposit": 0,
         "schools": [
           "Fry",
           "Rose"
@@ -305,7 +294,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -331,7 +319,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
@@ -357,7 +344,6 @@
         "rentalFees": "Swimming Pool: AED 440; Dojo Room 3rd Floor: AED 250; Tennis Court: AED 145; Gym 1: AED 330; Gym 2: AED 330; Gym 3: AED 440; Classrooms: AED 155",
         "revenueCollection": "School",
         "invoiceFrequency": "Termly",
-        "deposit": 0,
         "schools": [
           "Fry",
           "Rose"
@@ -383,7 +369,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Monthly",
-        "deposit": 0,
         "schools": [
           "Fry",
           "Rose"
@@ -409,7 +394,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry"
         ]
@@ -434,7 +418,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry"
         ]
@@ -459,7 +442,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Termly",
-        "deposit": 0,
         "schools": [
           "Fry",
           "Rose"
@@ -485,7 +467,6 @@
         "rentalFees": 0,
         "revenueCollection": "School",
         "invoiceFrequency": "Monthly",
-        "deposit": 10000,
         "schools": [
           "Fry",
           "Rose"
@@ -511,7 +492,6 @@
         "rentalFees": null,
         "revenueCollection": "",
         "invoiceFrequency": "",
-        "deposit": null,
         "schools": [
           "Fry",
           "Rose"
