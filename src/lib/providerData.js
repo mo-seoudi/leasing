@@ -66,7 +66,6 @@ export function getProviderByName(providerName) {
       rentalFees: null,
       revenueCollection: "",
       invoiceFrequency: "",
-      deposit: null,
       schools: [],
     },
   };
