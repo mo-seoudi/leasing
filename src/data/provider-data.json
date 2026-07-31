@@ -169,7 +169,7 @@
         "expiryDate": "2026-07-03",
         "noticePeriod": "",
         "commissionRate": 0.1,
-        "rentalFees": AED 0,
+        "rentalFees": 0,
         "revenueCollection": "",
         "invoiceFrequency": "",
         "schools": [
