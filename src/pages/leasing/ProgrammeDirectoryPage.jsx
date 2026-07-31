@@ -1,5 +1,6 @@
 import {
   Fragment,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -19,6 +20,10 @@ import {
 } from "recharts";
 
 import ProgrammeDetailView from "../../components/leasing/ProgrammeDetailView";
+
+import {
+  getProviderByName,
+} from "../../lib/providerData";
 
 import {
   academicYears,
@@ -96,6 +101,376 @@ function formatCompactNumber(value) {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(toNumber(value));
+}
+
+
+function formatProviderDate(value) {
+  if (!value) {
+    return "Not recorded";
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatCommissionRate(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "Not recorded";
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return String(value);
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "percent",
+    maximumFractionDigits: 2,
+  }).format(number);
+}
+
+function formatProviderAmount(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "Not recorded";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return formatCurrency(value);
+}
+
+function getProviderStatus(provider) {
+  const storedStatus =
+    provider?.contract?.status;
+
+  if (
+    storedStatus &&
+    storedStatus !== "Active" &&
+    storedStatus !== "Expired"
+  ) {
+    return {
+      key: "unknown",
+      label: storedStatus,
+      message:
+        provider?.contract?.expiryDate
+          ? `Contract date: ${formatProviderDate(
+              provider.contract.expiryDate
+            )}`
+          : "No current expiry date is recorded.",
+    };
+  }
+
+  const expiryDate =
+    provider?.contract?.expiryDate;
+
+  if (!expiryDate) {
+    return {
+      key: "unknown",
+      label:
+        storedStatus || "Not Recorded",
+      message:
+        "Contract expiry date is not recorded.",
+    };
+  }
+
+  const expiry = new Date(
+    `${expiryDate}T23:59:59`
+  );
+
+  if (Number.isNaN(expiry.getTime())) {
+    return {
+      key: "unknown",
+      label: "Not Recorded",
+      message:
+        "Contract expiry date is not valid.",
+    };
+  }
+
+  const formattedDate =
+    formatProviderDate(expiryDate);
+
+  if (expiry < new Date()) {
+    return {
+      key: "expired",
+      label: "Expired",
+      message: `Expired on ${formattedDate}`,
+    };
+  }
+
+  const millisecondsPerDay =
+    1000 * 60 * 60 * 24;
+
+  const daysRemaining = Math.ceil(
+    (expiry.getTime() -
+      new Date().getTime()) /
+      millisecondsPerDay
+  );
+
+  if (daysRemaining <= 60) {
+    return {
+      key: "expiring",
+      label: "Expiring Soon",
+      message: `Expires on ${formattedDate}`,
+    };
+  }
+
+  return {
+    key: "active",
+    label: "Active",
+    message: `Expires on ${formattedDate}`,
+  };
+}
+
+function ProviderDetailModal({
+  provider,
+  onClose,
+}) {
+  if (!provider) {
+    return null;
+  }
+
+  const contract =
+    provider.contract || {};
+
+  const status =
+    getProviderStatus(provider);
+
+  const schools =
+    Array.isArray(contract.schools) &&
+    contract.schools.length > 0
+      ? contract.schools.join(", ")
+      : "Not recorded";
+
+  const programmes =
+    Array.isArray(provider.programmes) &&
+    provider.programmes.length > 0
+      ? provider.programmes.join(", ")
+      : "Not recorded";
+
+  return (
+    <div
+      className="provider-modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (
+          event.target ===
+          event.currentTarget
+        ) {
+          onClose();
+        }
+      }}
+    >
+      <section
+        className="provider-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="provider-modal-title"
+      >
+        <div className="provider-modal-header">
+          <div>
+            <span className="provider-modal-eyebrow">
+              Provider Details
+            </span>
+
+            <h2 id="provider-modal-title">
+              {provider.name}
+            </h2>
+
+            <p>
+              Contact and contract information
+              for this provider.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="provider-modal-close"
+            onClick={onClose}
+            aria-label="Close provider details"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="provider-contract-status-row">
+          <span
+            className={`provider-status-badge provider-status-${status.key}`}
+          >
+            {status.label}
+          </span>
+
+          <strong>{status.message}</strong>
+        </div>
+
+        <div className="provider-detail-grid">
+          <section className="provider-detail-section">
+            <h3>Provider Details</h3>
+
+            <dl className="provider-detail-list">
+              <div>
+                <dt>Contact Person</dt>
+                <dd>
+                  {provider.contactPerson ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Email</dt>
+                <dd>
+                  {provider.email ? (
+                    <a
+                      href={`mailto:${provider.email}`}
+                    >
+                      {provider.email}
+                    </a>
+                  ) : (
+                    "Not recorded"
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Phone</dt>
+                <dd>
+                  {provider.phone ? (
+                    <a
+                      href={`tel:${provider.phone}`}
+                    >
+                      {provider.phone}
+                    </a>
+                  ) : (
+                    "Not recorded"
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Company Number</dt>
+                <dd>
+                  {provider.companyNumber ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Address</dt>
+                <dd>
+                  {provider.address ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Programmes</dt>
+                <dd>{programmes}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="provider-detail-section">
+            <h3>Contract Details</h3>
+
+            <dl className="provider-detail-list">
+              <div>
+                <dt>Schools</dt>
+                <dd>{schools}</dd>
+              </div>
+
+              <div>
+                <dt>Start Date</dt>
+                <dd>
+                  {formatProviderDate(
+                    contract.startDate
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Expiry Date</dt>
+                <dd>
+                  {formatProviderDate(
+                    contract.expiryDate
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Notice Period</dt>
+                <dd>
+                  {contract.noticePeriod ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Commission</dt>
+                <dd>
+                  {formatCommissionRate(
+                    contract.commissionRate
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Rental Fees</dt>
+                <dd>
+                  {formatProviderAmount(
+                    contract.rentalFees
+                  )}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Revenue Collected By</dt>
+                <dd>
+                  {contract.revenueCollection ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Invoice Frequency</dt>
+                <dd>
+                  {contract.invoiceFrequency ||
+                    "Not recorded"}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Deposit</dt>
+                <dd>
+                  {formatProviderAmount(
+                    contract.deposit
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function TableIcon() {
@@ -228,6 +603,53 @@ export default function ProgrammeDirectoryPage() {
   ] = useState("");
 
   const [viewMode, setViewMode] = useState("table");
+
+  const [
+    selectedProviderName,
+    setSelectedProviderName,
+  ] = useState("");
+
+  const selectedProvider = useMemo(
+    () =>
+      getProviderByName(
+        selectedProviderName
+      ),
+    [selectedProviderName]
+  );
+
+  useEffect(() => {
+    if (!selectedProviderName) {
+      return undefined;
+    }
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setSelectedProviderName("");
+      }
+    }
+
+    document.body.style.overflow =
+      "hidden";
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [selectedProviderName]);
+
 
   const availableProgrammes = useMemo(
     () =>
@@ -452,6 +874,7 @@ export default function ProgrammeDirectoryPage() {
 
     setSelectedProgrammeDetail("");
     setSelectedAggregateDetail("");
+    setSelectedProviderName("");
     setViewMode("table");
   }
 
@@ -926,7 +1349,22 @@ export default function ProgrammeDirectoryPage() {
                         </th>
 
                         <td>
-                          {item.provider || "—"}
+                          {item.provider ? (
+                            <button
+                              type="button"
+                              className="directory-provider-button"
+                              onClick={() =>
+                                setSelectedProviderName(
+                                  item.provider
+                                )
+                              }
+                              aria-label={`View provider details for ${item.provider}`}
+                            >
+                              {item.provider}
+                            </button>
+                          ) : (
+                            "—"
+                          )}
                         </td>
 
                         <td>
@@ -1019,6 +1457,13 @@ export default function ProgrammeDirectoryPage() {
           </div>
         )}
       </section>
+
+      <ProviderDetailModal
+        provider={selectedProvider}
+        onClose={() =>
+          setSelectedProviderName("")
+        }
+      />
     </section>
   );
 }
