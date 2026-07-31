@@ -170,9 +170,9 @@
         "Music"
       ],
       "contract": {
-        "status": "Not Recorded",
-        "startDate": "",
-        "expiryDate": "",
+        "status": "Expired",
+        "startDate": "2025-08-25",
+        "expiryDate": "2026-07-03",
         "noticePeriod": "",
         "commissionRate": 0.1,
         "rentalFees": null,
