@@ -163,3 +163,59 @@ export function getCateringSummary(records) {
     schools,
   };
 }
+
+export function getCateringAcademicYearComparison(records) {
+  const grouped = new Map();
+
+  records.forEach((record) => {
+    const academicYear = record.academicYear;
+
+    if (!academicYear) {
+      return;
+    }
+
+    const current = grouped.get(academicYear) || {
+      academicYear,
+      sales: 0,
+      commission: 0,
+      months: new Set(),
+      schools: new Set(),
+    };
+
+    const amount = Number(record.amount || 0);
+
+    if (record.metric === "Sales") {
+      current.sales += amount;
+    }
+
+    if (record.metric === "Commission") {
+      current.commission += amount;
+    }
+
+    if (record.month) {
+      current.months.add(record.month);
+    }
+
+    if (record.school) {
+      current.schools.add(record.school);
+    }
+
+    grouped.set(academicYear, current);
+  });
+
+  return [...grouped.values()]
+    .map((item) => ({
+      academicYear: item.academicYear,
+      sales: item.sales,
+      commission: item.commission,
+      commissionRate:
+        item.sales > 0
+          ? (item.commission / item.sales) * 100
+          : 0,
+      months: item.months.size,
+      schools: item.schools.size,
+    }))
+    .sort((a, b) =>
+      a.academicYear.localeCompare(b.academicYear)
+    );
+}
