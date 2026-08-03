@@ -5,6 +5,8 @@ import ProgrammeDirectoryPage from "../pages/leasing/ProgrammeDirectoryPage";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
 import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
+import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
+import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
 
 function DashboardPage() {
   return <h1>Commercial Operations Dashboard</h1>;
@@ -34,6 +36,16 @@ export default function AppRoutes() {
         <Route
           path="catering/comparison"
           element={<CateringComparisonPage />}
+        />
+
+        <Route
+          path="uniform"
+          element={<UniformDashboardPage />}
+        />
+
+        <Route
+          path="uniform/comparison"
+          element={<UniformComparisonPage />}
         />
 
         <Route
