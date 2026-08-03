@@ -34,6 +34,17 @@ const cateringLinks = [
   },
 ];
 
+const uniformLinks = [
+  {
+    label: "Uniform Dashboard",
+    path: "/uniform",
+  },
+  {
+    label: "Year-on-Year Comparison",
+    path: "/uniform/comparison",
+  },
+];
+
 function DashboardIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -181,6 +192,20 @@ function getPageDetails(pathname) {
     };
   }
 
+  if (pathname === "/uniform") {
+    return {
+      section: "Uniform",
+      title: "Uniform Dashboard",
+    };
+  }
+
+  if (pathname === "/uniform/comparison") {
+    return {
+      section: "Uniform",
+      title: "Year-on-Year Comparison",
+    };
+  }
+
   if (pathname === "/settings") {
     return {
       section: "Administration",
@@ -223,11 +248,17 @@ export default function PlatformLayout() {
   const isCateringRoute =
     location.pathname.startsWith("/catering");
 
+  const isUniformRoute =
+    location.pathname.startsWith("/uniform");
+
   const [leasingOpen, setLeasingOpen] =
     useState(isLeasingRoute);
 
   const [cateringOpen, setCateringOpen] =
     useState(isCateringRoute);
+
+  const [uniformOpen, setUniformOpen] =
+    useState(isUniformRoute);
 
   const [mobileOpen, setMobileOpen] =
     useState(false);
@@ -250,10 +281,15 @@ export default function PlatformLayout() {
       setCateringOpen(true);
     }
 
+    if (isUniformRoute) {
+      setUniformOpen(true);
+    }
+
     setMobileOpen(false);
   }, [
     isCateringRoute,
     isLeasingRoute,
+    isUniformRoute,
     location.pathname,
   ]);
 
@@ -290,6 +326,18 @@ export default function PlatformLayout() {
     }
 
     setCateringOpen(
+      (current) => !current,
+    );
+  };
+
+  const handleUniformToggle = () => {
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      setUniformOpen(true);
+      return;
+    }
+
+    setUniformOpen(
       (current) => !current,
     );
   };
@@ -534,22 +582,68 @@ export default function PlatformLayout() {
                 </div>
               )}
 
-            <div
-              className="future-module"
+            <button
+              type="button"
+              className={`navigation-link navigation-parent ${
+                isUniformRoute
+                  ? "module-active"
+                  : ""
+              }`}
+              onClick={handleUniformToggle}
+              aria-expanded={
+                !sidebarCollapsed &&
+                uniformOpen
+              }
               title={
                 sidebarCollapsed
-                  ? "Uniform — Soon"
+                  ? "Uniform"
                   : undefined
               }
             >
-              <span className="future-module-name">
-                Uniform
+              <span className="navigation-link-content">
+                <span className="navigation-icon">
+                  <RevenueIcon />
+                </span>
+
+                <span className="navigation-text">
+                  Uniform
+                </span>
               </span>
 
-              <span className="status-badge">
-                Soon
-              </span>
-            </div>
+              <ChevronIcon
+                open={uniformOpen}
+              />
+            </button>
+
+            {!sidebarCollapsed &&
+              uniformOpen && (
+                <div className="navigation-submenu">
+                  {uniformLinks.map(
+                    (link) => (
+                      <NavLink
+                        key={link.path}
+                        to={link.path}
+                        end={link.path === "/uniform"}
+                        className={({
+                          isActive,
+                        }) =>
+                          `submenu-link ${
+                            isActive
+                              ? "active"
+                              : ""
+                          }`
+                        }
+                      >
+                        <span className="submenu-dot" />
+
+                        <span>
+                          {link.label}
+                        </span>
+                      </NavLink>
+                    ),
+                  )}
+                </div>
+              )}
 
             <div
               className="future-module"
