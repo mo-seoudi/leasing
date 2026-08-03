@@ -156,6 +156,13 @@ function getPageDetails(pathname) {
     };
   }
 
+  if (pathname === "/catering") {
+    return {
+      section: "Catering",
+      title: "Catering Dashboard",
+    };
+  }
+
   if (pathname === "/settings") {
     return {
       section: "Administration",
@@ -423,22 +430,27 @@ export default function PlatformLayout() {
                 </div>
               )}
 
-            <div
-              className="future-module"
+            <NavLink
+              to="/catering"
               title={
                 sidebarCollapsed
-                  ? "Catering — Soon"
+                  ? "Catering"
                   : undefined
               }
+              className={({ isActive }) =>
+                `navigation-link ${
+                  isActive ? "active" : ""
+                }`
+              }
             >
-              <span className="future-module-name">
-                Catering
+              <span className="navigation-icon">
+                <RevenueIcon />
               </span>
 
-              <span className="status-badge">
-                Soon
+              <span className="navigation-text">
+                Catering
               </span>
-            </div>
+            </NavLink>
 
             <div
               className="future-module"
