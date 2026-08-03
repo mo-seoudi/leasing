@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import PlatformLayout from "../layouts/PlatformLayout";
 import ProgrammeDirectoryPage from "../pages/leasing/ProgrammeDirectoryPage";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
+import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 
 function DashboardPage() {
   return <h1>Commercial Operations Dashboard</h1>;
@@ -23,6 +24,11 @@ export default function AppRoutes() {
         />
 
         <Route path="dashboard" element={<DashboardPage />} />
+
+        <Route
+          path="catering"
+          element={<CateringDashboardPage />}
+        />
 
         <Route
           path="leasing/programmes"
