@@ -7,10 +7,8 @@ import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
 import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
 import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
+import DashboardPage from "../pages/dashboard/DashboardPage";
 
-function DashboardPage() {
-  return <h1>Commercial Operations Dashboard</h1>;
-}
 
 function SettingsPage() {
   return <h1>Settings</h1>;
@@ -20,10 +18,10 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<PlatformLayout />}>
-        {/* Programme Directory is the default landing page */}
+        {/* Commercial Operations Dashboard is the default landing page */}
         <Route
           index
-          element={<Navigate to="/leasing/programmes" replace />}
+          element={<Navigate to="/dashboard" replace />}
         />
 
         <Route path="dashboard" element={<DashboardPage />} />
@@ -74,7 +72,7 @@ export default function AppRoutes() {
 
       <Route
         path="*"
-        element={<Navigate to="/leasing/programmes" replace />}
+        element={<Navigate to="/dashboard" replace />}
       />
     </Routes>
   );
