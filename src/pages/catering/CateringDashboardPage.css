@@ -1,0 +1,311 @@
+.catering-dashboard-page {
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.catering-intro-card,
+.catering-filter-card,
+.catering-chart-card,
+.catering-table-card {
+  margin-bottom: 18px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.catering-intro-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.catering-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #4f46e5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.catering-intro-card h2,
+.catering-card-heading h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.catering-intro-card p,
+.catering-card-heading p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.catering-scope-pill,
+.catering-record-count {
+  padding: 6px 10px;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.catering-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.catering-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.catering-filter-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.catering-filter-grid label > span {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.catering-filter-grid select {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.catering-filter-grid select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.catering-secondary-button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #b9c2d0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.catering-secondary-button:hover { background: #f8fafc; }
+
+.catering-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.catering-kpi-card {
+  position: relative;
+  min-width: 0;
+  padding: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.catering-kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #98a2b3;
+}
+
+.catering-kpi-sales::before { background: #1679a7; }
+.catering-kpi-commission::before { background: #d85f1b; }
+.catering-kpi-rate::before { background: #7c3aed; }
+
+.catering-kpi-card > span {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.catering-kpi-card strong {
+  display: block;
+  margin-top: 8px;
+  overflow: hidden;
+  color: #101828;
+  font-size: clamp(18px, 1.6vw, 25px);
+  letter-spacing: -0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catering-kpi-card p {
+  margin: 6px 0 0;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+.catering-chart-heading { align-items: center; }
+
+.catering-metric-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.catering-metric-toggle button {
+  min-height: 30px;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.catering-metric-toggle button.active {
+  background: #ffffff;
+  color: #101828;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
+}
+
+.catering-line-chart { width: 100%; height: 360px; }
+.catering-bar-chart { width: 100%; height: 320px; }
+.catering-sales-line { color: #1679a7; }
+.catering-commission-line { color: #d85f1b; }
+
+.catering-two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.catering-chart-tooltip {
+  min-width: 170px;
+  padding: 10px 12px;
+  background: rgba(17, 24, 39, 0.95);
+  border-radius: 8px;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.2);
+}
+
+.catering-chart-tooltip > strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 11px;
+}
+
+.catering-chart-tooltip > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 3px 0;
+  font-size: 10px;
+}
+
+.catering-table-scroll { overflow-x: auto; }
+
+.catering-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.catering-results-table th,
+.catering-results-table td {
+  padding: 11px 13px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.catering-results-table th:first-child,
+.catering-results-table td:first-child,
+.catering-results-table th:nth-child(2),
+.catering-results-table td:nth-child(2),
+.catering-results-table th:nth-child(3),
+.catering-results-table td:nth-child(3) {
+  text-align: left;
+}
+
+.catering-results-table thead th {
+  background: #f8fafc;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.catering-results-table tbody tr:hover { background: #f9fafb; }
+.catering-results-table tbody td { color: #344054; }
+.catering-sales-value { color: #1679a7 !important; font-weight: 700; }
+.catering-commission-value { color: #d85f1b !important; font-weight: 700; }
+
+.catering-results-table tfoot th {
+  background: #f8fafc;
+  color: #101828;
+  font-weight: 800;
+}
+
+.catering-empty-state {
+  padding: 36px 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .catering-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .catering-two-column-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 800px) {
+  .catering-filter-grid { grid-template-columns: 1fr; }
+  .catering-intro-card,
+  .catering-card-heading { align-items: flex-start; flex-direction: column; }
+  .catering-scope-pill { white-space: normal; }
+}
+
+@media (max-width: 560px) {
+  .catering-kpi-grid { grid-template-columns: 1fr; }
+  .catering-secondary-button,
+  .catering-metric-toggle { width: 100%; }
+  .catering-metric-toggle button { flex: 1; }
+  .catering-line-chart { height: 300px; }
+  .catering-bar-chart { height: 285px; }
+}
