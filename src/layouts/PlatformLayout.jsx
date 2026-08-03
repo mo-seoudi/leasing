@@ -23,6 +23,17 @@ const leasingLinks = [
   },
 ];
 
+const cateringLinks = [
+  {
+    label: "Catering Dashboard",
+    path: "/catering",
+  },
+  {
+    label: "Year-on-Year Comparison",
+    path: "/catering/comparison",
+  },
+];
+
 function DashboardIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -163,6 +174,13 @@ function getPageDetails(pathname) {
     };
   }
 
+  if (pathname === "/catering/comparison") {
+    return {
+      section: "Catering",
+      title: "Year-on-Year Comparison",
+    };
+  }
+
   if (pathname === "/settings") {
     return {
       section: "Administration",
@@ -202,8 +220,14 @@ export default function PlatformLayout() {
   const isLeasingRoute =
     location.pathname.startsWith("/leasing");
 
+  const isCateringRoute =
+    location.pathname.startsWith("/catering");
+
   const [leasingOpen, setLeasingOpen] =
     useState(isLeasingRoute);
+
+  const [cateringOpen, setCateringOpen] =
+    useState(isCateringRoute);
 
   const [mobileOpen, setMobileOpen] =
     useState(false);
@@ -222,8 +246,13 @@ export default function PlatformLayout() {
       setLeasingOpen(true);
     }
 
+    if (isCateringRoute) {
+      setCateringOpen(true);
+    }
+
     setMobileOpen(false);
   }, [
+    isCateringRoute,
     isLeasingRoute,
     location.pathname,
   ]);
@@ -249,6 +278,18 @@ export default function PlatformLayout() {
     }
 
     setLeasingOpen(
+      (current) => !current,
+    );
+  };
+
+  const handleCateringToggle = () => {
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      setCateringOpen(true);
+      return;
+    }
+
+    setCateringOpen(
       (current) => !current,
     );
   };
@@ -430,27 +471,68 @@ export default function PlatformLayout() {
                 </div>
               )}
 
-            <NavLink
-              to="/catering"
+            <button
+              type="button"
+              className={`navigation-link navigation-parent ${
+                isCateringRoute
+                  ? "module-active"
+                  : ""
+              }`}
+              onClick={handleCateringToggle}
+              aria-expanded={
+                !sidebarCollapsed &&
+                cateringOpen
+              }
               title={
                 sidebarCollapsed
                   ? "Catering"
                   : undefined
               }
-              className={({ isActive }) =>
-                `navigation-link ${
-                  isActive ? "active" : ""
-                }`
-              }
             >
-              <span className="navigation-icon">
-                <RevenueIcon />
+              <span className="navigation-link-content">
+                <span className="navigation-icon">
+                  <RevenueIcon />
+                </span>
+
+                <span className="navigation-text">
+                  Catering
+                </span>
               </span>
 
-              <span className="navigation-text">
-                Catering
-              </span>
-            </NavLink>
+              <ChevronIcon
+                open={cateringOpen}
+              />
+            </button>
+
+            {!sidebarCollapsed &&
+              cateringOpen && (
+                <div className="navigation-submenu">
+                  {cateringLinks.map(
+                    (link) => (
+                      <NavLink
+                        key={link.path}
+                        to={link.path}
+                        end={link.path === "/catering"}
+                        className={({
+                          isActive,
+                        }) =>
+                          `submenu-link ${
+                            isActive
+                              ? "active"
+                              : ""
+                          }`
+                        }
+                      >
+                        <span className="submenu-dot" />
+
+                        <span>
+                          {link.label}
+                        </span>
+                      </NavLink>
+                    ),
+                  )}
+                </div>
+              )}
 
             <div
               className="future-module"
