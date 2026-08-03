@@ -1,0 +1,256 @@
+.catering-comparison-page {
+  width: 100%;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.catering-comparison-filter-card,
+.catering-comparison-summary-card,
+.catering-comparison-chart-card {
+  margin-bottom: 18px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.catering-comparison-filter-heading,
+.catering-comparison-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.catering-comparison-filter-heading h2,
+.catering-comparison-card-heading h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.catering-comparison-filter-heading p,
+.catering-comparison-card-heading p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.catering-comparison-secondary-button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #b9c2d0;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.catering-comparison-secondary-button:hover {
+  background: #f8fafc;
+  border-color: #98a2b3;
+}
+
+.catering-comparison-filter-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.catering-comparison-filter-grid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.catering-comparison-filter-grid label > span {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.catering-comparison-filter-grid select {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.catering-comparison-filter-grid select:focus {
+  border-color: #667eea;
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.catering-comparison-year-count {
+  padding: 6px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.catering-comparison-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.catering-comparison-table {
+  width: 100%;
+  min-width: 830px;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.catering-comparison-table th,
+.catering-comparison-table td {
+  padding: 11px 13px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.catering-comparison-table thead th {
+  background: #f8fafc;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.catering-comparison-table th:first-child {
+  text-align: left;
+}
+
+.catering-comparison-table tbody th {
+  color: #344054;
+  font-weight: 700;
+}
+
+.catering-comparison-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.catering-comparison-sales-cell {
+  color: #1679a7;
+  font-weight: 700;
+}
+
+.catering-comparison-commission-cell {
+  color: #d85f1b;
+  font-weight: 700;
+}
+
+.catering-growth-value {
+  display: inline-flex;
+  min-width: 54px;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.catering-growth-value.positive {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.catering-growth-value.negative {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.catering-growth-value.neutral {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.catering-comparison-chart-container {
+  width: 100%;
+  height: 420px;
+}
+
+.catering-comparison-tooltip {
+  min-width: 180px;
+  padding: 10px 12px;
+  background: rgba(17, 24, 39, 0.95);
+  border-radius: 8px;
+  color: #ffffff;
+  box-shadow:
+    0 10px 30px rgba(16, 24, 40, 0.2);
+}
+
+.catering-comparison-tooltip > strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 11px;
+}
+
+.catering-comparison-tooltip > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 3px 0;
+  font-size: 10px;
+}
+
+.catering-comparison-empty-state {
+  padding: 36px 20px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .catering-comparison-filter-heading,
+  .catering-comparison-card-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catering-comparison-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catering-comparison-year-count {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .catering-comparison-filter-card,
+  .catering-comparison-summary-card,
+  .catering-comparison-chart-card {
+    padding: 14px;
+  }
+
+  .catering-comparison-secondary-button {
+    width: 100%;
+  }
+
+  .catering-comparison-chart-container {
+    height: 340px;
+  }
+}
