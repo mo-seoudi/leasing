@@ -3,7 +3,7 @@
     "schemaVersion": "1.0.0",
     "sourceFile": "Leasing RAD  Data PowerBI.xlsx",
     "sourceSheet": "Raw Data",
-    "generatedAtUtc": "2026-07-24T07:30:49+00:00",
+    "generatedAtUtc": "2026-08-05T05:06:40+00:00",
     "currency": "AED",
     "grain": "One record per school, individual program, base income type, month and academic year",
     "calculationPolicy": {
@@ -23,7 +23,7 @@
       "totalCommissionAndRent": "Commission + Rental Fees"
     },
     "sourceRowCount": 6645,
-    "truthRecordCount": 5589,
+    "truthRecordCount": 5593,
     "excludedRowCounts": {
       "summary_program_rows": 1056
     },
@@ -69630,7 +69630,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 182.857143,
       "sourceRow": 36
     },
     {
@@ -69658,7 +69658,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 609.52380952381,
       "sourceRow": 35
     },
     {
@@ -70302,7 +70302,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 137.14286,
       "sourceRow": 39
     },
     {
@@ -70330,7 +70330,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 457.142857142857,
       "sourceRow": 38
     },
     {
@@ -70904,7 +70904,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 668.57143,
       "sourceRow": 36
     },
     {
@@ -70932,7 +70932,7 @@
       "term": "Term 2",
       "termOrder": 2,
       "termStart": "2026-01-01",
-      "amount": 0,
+      "amount": 2228.57142857143,
       "sourceRow": 35
     },
     {
@@ -72108,7 +72108,7 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 257.1429,
       "sourceRow": 36
     },
     {
@@ -72136,7 +72136,7 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 857.142857142857,
       "sourceRow": 35
     },
     {
@@ -72724,7 +72724,7 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 457.1429,
       "sourceRow": 39
     },
     {
@@ -72752,7 +72752,7 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 1523.80952380952,
       "sourceRow": 38
     },
     {
@@ -74810,8 +74810,36 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 2228.5714,
       "sourceRow": 20
+    },
+    {
+      "school": "Fry",
+      "program": "Tennis Academy",
+      "programGroup": "Sports Academies",
+      "provider": "Global Sports RS",
+      "incomeType": "Rental Fees",
+      "month": "2026-06-01",
+      "academicYear": "AY2025-26",
+      "term": "Term 3",
+      "termOrder": 3,
+      "termStart": "2026-04-01",
+      "amount": 0,
+      "sourceRow": 21
+    },
+    {
+      "school": "Fry",
+      "program": "Tennis Academy",
+      "programGroup": "Sports Academies",
+      "provider": "Global Sports RS",
+      "incomeType": "Sales",
+      "month": "2026-06-01",
+      "academicYear": "AY2025-26",
+      "term": "Term 3",
+      "termOrder": 3,
+      "termStart": "2026-04-01",
+      "amount": 7428.57142857143,
+      "sourceRow": 19
     },
     {
       "school": "Fry",
@@ -76196,8 +76224,36 @@
       "term": "Term 3",
       "termOrder": 3,
       "termStart": "2026-04-01",
-      "amount": 0,
+      "amount": 222.85714,
       "sourceRow": 20
+    },
+    {
+      "school": "Fry",
+      "program": "Tennis Academy",
+      "programGroup": "Sports Academies",
+      "provider": "Global Sports RS",
+      "incomeType": "Rental Fees",
+      "month": "2026-07-01",
+      "academicYear": "AY2025-26",
+      "term": "Term 3",
+      "termOrder": 3,
+      "termStart": "2026-04-01",
+      "amount": 0,
+      "sourceRow": 21
+    },
+    {
+      "school": "Fry",
+      "program": "Tennis Academy",
+      "programGroup": "Sports Academies",
+      "provider": "Global Sports RS",
+      "incomeType": "Sales",
+      "month": "2026-07-01",
+      "academicYear": "AY2025-26",
+      "term": "Term 3",
+      "termOrder": 3,
+      "termStart": "2026-04-01",
+      "amount": 742.857142857143,
+      "sourceRow": 19
     },
     {
       "school": "Fry",
