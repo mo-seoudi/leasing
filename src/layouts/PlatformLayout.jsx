@@ -240,7 +240,12 @@ function getInitialCollapsedState() {
 }
 
 export default function PlatformLayout() {
+  const [headerControls, setHeaderControls] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    setHeaderControls(null);
+  }, [location.pathname]);
 
   const isLeasingRoute =
     location.pathname.startsWith("/leasing");
@@ -375,11 +380,11 @@ export default function PlatformLayout() {
 
           <div className="brand-copy">
             <strong>
-              Commercial Operations
+              ComOps
             </strong>
 
             <span>
-              Analytics Platform
+              Commercial workspace
             </span>
           </div>
 
@@ -776,11 +781,47 @@ export default function PlatformLayout() {
               </h1>
             </div>
           </div>
-          <div className="header-actions" />
+          <div className={`header-actions ${headerControls ? "has-page-controls" : ""}`}>
+            {headerControls ? (
+              <div className="header-page-controls">
+                {headerControls}
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="global-search-button"
+                aria-label="Search platform"
+                title="Search"
+              >
+                <span className="global-search-icon">
+                  ⌕
+                </span>
+
+                <span className="global-search-text">
+                  Search
+                </span>
+
+                <kbd>⌘ K</kbd>
+              </button>
+            )}
+
+            <div className="header-user">
+              <span className="header-user-status" />
+
+              <div className="header-user-copy">
+                <strong>Mohammed</strong>
+                <span>Commercial Operations</span>
+              </div>
+
+              <div className="header-user-avatar">
+                MS
+              </div>
+            </div>
+          </div>
         </header>
 
         <main className="platform-content">
-          <Outlet />
+          <Outlet context={{ setHeaderControls }} />
         </main>
       </div>
     </div>
