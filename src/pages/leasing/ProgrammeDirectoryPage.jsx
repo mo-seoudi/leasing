@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import { useOutletContext } from "react-router-dom";
+
 import {
   Bar,
   BarChart,
@@ -574,6 +576,7 @@ function DirectoryPieCard({
 }
 
 export default function ProgrammeDirectoryPage() {
+  const { setHeaderControls } = useOutletContext();
   const latestAcademicYear =
     academicYears[academicYears.length - 1] || "";
 
@@ -871,170 +874,109 @@ export default function ProgrammeDirectoryPage() {
     setViewMode("table");
   }
 
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control">
+          <span>Academic Year</span>
+          <select
+            value={filters.academicYear}
+            onChange={(event) =>
+              handleFilterChange("academicYear", event.target.value)
+            }
+          >
+            <option value="">All Time</option>
+            {academicYears.map((academicYear) => (
+              <option key={academicYear} value={academicYear}>
+                {academicYear}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>School</span>
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange("school", event.target.value)
+            }
+          >
+            <option value="">All Schools</option>
+            {schools.map((school) => (
+              <option key={school} value={school}>
+                {school}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control">
+          <span>Group</span>
+          <select
+            value={filters.programGroup}
+            onChange={(event) =>
+              handleFilterChange("programGroup", event.target.value)
+            }
+          >
+            <option value="">All Groups</option>
+            {programmeGroups.map((group) => (
+              <option key={group} value={group}>{group}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>Programme</span>
+          <select
+            value={filters.program}
+            onChange={(event) =>
+              handleFilterChange("program", event.target.value)
+            }
+          >
+            <option value="">All Programmes</option>
+            {availableProgrammes.map((programme) => (
+              <option key={programme} value={programme}>
+                {programme}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control search">
+          <span>Search</span>
+          <input
+            type="search"
+            value={filters.searchText}
+            placeholder="Programme or provider"
+            onChange={(event) =>
+              handleFilterChange("searchText", event.target.value)
+            }
+          />
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    availableProgrammes,
+    setHeaderControls,
+  ]);
+
   const selectedPeriodLabel =
     filters.academicYear || "All Time";
 
   return (
     <section className="programme-comparison-page programme-directory-page">
-      <section className="programme-filter-card">
-        <div className="programme-card-heading programme-filter-heading">
-          <div>
-            <h2>Directory Filters</h2>
-
-            <p>
-              Compare programmes and expand any programme or
-              programme group to view detailed monthly or
-              termly figures.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="programme-filter-grid directory-comparison-filter-grid">
-          <div className="programme-filter">
-            <label htmlFor="directory-academic-year">
-              Academic Year
-            </label>
-
-            <select
-              id="directory-academic-year"
-              value={filters.academicYear}
-              onChange={(event) =>
-                handleFilterChange(
-                  "academicYear",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Time</option>
-
-              {academicYears.map((academicYear) => (
-                <option
-                  key={academicYear}
-                  value={academicYear}
-                >
-                  {academicYear}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="programme-filter">
-            <label htmlFor="directory-school">
-              School
-            </label>
-
-            <select
-              id="directory-school"
-              value={filters.school}
-              onChange={(event) =>
-                handleFilterChange(
-                  "school",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Schools</option>
-
-              {schools.map((school) => (
-                <option
-                  key={school}
-                  value={school}
-                >
-                  {school}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="programme-filter">
-            <label htmlFor="directory-programme-group">
-              Programme Group
-            </label>
-
-            <select
-              id="directory-programme-group"
-              value={filters.programGroup}
-              onChange={(event) =>
-                handleFilterChange(
-                  "programGroup",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Groups</option>
-
-              {programmeGroups.map((group) => (
-                <option
-                  key={group}
-                  value={group}
-                >
-                  {group}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="programme-filter">
-            <label htmlFor="directory-programme">
-              Programme
-            </label>
-
-            <select
-              id="directory-programme"
-              value={filters.program}
-              onChange={(event) =>
-                handleFilterChange(
-                  "program",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">
-                All Programmes
-              </option>
-
-              {availableProgrammes.map(
-                (programme) => (
-                  <option
-                    key={programme}
-                    value={programme}
-                  >
-                    {programme}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-
-          <div className="programme-filter directory-search-filter">
-            <label htmlFor="directory-search">
-              Search
-            </label>
-
-            <input
-              id="directory-search"
-              type="search"
-              value={filters.searchText}
-              placeholder="Programme or provider"
-              onChange={(event) =>
-                handleFilterChange(
-                  "searchText",
-                  event.target.value
-                )
-              }
-            />
-          </div>
-        </div>
-      </section>
-
       <section className="programme-summary-strip">
         <div>
           <span>Total Revenue</span>
@@ -1071,17 +1013,6 @@ export default function ProgrammeDirectoryPage() {
 
       <section className="directory-table-card">
         <div className="directory-table-heading">
-          <div className="directory-title-block">
-            <h2>Programme Directory</h2>
-
-            <p>
-              Revenue, school income and contribution to total
-              leasing performance. Expand a programme or a
-              summary tab for the detailed monthly or termly
-              table.
-            </p>
-          </div>
-
           <div className="directory-header-controls">
             <div
               className="directory-aggregate-tabs"
