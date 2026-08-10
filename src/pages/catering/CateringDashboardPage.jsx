@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -30,7 +31,7 @@ import "./CateringDashboardPage.css";
 
 function KpiCard({ label, value, detail, tone = "default" }) {
   return (
-    <article className={`catering-kpi-card catering-kpi-${tone}`}>
+    <article className="catering-kpi-card">
       <span>{label}</span>
       <strong>{value}</strong>
       <p>{detail}</p>
@@ -55,6 +56,7 @@ function CurrencyTooltip({ active, payload, label }) {
 }
 
 export default function CateringDashboardPage() {
+  const { setHeaderControls } = useOutletContext();
   const latestAcademicYear =
     cateringAcademicYears[cateringAcademicYears.length - 1] || "";
 
@@ -103,88 +105,76 @@ export default function CateringDashboardPage() {
     });
   }
 
-  const selectedSchool = cateringSchools.find(
-    (school) => school.code === filters.school
-  );
-
-  const scopeLabel = [
-    filters.academicYear || "All Academic Years",
-    selectedSchool?.name || "All Schools",
-    filters.term || "All Terms",
-  ].join(" · ");
-
   const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
+
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control">
+          <span>Academic Year</span>
+          <select
+            value={filters.academicYear}
+            onChange={(event) =>
+              handleFilterChange("academicYear", event.target.value)
+            }
+          >
+            <option value="">All Years</option>
+            {cateringAcademicYears.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>School</span>
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange("school", event.target.value)
+            }
+          >
+            <option value="">All Schools</option>
+            {cateringSchools.map((school) => (
+              <option key={school.code} value={school.code}>
+                {school.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control">
+          <span>Term</span>
+          <select
+            value={filters.term}
+            onChange={(event) =>
+              handleFilterChange("term", event.target.value)
+            }
+          >
+            <option value="">All Terms</option>
+            {cateringTerms.map((term) => (
+              <option key={term} value={term}>{term}</option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    setHeaderControls,
+  ]);
 
   return (
     <section className="catering-dashboard-page">
-      <section className="catering-intro-card">
-        <div>
-          <span className="catering-eyebrow">Revenue Stream</span>
-          <h2>Catering Performance</h2>
-          <p>
-            Monthly sales and commission performance across the four Repton schools.
-          </p>
-        </div>
-
-        <div className="catering-scope-pill">{scopeLabel}</div>
-      </section>
-
-      <section className="catering-filter-card">
-        <div className="catering-card-heading">
-          <div>
-            <h2>Dashboard Filters</h2>
-            <p>Filter the catering results by academic year, school and term.</p>
-          </div>
-
-          <button type="button" className="catering-secondary-button" onClick={clearFilters}>
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="catering-filter-grid">
-          <label>
-            <span>Academic Year</span>
-            <select
-              value={filters.academicYear}
-              onChange={(event) => handleFilterChange("academicYear", event.target.value)}
-            >
-              <option value="">All Academic Years</option>
-              {cateringAcademicYears.map((year) => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>School</span>
-            <select
-              value={filters.school}
-              onChange={(event) => handleFilterChange("school", event.target.value)}
-            >
-              <option value="">All Schools</option>
-              {cateringSchools.map((school) => (
-                <option key={school.code} value={school.code}>
-                  {school.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Term</span>
-            <select
-              value={filters.term}
-              onChange={(event) => handleFilterChange("term", event.target.value)}
-            >
-              <option value="">All Terms</option>
-              {cateringTerms.map((term) => (
-                <option key={term} value={term}>{term}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-
       <section className="catering-kpi-grid">
         <KpiCard
           label="Total Sales"
@@ -209,49 +199,6 @@ export default function CateringDashboardPage() {
           value={formatCurrency(summary.averageMonthlySales)}
           detail="Average across the selected period"
         />
-      </section>
-
-      <section className="catering-chart-card catering-wide-card">
-        <div className="catering-card-heading catering-chart-heading">
-          <div>
-            <h2>Monthly Trend</h2>
-            <p>{trendMetric} by month for the selected reporting scope.</p>
-          </div>
-
-          <div className="catering-metric-toggle" aria-label="Trend metric">
-            {["Sales", "Commission"].map((metric) => (
-              <button
-                key={metric}
-                type="button"
-                className={trendMetric === metric ? "active" : ""}
-                onClick={() => setTrendMetric(metric)}
-              >
-                {metric}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="catering-line-chart">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={monthlyData} margin={{ top: 15, right: 20, left: 10, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} />
-              <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={80} />
-              <Tooltip content={<CurrencyTooltip />} />
-              <Line
-                type="monotone"
-                dataKey={trendDataKey}
-                name={trendMetric}
-                stroke="currentColor"
-                strokeWidth={3}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-                className={trendMetric === "Sales" ? "catering-sales-line" : "catering-commission-line"}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
       </section>
 
       <section className="catering-two-column-grid">
@@ -300,6 +247,50 @@ export default function CateringDashboardPage() {
             </ResponsiveContainer>
           </div>
         </section>
+      </section>
+
+
+      <section className="catering-chart-card catering-wide-card">
+        <div className="catering-card-heading catering-chart-heading">
+          <div>
+            <h2>Monthly Trend</h2>
+            <p>{trendMetric} by month for the selected reporting scope.</p>
+          </div>
+
+          <div className="catering-metric-toggle" aria-label="Trend metric">
+            {["Sales", "Commission"].map((metric) => (
+              <button
+                key={metric}
+                type="button"
+                className={trendMetric === metric ? "active" : ""}
+                onClick={() => setTrendMetric(metric)}
+              >
+                {metric}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="catering-line-chart">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyData} margin={{ top: 15, right: 20, left: 10, bottom: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} />
+              <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={80} />
+              <Tooltip content={<CurrencyTooltip />} />
+              <Line
+                type="monotone"
+                dataKey={trendDataKey}
+                name={trendMetric}
+                stroke="currentColor"
+                strokeWidth={3}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                className={trendMetric === "Sales" ? "catering-sales-line" : "catering-commission-line"}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </section>
 
       <section className="catering-table-card">
