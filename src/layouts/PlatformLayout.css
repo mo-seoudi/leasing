@@ -856,3 +856,69 @@ select {
     display: none;
   }
 }
+
+
+/* Revenue page header filters */
+.platform-header {
+  align-items: center;
+}
+
+.header-left {
+  flex: 0 0 auto;
+}
+
+.header-actions {
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.header-actions:not(.has-page-controls) {
+  flex: 0 0 auto;
+}
+
+.header-actions.has-page-controls {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.header-page-controls {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.header-page-filters {
+  min-width: max-content;
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  .platform-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-actions.has-page-controls {
+    display: flex;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  .header-page-controls {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .header-page-controls::-webkit-scrollbar {
+    display: none;
+  }
+}
