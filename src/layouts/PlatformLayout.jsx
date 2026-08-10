@@ -156,7 +156,7 @@ function ChevronIcon({ open }) {
 function getPageDetails(pathname) {
   if (pathname === "/dashboard") {
     return {
-      section: "Overview",
+      section: "",
       title: "Dashboard",
     };
   }
@@ -758,19 +758,21 @@ export default function PlatformLayout() {
             </button>
 
             <div>
-              <div className="breadcrumb">
-                <span>
-                  Commercial Operations
-                </span>
+              {pageDetails.section && (
+                <div className="breadcrumb">
+                  <span>
+                    Commercial Operations
+                  </span>
 
-                <span className="breadcrumb-divider">
-                  /
-                </span>
+                  <span className="breadcrumb-divider">
+                    /
+                  </span>
 
-                <span>
-                  {pageDetails.section}
-                </span>
-              </div>
+                  <span>
+                    {pageDetails.section}
+                  </span>
+                </div>
+              )}
 
               <h1>
                 {pageDetails.title}
