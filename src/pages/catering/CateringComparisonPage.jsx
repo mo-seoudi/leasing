@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+
 import {
   Bar,
   BarChart,
@@ -80,6 +82,8 @@ function ComparisonTooltip({ active, payload, label }) {
 }
 
 export default function CateringComparisonPage() {
+  const { setHeaderControls } = useOutletContext();
+
   const [filters, setFilters] = useState({
     school: "",
     term: "",
@@ -143,78 +147,74 @@ export default function CateringComparisonPage() {
 
   const selectedTerm = filters.term || "All Terms";
 
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control wide">
+          <span>School</span>
+
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange(
+                "school",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Schools</option>
+
+            {cateringSchools.map((school) => (
+              <option
+                key={school.code}
+                value={school.code}
+              >
+                {school.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control">
+          <span>Term</span>
+
+          <select
+            value={filters.term}
+            onChange={(event) =>
+              handleFilterChange(
+                "term",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Terms</option>
+
+            {cateringTerms.map((term) => (
+              <option key={term} value={term}>
+                {term}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    setHeaderControls,
+  ]);
+
   return (
     <section className="catering-comparison-page">
-      <section className="catering-comparison-filter-card">
-        <div className="catering-comparison-filter-heading">
-          <div>
-            <h2>Comparison Filters</h2>
-
-            <p>
-              Compare Catering sales and commission across
-              academic years by school and reporting term.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="catering-comparison-secondary-button"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="catering-comparison-filter-grid">
-          <label>
-            <span>School</span>
-
-            <select
-              value={filters.school}
-              onChange={(event) =>
-                handleFilterChange(
-                  "school",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Schools</option>
-
-              {cateringSchools.map((school) => (
-                <option
-                  key={school.code}
-                  value={school.code}
-                >
-                  {school.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Term</span>
-
-            <select
-              value={filters.term}
-              onChange={(event) =>
-                handleFilterChange(
-                  "term",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Terms</option>
-
-              {cateringTerms.map((term) => (
-                <option key={term} value={term}>
-                  {term}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-
       <section className="catering-comparison-summary-card">
         <div className="catering-comparison-card-heading">
           <div>
