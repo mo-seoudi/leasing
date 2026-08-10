@@ -30,7 +30,7 @@ import "./UniformDashboardPage.css";
 
 function KpiCard({ label, value, detail, tone = "default" }) {
   return (
-    <article className={`uniform-kpi-card uniform-kpi-${tone}`}>
+    <article className="uniform-kpi-card">
       <span>{label}</span>
       <strong>{value}</strong>
       <p>{detail}</p>
@@ -103,44 +103,11 @@ export default function UniformDashboardPage() {
     });
   }
 
-  const selectedSchool = uniformSchools.find(
-    (school) => school.code === filters.school
-  );
-
-  const scopeLabel = [
-    filters.academicYear || "All Academic Years",
-    selectedSchool?.name || "All Schools",
-    filters.term || "All Terms",
-  ].join(" · ");
-
   const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
 
   return (
     <section className="uniform-dashboard-page">
-      <section className="uniform-intro-card">
-        <div>
-          <span className="uniform-eyebrow">Revenue Stream</span>
-          <h2>Uniform Performance</h2>
-          <p>
-            Monthly sales and commission performance across the four Repton schools.
-          </p>
-        </div>
-
-        <div className="uniform-scope-pill">{scopeLabel}</div>
-      </section>
-
-      <section className="uniform-filter-card">
-        <div className="uniform-card-heading">
-          <div>
-            <h2>Dashboard Filters</h2>
-            <p>Filter the uniform results by academic year, school and term.</p>
-          </div>
-
-          <button type="button" className="uniform-secondary-button" onClick={clearFilters}>
-            Clear Filters
-          </button>
-        </div>
-
+      <section className="uniform-filter-card uniform-sticky-filters">
         <div className="uniform-filter-grid">
           <label>
             <span>Academic Year</span>
@@ -182,6 +149,15 @@ export default function UniformDashboardPage() {
               ))}
             </select>
           </label>
+          <div className="uniform-filter-action">
+            <button
+              type="button"
+              className="uniform-secondary-button"
+              onClick={clearFilters}
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
       </section>
 
@@ -209,49 +185,6 @@ export default function UniformDashboardPage() {
           value={formatCurrency(summary.averageMonthlySales)}
           detail="Average across the selected period"
         />
-      </section>
-
-      <section className="uniform-chart-card uniform-wide-card">
-        <div className="uniform-card-heading uniform-chart-heading">
-          <div>
-            <h2>Monthly Trend</h2>
-            <p>{trendMetric} by month for the selected reporting scope.</p>
-          </div>
-
-          <div className="uniform-metric-toggle" aria-label="Trend metric">
-            {["Sales", "Commission"].map((metric) => (
-              <button
-                key={metric}
-                type="button"
-                className={trendMetric === metric ? "active" : ""}
-                onClick={() => setTrendMetric(metric)}
-              >
-                {metric}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="uniform-line-chart">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={monthlyData} margin={{ top: 15, right: 20, left: 10, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} />
-              <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={80} />
-              <Tooltip content={<CurrencyTooltip />} />
-              <Line
-                type="monotone"
-                dataKey={trendDataKey}
-                name={trendMetric}
-                stroke="currentColor"
-                strokeWidth={3}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-                className={trendMetric === "Sales" ? "uniform-sales-line" : "uniform-commission-line"}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
       </section>
 
       <section className="uniform-two-column-grid">
@@ -300,6 +233,50 @@ export default function UniformDashboardPage() {
             </ResponsiveContainer>
           </div>
         </section>
+      </section>
+
+
+      <section className="uniform-chart-card uniform-wide-card">
+        <div className="uniform-card-heading uniform-chart-heading">
+          <div>
+            <h2>Monthly Trend</h2>
+            <p>{trendMetric} by month for the selected reporting scope.</p>
+          </div>
+
+          <div className="uniform-metric-toggle" aria-label="Trend metric">
+            {["Sales", "Commission"].map((metric) => (
+              <button
+                key={metric}
+                type="button"
+                className={trendMetric === metric ? "active" : ""}
+                onClick={() => setTrendMetric(metric)}
+              >
+                {metric}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="uniform-line-chart">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyData} margin={{ top: 15, right: 20, left: 10, bottom: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} />
+              <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={80} />
+              <Tooltip content={<CurrencyTooltip />} />
+              <Line
+                type="monotone"
+                dataKey={trendDataKey}
+                name={trendMetric}
+                stroke="currentColor"
+                strokeWidth={3}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                className={trendMetric === "Sales" ? "uniform-sales-line" : "uniform-commission-line"}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </section>
 
       <section className="uniform-table-card">
