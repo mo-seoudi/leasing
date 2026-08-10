@@ -1000,3 +1000,138 @@
   }
 }
 
+
+
+/* Compact sticky filter rail and unified KPI strip */
+.programme-directory-page .programme-filter-card.programme-sticky-filters {
+  position: sticky;
+  top: 64px;
+  z-index: 16;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: #e5e5e5;
+  border-radius: 9px;
+  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.programme-directory-page .directory-comparison-filter-grid {
+  grid-template-columns:
+    minmax(125px, .9fr)
+    minmax(125px, .9fr)
+    minmax(145px, 1fr)
+    minmax(155px, 1fr)
+    minmax(175px, 1.1fr)
+    auto;
+  gap: 9px;
+  align-items: end;
+}
+
+.programme-directory-page .programme-filter {
+  gap: 4px;
+}
+
+.programme-directory-page .programme-filter label {
+  color: #737373;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.programme-directory-page .programme-filter select,
+.programme-directory-page .directory-search-filter input {
+  min-height: 34px;
+  padding: 6px 9px;
+  border-color: #e5e5e5;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.programme-filter-action {
+  display: flex;
+  align-items: flex-end;
+}
+
+.programme-filter-action .secondary-button {
+  min-height: 34px;
+  padding: 6px 10px;
+  border-color: #e5e5e5;
+  border-radius: 7px;
+  color: #525252;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.programme-directory-page .programme-summary-strip {
+  gap: 0;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+}
+
+.programme-directory-page .programme-summary-strip > div {
+  min-height: 78px;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 14px;
+  border: 0;
+  border-left: 1px solid #e5e5e5;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.programme-directory-page .programme-summary-strip > div:first-child {
+  border-left: 0;
+}
+
+.programme-directory-page .programme-summary-strip span {
+  color: #737373;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.programme-directory-page .programme-summary-strip strong {
+  color: #171717;
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.programme-directory-page .directory-table-heading {
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.programme-directory-page .directory-header-controls {
+  width: 100%;
+  justify-content: space-between;
+}
+
+@media (max-width: 1250px) {
+  .programme-directory-page .directory-comparison-filter-grid {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+  .programme-filter-action .secondary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .programme-directory-page .programme-filter-card.programme-sticky-filters {
+    top: 58px;
+    overflow-x: auto;
+  }
+
+  .programme-directory-page .directory-comparison-filter-grid {
+    min-width: 720px;
+    grid-template-columns:
+      repeat(5, minmax(125px, 1fr))
+      auto;
+  }
+}
+
+
+/* Directory filters now live in the fixed platform header. */
+.programme-directory-page { padding-top: 0; }
