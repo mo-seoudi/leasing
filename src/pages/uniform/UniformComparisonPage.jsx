@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+
 import {
   Bar,
   BarChart,
@@ -80,6 +82,8 @@ function ComparisonTooltip({ active, payload, label }) {
 }
 
 export default function UniformComparisonPage() {
+  const { setHeaderControls } = useOutletContext();
+
   const [filters, setFilters] = useState({
     school: "",
     term: "",
@@ -143,78 +147,74 @@ export default function UniformComparisonPage() {
 
   const selectedTerm = filters.term || "All Terms";
 
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control wide">
+          <span>School</span>
+
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange(
+                "school",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Schools</option>
+
+            {uniformSchools.map((school) => (
+              <option
+                key={school.code}
+                value={school.code}
+              >
+                {school.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control">
+          <span>Term</span>
+
+          <select
+            value={filters.term}
+            onChange={(event) =>
+              handleFilterChange(
+                "term",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Terms</option>
+
+            {uniformTerms.map((term) => (
+              <option key={term} value={term}>
+                {term}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    setHeaderControls,
+  ]);
+
   return (
     <section className="uniform-comparison-page">
-      <section className="uniform-comparison-filter-card">
-        <div className="uniform-comparison-filter-heading">
-          <div>
-            <h2>Comparison Filters</h2>
-
-            <p>
-              Compare Uniform sales and commission across
-              academic years by school and reporting term.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="uniform-comparison-secondary-button"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="uniform-comparison-filter-grid">
-          <label>
-            <span>School</span>
-
-            <select
-              value={filters.school}
-              onChange={(event) =>
-                handleFilterChange(
-                  "school",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Schools</option>
-
-              {uniformSchools.map((school) => (
-                <option
-                  key={school.code}
-                  value={school.code}
-                >
-                  {school.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Term</span>
-
-            <select
-              value={filters.term}
-              onChange={(event) =>
-                handleFilterChange(
-                  "term",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Terms</option>
-
-              {uniformTerms.map((term) => (
-                <option key={term} value={term}>
-                  {term}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-
       <section className="uniform-comparison-summary-card">
         <div className="uniform-comparison-card-heading">
           <div>
