@@ -39,37 +39,6 @@
   font-size: 12px;
 }
 
-.comparison-filter-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-.comparison-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.comparison-filter label {
-  color: #344054;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.comparison-filter select {
-  width: 100%;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid #d0d5dd;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #101828;
-  font: inherit;
-  font-size: 13px;
-  outline: none;
-}
-
 .comparison-filter select:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
