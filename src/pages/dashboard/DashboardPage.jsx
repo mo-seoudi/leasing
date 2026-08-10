@@ -364,6 +364,38 @@ function StreamCard({
   );
 }
 
+
+function RevenueMixTooltip({
+  active,
+  payload,
+}) {
+  if (
+    !active ||
+    !payload ||
+    payload.length === 0
+  ) {
+    return null;
+  }
+
+  const item = payload[0]?.payload;
+
+  if (!item) {
+    return null;
+  }
+
+  return (
+    <div className="dashboard-donut-tooltip">
+      <span>{item.name}</span>
+      <strong>
+        {formatCurrency(item.revenue)}
+      </strong>
+      <small>
+        {formatPercent(item.contribution)}
+      </small>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const leasingRecords = Array.isArray(leasingSource.records)
     ? leasingSource.records
@@ -391,12 +423,17 @@ export default function DashboardPage() {
     getLatestAcademicYear(academicYears),
   );
 
+  const [schoolFilter, setSchoolFilter] = useState("");
+
   const filteredLeasing = useMemo(
     () =>
       leasingRecords.filter(
-        (record) => !academicYear || record.academicYear === academicYear,
+        (record) =>
+          (!academicYear || record.academicYear === academicYear) &&
+          (!schoolFilter ||
+            getSchoolLabel(record.school) === schoolFilter),
       ),
-    [academicYear, leasingRecords],
+    [academicYear, schoolFilter, leasingRecords],
   );
 
   const filteredCatering = useMemo(
@@ -404,9 +441,12 @@ export default function DashboardPage() {
       cateringRecords.filter(
         (record) =>
           (!academicYear || record.academicYear === academicYear) &&
+          (!schoolFilter ||
+            getSchoolLabel(record.schoolName || record.school) ===
+              schoolFilter) &&
           record.scenario === "Actual",
       ),
-    [academicYear, cateringRecords],
+    [academicYear, schoolFilter, cateringRecords],
   );
 
   const filteredUniform = useMemo(
@@ -414,9 +454,12 @@ export default function DashboardPage() {
       uniformRecords.filter(
         (record) =>
           (!academicYear || record.academicYear === academicYear) &&
+          (!schoolFilter ||
+            getSchoolLabel(record.schoolName || record.school) ===
+              schoolFilter) &&
           record.scenario === "Actual",
       ),
-    [academicYear, uniformRecords],
+    [academicYear, schoolFilter, uniformRecords],
   );
 
   const streamData = useMemo(() => {
@@ -495,21 +538,18 @@ export default function DashboardPage() {
 
   return (
     <section className="commercial-dashboard-page">
-      <section className="dashboard-hero">
-        <div>
-          <span className="dashboard-eyebrow">Executive Overview</span>
-          <h1>Commercial Operations Dashboard</h1>
-          <p>
-            Consolidated performance across Leasing, Catering and Uniform.
-          </p>
-        </div>
+      <div className="dashboard-toolbar">
+        <div className="dashboard-filter-control">
+          <label htmlFor="dashboard-academic-year">
+            Academic year
+          </label>
 
-        <div className="dashboard-period-filter">
-          <label htmlFor="dashboard-academic-year">Academic Year</label>
           <select
             id="dashboard-academic-year"
             value={academicYear}
-            onChange={(event) => setAcademicYear(event.target.value)}
+            onChange={(event) =>
+              setAcademicYear(event.target.value)
+            }
           >
             {academicYears.map((year) => (
               <option key={year} value={year}>
@@ -518,250 +558,479 @@ export default function DashboardPage() {
             ))}
           </select>
         </div>
-      </section>
 
-      <section className="dashboard-kpi-grid">
-        <article className="dashboard-kpi-card primary">
-          <span>Commercial Revenue</span>
+        <div className="dashboard-filter-control">
+          <label htmlFor="dashboard-school">
+            School
+          </label>
+
+          <select
+            id="dashboard-school"
+            value={schoolFilter}
+            onChange={(event) =>
+              setSchoolFilter(event.target.value)
+            }
+          >
+            <option value="">All Schools</option>
+            <option value="Repton Dubai">
+              Repton Dubai
+            </option>
+            <option value="Repton Al Barsha">
+              Repton Al Barsha
+            </option>
+            <option value="Repton Fry">
+              Repton Fry
+            </option>
+            <option value="Repton Rose">
+              Repton Rose
+            </option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          className="dashboard-secondary-action"
+        >
+          Export
+        </button>
+      </div>
+
+      <section className="dashboard-overview-strip">
+        <article className="dashboard-primary-metric">
+          <div className="dashboard-metric-label">
+            <span>Commercial revenue</span>
+            <b>Selected period</b>
+          </div>
+
           <strong>{formatCurrency(totalRevenue)}</strong>
-          <small>Combined revenue across active streams</small>
-        </article>
 
-        <article className="dashboard-kpi-card income">
-          <span>School Income</span>
-          <strong>{formatCurrency(totalIncome)}</strong>
-          <small>Commission and leasing income</small>
-        </article>
-
-        <article className="dashboard-kpi-card">
-          <span>Revenue Streams</span>
-          <strong>{streamData.length}</strong>
-          <small>Leasing, Catering and Uniform</small>
-        </article>
-
-        <article className="dashboard-kpi-card">
-          <span>Schools Covered</span>
-          <strong>{schoolsCount}</strong>
-          <small>Schools represented in the selected period</small>
-        </article>
-      </section>
-
-      <section className="dashboard-section">
-        <div className="dashboard-section-heading">
-          <div>
-            <h2>Revenue Streams</h2>
-            <p>Select a stream to open its detailed dashboard.</p>
-          </div>
-        </div>
-
-        <div className="dashboard-stream-grid">
-          {streamData.map((stream) => (
-            <StreamCard
-              key={stream.name}
-              title={stream.name}
-              description={stream.description}
-              revenue={stream.revenue}
-              income={stream.income}
-              contribution={stream.contribution}
-              path={stream.path}
-              colour={STREAM_COLOURS[stream.name]}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="dashboard-chart-grid">
-        <article className="dashboard-chart-card">
-          <div className="dashboard-card-heading">
-            <div>
-              <h2>Revenue by Stream</h2>
-              <p>Contribution of each revenue stream for {academicYear}.</p>
-            </div>
-          </div>
-
-          <div className="dashboard-chart-container dashboard-pie-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={streamData}
-                  dataKey="revenue"
-                  nameKey="name"
-                  innerRadius="56%"
-                  outerRadius="82%"
-                  paddingAngle={3}
-                >
-                  {streamData.map((item) => (
-                    <Cell
-                      key={item.name}
-                      fill={STREAM_COLOURS[item.name]}
-                    />
-                  ))}
-                </Pie>
-
-                <Tooltip
-                  formatter={(value) => formatCurrency(value)}
-                />
-
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </article>
-
-        <article className="dashboard-chart-card">
-          <div className="dashboard-card-heading">
-            <div>
-              <h2>Performance by School</h2>
-              <p>Commercial revenue and school income by school.</p>
-            </div>
-          </div>
-
-          <div className="dashboard-chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={schoolData}
-                margin={{ top: 12, right: 12, left: 8, bottom: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="school"
-                  tick={{ fontSize: 10 }}
-                  interval={0}
-                  angle={-12}
-                  textAnchor="end"
-                  height={52}
-                />
-                <YAxis
-                  tick={{ fontSize: 10 }}
-                  tickFormatter={formatCompactCurrency}
-                />
-                <Tooltip formatter={(value) => formatCurrency(value)} />
-                <Legend />
-                <Bar
-                  dataKey="revenue"
-                  name="Commercial Revenue"
-                  fill="#38a3d1"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="income"
-                  name="School Income"
-                  fill="#e97832"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </article>
-      </section>
-
-      <section className="dashboard-chart-card dashboard-monthly-card">
-        <div className="dashboard-card-heading">
-          <div>
-            <h2>Monthly Performance</h2>
-            <p>Combined commercial revenue and school income from September to August.</p>
-          </div>
-        </div>
-
-        <div className="dashboard-chart-container dashboard-line-container">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={monthlyData}
-              margin={{ top: 12, right: 22, left: 10, bottom: 8 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-              <YAxis
-                tick={{ fontSize: 10 }}
-                tickFormatter={formatCompactCurrency}
-              />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                name="Commercial Revenue"
-                stroke="#38a3d1"
-                strokeWidth={3}
-                dot={{ r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="income"
-                name="School Income"
-                stroke="#e97832"
-                strokeWidth={3}
-                dot={{ r: 3 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      <section className="dashboard-bottom-grid">
-        <article className="dashboard-info-card">
-          <div className="dashboard-card-heading">
-            <div>
-              <h2>Contract Health</h2>
-              <p>Current status of leasing provider records.</p>
-            </div>
-
-            <span className="dashboard-count-pill">
-              {contractHealth.total} providers
+          <div className="dashboard-metric-footer">
+            <span>
+              Across Leasing, Catering and Uniform
             </span>
-          </div>
 
-          <div className="contract-health-grid">
-            <div className="contract-health-item active">
-              <span>Active</span>
-              <strong>{contractHealth.active}</strong>
-            </div>
-
-            <div className="contract-health-item expiring">
-              <span>Expiring Soon</span>
-              <strong>{contractHealth.expiring}</strong>
-            </div>
-
-            <div className="contract-health-item expired">
-              <span>Expired / Inactive</span>
-              <strong>{contractHealth.expired}</strong>
-            </div>
-
-            <div className="contract-health-item unknown">
-              <span>Not Recorded</span>
-              <strong>{contractHealth.notRecorded}</strong>
-            </div>
+            <i>
+              {streamData.length} streams
+            </i>
           </div>
         </article>
 
-        <article className="dashboard-info-card">
-          <div className="dashboard-card-heading">
-            <div>
-              <h2>Quick Access</h2>
-              <p>Open the main operational views.</p>
-            </div>
-          </div>
-
-          <div className="dashboard-quick-links">
-            <Link to="/leasing/programmes">
-              <span>Leasing</span>
-              <b>Programme Directory</b>
-              <i>→</i>
-            </Link>
-
-            <Link to="/catering">
-              <span>Catering</span>
-              <b>Dashboard</b>
-              <i>→</i>
-            </Link>
-
-            <Link to="/uniform">
-              <span>Uniform</span>
-              <b>Dashboard</b>
-              <i>→</i>
-            </Link>
-          </div>
+        <article className="dashboard-secondary-metric">
+          <span>School income</span>
+          <strong>{formatCurrency(totalIncome)}</strong>
+          <small>
+            Commission and leasing income
+          </small>
         </article>
+
+        <article className="dashboard-secondary-metric">
+          <span>Income yield</span>
+          <strong>
+            {formatPercent(
+              totalRevenue > 0
+                ? (totalIncome / totalRevenue) * 100
+                : 0
+            )}
+          </strong>
+          <small>
+            School income as a share of revenue
+          </small>
+        </article>
+
+        <article className="dashboard-secondary-metric">
+          <span>Schools covered</span>
+          <strong>{schoolsCount}</strong>
+          <small>
+            Schools represented in the selected year
+          </small>
+        </article>
+      </section>
+
+      <section className="dashboard-content-grid">
+        <section className="dashboard-main-column">
+          <article className="saas-panel dashboard-performance-panel">
+            <div className="saas-panel-heading">
+              <div>
+                <span className="saas-panel-kicker">
+                  Schools
+                </span>
+
+                <h2>Performance by school</h2>
+
+                <p>
+                  Commercial revenue and school income by
+                  school.
+                </p>
+              </div>
+
+              <span className="dashboard-count-pill">
+                {academicYear}
+              </span>
+            </div>
+
+            <div className="dashboard-chart-container dashboard-school-chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={schoolData}
+                  margin={{
+                    top: 12,
+                    right: 10,
+                    left: 2,
+                    bottom: 24,
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="2 6"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+
+                  <XAxis
+                    dataKey="school"
+                    tick={{ fontSize: 10 }}
+                    interval={0}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={formatCompactCurrency}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+
+                  <Tooltip
+                    formatter={(value) =>
+                      formatCurrency(value)
+                    }
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: "1px solid #e5e7eb",
+                      boxShadow:
+                        "0 12px 30px rgba(15, 23, 42, 0.10)",
+                    }}
+                  />
+
+                  <Legend />
+
+                  <Bar
+                    dataKey="revenue"
+                    name="Commercial Revenue"
+                    fill="#111827"
+                    radius={[5, 5, 0, 0]}
+                  />
+
+                  <Bar
+                    dataKey="income"
+                    name="School Income"
+                    fill="#8b5cf6"
+                    radius={[5, 5, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="saas-panel">
+            <div className="saas-panel-heading">
+              <div>
+                <span className="saas-panel-kicker">
+                  Revenue streams
+                </span>
+
+                <h2>Business lines</h2>
+
+                <p>
+                  Open a stream to continue into its detailed
+                  operating view.
+                </p>
+              </div>
+            </div>
+
+            <div className="dashboard-stream-list">
+              {streamData.map((stream) => (
+                <Link
+                  key={stream.name}
+                  to={stream.path}
+                  className="dashboard-stream-row"
+                >
+                  <div
+                    className="dashboard-stream-symbol"
+                    style={{
+                      "--stream-colour":
+                        STREAM_COLOURS[stream.name],
+                    }}
+                  >
+                    {stream.name.slice(0, 1)}
+                  </div>
+
+                  <div className="dashboard-stream-copy">
+                    <strong>{stream.name}</strong>
+                    <span>{stream.description}</span>
+                  </div>
+
+                  <div className="dashboard-stream-value">
+                    <strong>
+                      {formatCurrency(stream.revenue)}
+                    </strong>
+
+                    <span>
+                      {formatPercent(stream.contribution)}
+                      {" "}of revenue
+                    </span>
+                  </div>
+
+                  <div className="dashboard-stream-income">
+                    <span>School income</span>
+                    <strong>
+                      {formatCurrency(stream.income)}
+                    </strong>
+                  </div>
+
+                  <span className="dashboard-stream-chevron">
+                    →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </article>
+
+          <article className="saas-panel">
+            <div className="saas-panel-heading">
+              <div>
+                <span className="saas-panel-kicker">
+                  Performance
+                </span>
+
+                <h2>Monthly revenue</h2>
+
+                <p>
+                  Combined commercial revenue and school
+                  income from September to August.
+                </p>
+              </div>
+            </div>
+
+            <div className="dashboard-line-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={monthlyData}
+                  margin={{
+                    top: 14,
+                    right: 18,
+                    left: 4,
+                    bottom: 4,
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="2 6"
+                    vertical={false}
+                    stroke="#e5e7eb"
+                  />
+
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={formatCompactCurrency}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+
+                  <Tooltip
+                    formatter={(value) =>
+                      formatCurrency(value)
+                    }
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: "1px solid #e5e7eb",
+                      boxShadow:
+                        "0 12px 30px rgba(15, 23, 42, 0.10)",
+                    }}
+                  />
+
+                  <Legend />
+
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    name="Commercial Revenue"
+                    stroke="#111827"
+                    strokeWidth={2.5}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="income"
+                    name="School Income"
+                    stroke="#7c3aed"
+                    strokeWidth={2.5}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+        </section>
+
+        <aside className="dashboard-side-column">
+          <article className="saas-panel dashboard-breakdown-panel">
+            <div className="saas-panel-heading compact">
+              <div>
+                <span className="saas-panel-kicker">
+                  Mix
+                </span>
+
+                <h2>Revenue breakdown</h2>
+              </div>
+            </div>
+
+            <div className="dashboard-donut-wrap">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={streamData}
+                    dataKey="revenue"
+                    nameKey="name"
+                    innerRadius="63%"
+                    outerRadius="84%"
+                    paddingAngle={4}
+                    stroke="none"
+                  >
+                    {streamData.map((item) => (
+                      <Cell
+                        key={item.name}
+                        fill={STREAM_COLOURS[item.name]}
+                      />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    content={<RevenueMixTooltip />}
+                    position={{ x: 6, y: 6 }}
+                    allowEscapeViewBox={{
+                      x: true,
+                      y: true,
+                    }}
+                    wrapperStyle={{
+                      pointerEvents: "none",
+                      zIndex: 5,
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+
+              <div className="dashboard-donut-centre">
+                <strong>
+                  {formatCompactCurrency(totalRevenue)}
+                </strong>
+                <span>Total</span>
+              </div>
+            </div>
+
+            <div className="dashboard-breakdown-list">
+              {streamData.map((stream) => (
+                <div key={stream.name}>
+                  <span
+                    style={{
+                      "--stream-colour":
+                        STREAM_COLOURS[stream.name],
+                    }}
+                  />
+
+                  <b>{stream.name}</b>
+
+                  <strong>
+                    {formatPercent(stream.contribution)}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="saas-panel">
+            <div className="saas-panel-heading compact">
+              <div>
+                <span className="saas-panel-kicker">
+                  Contracts
+                </span>
+
+                <h2>Contract health</h2>
+              </div>
+
+              <span className="dashboard-count-pill">
+                {contractHealth.total}
+              </span>
+            </div>
+
+            <div className="contract-health-list">
+              <div>
+                <span className="status-dot active" />
+                <b>Active</b>
+                <strong>{contractHealth.active}</strong>
+              </div>
+
+              <div>
+                <span className="status-dot expiring" />
+                <b>Expiring soon</b>
+                <strong>{contractHealth.expiring}</strong>
+              </div>
+
+              <div>
+                <span className="status-dot expired" />
+                <b>Expired / inactive</b>
+                <strong>{contractHealth.expired}</strong>
+              </div>
+
+              <div>
+                <span className="status-dot unknown" />
+                <b>Not recorded</b>
+                <strong>{contractHealth.notRecorded}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article className="saas-panel">
+            <div className="saas-panel-heading compact">
+              <div>
+                <span className="saas-panel-kicker">
+                  Shortcuts
+                </span>
+
+                <h2>Quick access</h2>
+              </div>
+            </div>
+
+            <div className="dashboard-quick-links">
+              <Link to="/leasing/programmes">
+                <span>Leasing</span>
+                <strong>Programme Directory</strong>
+                <i>→</i>
+              </Link>
+
+              <Link to="/catering">
+                <span>Catering</span>
+                <strong>Open dashboard</strong>
+                <i>→</i>
+              </Link>
+
+              <Link to="/uniform">
+                <span>Uniform</span>
+                <strong>Open dashboard</strong>
+                <i>→</i>
+              </Link>
+            </div>
+          </article>
+        </aside>
       </section>
     </section>
   );
