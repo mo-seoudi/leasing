@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+
 import {
   Bar,
   BarChart,
@@ -11,7 +13,6 @@ import {
 } from "recharts";
 
 import {
-  academicYears,
   filterRecords,
   formatCurrency,
   getAcademicYearComparison,
@@ -61,6 +62,8 @@ function GrowthValue({ value }) {
 }
 
 export default function YearComparisonPage() {
+  const { setHeaderControls } = useOutletContext();
+
   const [filters, setFilters] = useState({
     school: "",
     programGroup: "",
@@ -133,106 +136,97 @@ export default function YearComparisonPage() {
   const selectedProgrammeLabel =
     filters.program || "All Programmes";
 
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control wide">
+          <span>School</span>
+
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange(
+                "school",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Schools</option>
+
+            {schools.map((school) => (
+              <option key={school} value={school}>
+                {school}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>Programme Group</span>
+
+          <select
+            value={filters.programGroup}
+            onChange={(event) =>
+              handleFilterChange(
+                "programGroup",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Groups</option>
+
+            {programmeGroups.map((group) => (
+              <option key={group} value={group}>
+                {group}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>Programme</span>
+
+          <select
+            value={filters.program}
+            onChange={(event) =>
+              handleFilterChange(
+                "program",
+                event.target.value
+              )
+            }
+          >
+            <option value="">All Programmes</option>
+
+            {availableProgrammes.map((programme) => (
+              <option
+                key={programme}
+                value={programme}
+              >
+                {programme}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    availableProgrammes,
+    setHeaderControls,
+  ]);
+
   return (
     <section className="year-comparison-page">
-      <section className="comparison-filter-card">
-        <div className="comparison-filter-heading">
-          <div>
-            <h2>Comparison Filters</h2>
-            <p>
-              Select one programme or a programme group to
-              compare its performance across academic years.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="comparison-filter-grid">
-          <div className="comparison-filter">
-            <label htmlFor="year-school">School</label>
-
-            <select
-              id="year-school"
-              value={filters.school}
-              onChange={(event) =>
-                handleFilterChange(
-                  "school",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Schools</option>
-
-              {schools.map((school) => (
-                <option key={school} value={school}>
-                  {school}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="comparison-filter">
-            <label htmlFor="year-programme-group">
-              Programme Group
-            </label>
-
-            <select
-              id="year-programme-group"
-              value={filters.programGroup}
-              onChange={(event) =>
-                handleFilterChange(
-                  "programGroup",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Groups</option>
-
-              {programmeGroups.map((group) => (
-                <option key={group} value={group}>
-                  {group}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="comparison-filter">
-            <label htmlFor="year-programme">
-              Programme
-            </label>
-
-            <select
-              id="year-programme"
-              value={filters.program}
-              onChange={(event) =>
-                handleFilterChange(
-                  "program",
-                  event.target.value
-                )
-              }
-            >
-              <option value="">All Programmes</option>
-
-              {availableProgrammes.map((programme) => (
-                <option
-                  key={programme}
-                  value={programme}
-                >
-                  {programme}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </section>
-
       <section className="year-summary-card">
         <div className="year-card-heading">
           <div>
