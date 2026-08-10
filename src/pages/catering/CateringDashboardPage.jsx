@@ -212,10 +212,25 @@ export default function CateringDashboardPage() {
 
           <div className="catering-bar-chart">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={schoolData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+              <BarChart
+                  data={schoolData}
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: 24,
+                    bottom: 5,
+                  }}
+                  barCategoryGap="22%"
+                  barGap={6}
+                >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="school" tickLine={false} axisLine={false} />
-                <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={72} />
+                <YAxis
+                  tickFormatter={formatCompactCurrency}
+                  tickLine={false}
+                  axisLine={false}
+                  width={84}
+                />
                 <Tooltip content={<CurrencyTooltip />} />
                 <Legend />
                 <Bar dataKey="sales" name="Sales" fill="#1679a7" radius={[5, 5, 0, 0]} />
@@ -235,10 +250,25 @@ export default function CateringDashboardPage() {
 
           <div className="catering-bar-chart">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={termData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
+              <BarChart
+                  data={termData}
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: 24,
+                    bottom: 5,
+                  }}
+                  barCategoryGap="22%"
+                  barGap={6}
+                >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="term" tickLine={false} axisLine={false} />
-                <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={72} />
+                <YAxis
+                  tickFormatter={formatCompactCurrency}
+                  tickLine={false}
+                  axisLine={false}
+                  width={84}
+                />
                 <Tooltip content={<CurrencyTooltip />} />
                 <Legend />
                 <Bar dataKey="sales" name="Sales" fill="#1679a7" radius={[5, 5, 0, 0]} />
