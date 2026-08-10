@@ -523,3 +523,7 @@
     border-top: 0;
   }
 }
+
+
+/* Filters now live in the fixed platform header. */
+.uniform-dashboard-page { padding-top: 0; }
