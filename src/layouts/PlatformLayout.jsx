@@ -157,7 +157,7 @@ function getPageDetails(pathname) {
   if (pathname === "/dashboard") {
     return {
       section: "",
-      title: "Dashboard",
+      title: "Commercial Operations Dashboard",
     };
   }
 
