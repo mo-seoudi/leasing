@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -397,6 +397,8 @@ function RevenueMixTooltip({
 }
 
 export default function DashboardPage() {
+  const { setHeaderControls } = useOutletContext();
+
   const leasingRecords = Array.isArray(leasingSource.records)
     ? leasingSource.records
     : [];
@@ -424,6 +426,74 @@ export default function DashboardPage() {
   );
 
   const [schoolFilter, setSchoolFilter] = useState("");
+
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <div className="header-filter-control">
+          <label htmlFor="dashboard-academic-year">
+            Academic year
+          </label>
+
+          <select
+            id="dashboard-academic-year"
+            value={academicYear}
+            onChange={(event) =>
+              setAcademicYear(event.target.value)
+            }
+          >
+            {academicYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="header-filter-control wide">
+          <label htmlFor="dashboard-school">
+            School
+          </label>
+
+          <select
+            id="dashboard-school"
+            value={schoolFilter}
+            onChange={(event) =>
+              setSchoolFilter(event.target.value)
+            }
+          >
+            <option value="">All Schools</option>
+            <option value="Repton Dubai">
+              Repton Dubai
+            </option>
+            <option value="Repton Al Barsha">
+              Repton Al Barsha
+            </option>
+            <option value="Repton Fry">
+              Repton Fry
+            </option>
+            <option value="Repton Rose">
+              Repton Rose
+            </option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          className="header-clear-button"
+        >
+          Export
+        </button>
+      </div>,
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    academicYear,
+    academicYears,
+    schoolFilter,
+    setHeaderControls,
+  ]);
 
   const filteredLeasing = useMemo(
     () =>
@@ -538,63 +608,6 @@ export default function DashboardPage() {
 
   return (
     <section className="commercial-dashboard-page">
-      <div className="dashboard-toolbar">
-        <div className="dashboard-filter-control">
-          <label htmlFor="dashboard-academic-year">
-            Academic year
-          </label>
-
-          <select
-            id="dashboard-academic-year"
-            value={academicYear}
-            onChange={(event) =>
-              setAcademicYear(event.target.value)
-            }
-          >
-            {academicYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="dashboard-filter-control">
-          <label htmlFor="dashboard-school">
-            School
-          </label>
-
-          <select
-            id="dashboard-school"
-            value={schoolFilter}
-            onChange={(event) =>
-              setSchoolFilter(event.target.value)
-            }
-          >
-            <option value="">All Schools</option>
-            <option value="Repton Dubai">
-              Repton Dubai
-            </option>
-            <option value="Repton Al Barsha">
-              Repton Al Barsha
-            </option>
-            <option value="Repton Fry">
-              Repton Fry
-            </option>
-            <option value="Repton Rose">
-              Repton Rose
-            </option>
-          </select>
-        </div>
-
-        <button
-          type="button"
-          className="dashboard-secondary-action"
-        >
-          Export
-        </button>
-      </div>
-
       <section className="dashboard-overview-strip">
         <article className="dashboard-primary-metric">
           <div className="dashboard-metric-label">
