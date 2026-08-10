@@ -41,55 +41,10 @@
   line-height: 1.5;
 }
 
-.catering-comparison-secondary-button {
-  min-height: 38px;
-  padding: 8px 14px;
-  border: 1px solid #b9c2d0;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #344054;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.catering-comparison-secondary-button:hover {
-  background: #f8fafc;
-  border-color: #98a2b3;
-}
-
-.catering-comparison-filter-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(2, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-.catering-comparison-filter-grid label {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .catering-comparison-filter-grid label > span {
   color: #344054;
   font-size: 12px;
   font-weight: 600;
-}
-
-.catering-comparison-filter-grid select {
-  width: 100%;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid #d0d5dd;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #101828;
-  font: inherit;
-  font-size: 13px;
-  outline: none;
 }
 
 .catering-comparison-filter-grid select:focus {
