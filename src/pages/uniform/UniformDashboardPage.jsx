@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -55,6 +56,7 @@ function CurrencyTooltip({ active, payload, label }) {
 }
 
 export default function UniformDashboardPage() {
+  const { setHeaderControls } = useOutletContext();
   const latestAcademicYear =
     uniformAcademicYears[uniformAcademicYears.length - 1] || "";
 
@@ -105,62 +107,74 @@ export default function UniformDashboardPage() {
 
   const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
 
+  useEffect(() => {
+    setHeaderControls(
+      <div className="header-page-filters">
+        <label className="header-filter-control">
+          <span>Academic Year</span>
+          <select
+            value={filters.academicYear}
+            onChange={(event) =>
+              handleFilterChange("academicYear", event.target.value)
+            }
+          >
+            <option value="">All Years</option>
+            {uniformAcademicYears.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control wide">
+          <span>School</span>
+          <select
+            value={filters.school}
+            onChange={(event) =>
+              handleFilterChange("school", event.target.value)
+            }
+          >
+            <option value="">All Schools</option>
+            {uniformSchools.map((school) => (
+              <option key={school.code} value={school.code}>
+                {school.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="header-filter-control">
+          <span>Term</span>
+          <select
+            value={filters.term}
+            onChange={(event) =>
+              handleFilterChange("term", event.target.value)
+            }
+          >
+            <option value="">All Terms</option>
+            {uniformTerms.map((term) => (
+              <option key={term} value={term}>{term}</option>
+            ))}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
+      </div>
+    );
+
+    return () => setHeaderControls(null);
+  }, [
+    filters,
+    setHeaderControls,
+  ]);
+
   return (
     <section className="uniform-dashboard-page">
-      <section className="uniform-filter-card uniform-sticky-filters">
-        <div className="uniform-filter-grid">
-          <label>
-            <span>Academic Year</span>
-            <select
-              value={filters.academicYear}
-              onChange={(event) => handleFilterChange("academicYear", event.target.value)}
-            >
-              <option value="">All Academic Years</option>
-              {uniformAcademicYears.map((year) => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>School</span>
-            <select
-              value={filters.school}
-              onChange={(event) => handleFilterChange("school", event.target.value)}
-            >
-              <option value="">All Schools</option>
-              {uniformSchools.map((school) => (
-                <option key={school.code} value={school.code}>
-                  {school.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Term</span>
-            <select
-              value={filters.term}
-              onChange={(event) => handleFilterChange("term", event.target.value)}
-            >
-              <option value="">All Terms</option>
-              {uniformTerms.map((term) => (
-                <option key={term} value={term}>{term}</option>
-              ))}
-            </select>
-          </label>
-          <div className="uniform-filter-action">
-            <button
-              type="button"
-              className="uniform-secondary-button"
-              onClick={clearFilters}
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section className="uniform-kpi-grid">
         <KpiCard
           label="Total Sales"
