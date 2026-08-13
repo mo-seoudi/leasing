@@ -101,7 +101,6 @@ function normaliseMonth(month) {
 
   const rawValue = String(month).trim();
 
-  // Handles ISO dates such as "2025-09-01".
   const isoDateMatch = rawValue.match(
     /^(\d{4})-(\d{2})-(\d{2})$/
   );
@@ -127,7 +126,6 @@ function normaliseMonth(month) {
     return monthsByNumber[monthNumber] || "";
   }
 
-  // Handles other valid date strings.
   const parsedDate = new Date(rawValue);
 
   if (!Number.isNaN(parsedDate.getTime())) {
@@ -147,7 +145,6 @@ function normaliseMonth(month) {
     ][parsedDate.getUTCMonth()];
   }
 
-  // Handles month names and abbreviations.
   const value = rawValue.toLowerCase();
 
   const monthNames = {
@@ -348,6 +345,7 @@ export default function ProgrammeDetailView({
     return MONTHS.map((month) => ({
       period: month,
       label: MONTH_LABELS[month],
+      mobileLabel: month,
       ...finishMeasures(grouped[month]),
     }));
   }, [programmeRecords]);
@@ -376,6 +374,7 @@ export default function ProgrammeDetailView({
       ([term, measures]) => ({
         period: term,
         label: term,
+        mobileLabel: term,
         ...finishMeasures(measures),
       })
     );
@@ -409,7 +408,7 @@ export default function ProgrammeDetailView({
   return (
     <section className="programme-detail-panel">
       <header className="programme-detail-header">
-        <div>
+        <div className="programme-detail-title">
           <span className="programme-detail-eyebrow">
             Programme details
           </span>
@@ -494,7 +493,10 @@ export default function ProgrammeDetailView({
           </div>
         </div>
 
-        <div className="programme-detail-tabs">
+        <div
+          className="programme-detail-tabs"
+          aria-label="Programme detail view"
+        >
           <button
             type="button"
             className={
@@ -570,7 +572,7 @@ export default function ProgrammeDetailView({
           </strong>
         </div>
 
-        <div>
+        <div className="rental-summary">
           <span>Rental Fees</span>
 
           <strong>
@@ -581,7 +583,13 @@ export default function ProgrammeDetailView({
         </div>
       </div>
 
-      <div className="programme-detail-table-scroll">
+      <div
+        className={
+          viewMode === "monthly"
+            ? "programme-detail-table-scroll monthly"
+            : "programme-detail-table-scroll termly"
+        }
+      >
         <table className="programme-detail-table">
           <thead>
             <tr>
@@ -630,6 +638,48 @@ export default function ProgrammeDetailView({
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="programme-detail-mobile-periods">
+        {displayedPeriods.map((period) => (
+          <article
+            key={period.period}
+            className="programme-detail-period-card"
+          >
+            <header>
+              <span>
+                {viewMode === "monthly"
+                  ? "Month"
+                  : "Reporting period"}
+              </span>
+
+              <strong>
+                {period.mobileLabel}
+              </strong>
+            </header>
+
+            <div className="programme-detail-period-values">
+              {MEASURES.map((measure) => (
+                <div
+                  key={`${period.period}-${measure.key}`}
+                  className={
+                    measure.type === "main"
+                      ? "programme-detail-period-row main"
+                      : "programme-detail-period-row"
+                  }
+                >
+                  <span>{measure.label}</span>
+
+                  <strong>
+                    {formatDisplayValue(
+                      period[measure.key]
+                    )}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );
