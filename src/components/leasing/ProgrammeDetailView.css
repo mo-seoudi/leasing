@@ -970,3 +970,146 @@
     padding-inline: 7px;
   }
 }
+
+
+/* =========================================================
+   MOBILE V4 - compact value alignment
+   Keeps values close to their labels instead of pushing them
+   to the far-right edge of a full-width financial card.
+   ========================================================= */
+
+@media (max-width: 820px) {
+  .programme-detail-mobile-card {
+    width: 100%;
+    max-width: 390px;
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  .programme-detail-mobile-card > header {
+    width: 100%;
+  }
+
+  .programme-detail-mobile-values {
+    width: 100%;
+    padding: 2px 8px 4px;
+  }
+
+  .programme-detail-mobile-row {
+    display: grid;
+    grid-template-columns:
+      minmax(110px, 1.15fr)
+      minmax(100px, 0.85fr);
+    align-items: center;
+    justify-content: start;
+    column-gap: 12px;
+    min-height: 29px;
+    width: 100%;
+  }
+
+  .programme-detail-mobile-row span {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .programme-detail-mobile-row strong {
+    min-width: 0;
+    text-align: left;
+    justify-self: start;
+    white-space: nowrap;
+  }
+
+  .programme-detail-mobile-row.main {
+    margin-inline: -8px;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .programme-detail-mobile-card {
+    max-width: 340px;
+  }
+
+  .programme-detail-mobile-row {
+    grid-template-columns:
+      minmax(100px, 1fr)
+      minmax(92px, 0.78fr);
+    column-gap: 10px;
+  }
+}
+
+@media (max-width: 370px) {
+  .programme-detail-mobile-card {
+    max-width: 310px;
+  }
+
+  .programme-detail-mobile-row {
+    grid-template-columns:
+      minmax(92px, 1fr)
+      minmax(86px, 0.75fr);
+    column-gap: 8px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE V5 - full screen width, compact internal columns
+   The card fills the available phone width, but the label/value
+   content does not stretch to opposite edges.
+   ========================================================= */
+
+@media (max-width: 820px) {
+  .programme-detail-mobile-card {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .programme-detail-mobile-values {
+    width: 100%;
+  }
+
+  .programme-detail-mobile-row {
+    display: grid;
+    grid-template-columns:
+      minmax(105px, 145px)
+      max-content;
+    justify-content: start;
+    align-items: center;
+    column-gap: 14px;
+    width: 100%;
+  }
+
+  .programme-detail-mobile-row span {
+    text-align: left;
+  }
+
+  .programme-detail-mobile-row strong {
+    justify-self: start;
+    text-align: left;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .programme-detail-mobile-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .programme-detail-mobile-row {
+    grid-template-columns:
+      minmax(96px, 132px)
+      max-content;
+    column-gap: 12px;
+  }
+}
+
+@media (max-width: 370px) {
+  .programme-detail-mobile-row {
+    grid-template-columns:
+      minmax(88px, 120px)
+      max-content;
+    column-gap: 10px;
+  }
+}
