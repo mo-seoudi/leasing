@@ -692,3 +692,281 @@
     font-size: 9px;
   }
 }
+
+
+/* =========================================================
+   MOBILE V3
+   A genuinely compact phone experience:
+   - only 2 headline KPIs
+   - period selector instead of a long stack of cards
+   - one financial card visible at a time
+   ========================================================= */
+
+@media (max-width: 820px) {
+  .programme-detail-panel {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #ffffff;
+  }
+
+  .programme-detail-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .programme-detail-header h2 {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .programme-detail-header p {
+    display: none;
+  }
+
+  .programme-detail-eyebrow {
+    margin-bottom: 3px;
+    font-size: 7px;
+  }
+
+  .programme-detail-close {
+    min-height: 28px;
+    padding: 4px 7px;
+    font-size: 8px;
+  }
+
+  .programme-detail-controls {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .programme-detail-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .programme-detail-filter {
+    gap: 3px;
+  }
+
+  .programme-detail-filter label {
+    font-size: 8px;
+  }
+
+  .programme-detail-filter select {
+    min-height: 32px;
+    padding: 5px 24px 5px 7px;
+    font-size: 9px;
+    border-radius: 6px;
+  }
+
+  .programme-detail-tabs {
+    width: 100%;
+    padding: 2px;
+    border-radius: 7px;
+  }
+
+  .programme-detail-tabs button {
+    min-height: 30px;
+    min-width: 0;
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+
+  /* Only the two useful headline KPIs remain on mobile. */
+  .programme-detail-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 9px;
+  }
+
+  .programme-detail-summary > div {
+    min-height: 54px;
+    padding: 8px;
+  }
+
+  .programme-detail-summary
+    .secondary-summary {
+    display: none;
+  }
+
+  .programme-detail-summary
+    .main-summary {
+    grid-column: auto;
+  }
+
+  .programme-detail-summary span {
+    font-size: 7px;
+  }
+
+  .programme-detail-summary strong,
+  .programme-detail-summary
+    .main-summary
+    strong {
+    margin-top: 3px;
+    font-size: 13px;
+  }
+
+  .programme-detail-summary small {
+    margin-top: 2px;
+    font-size: 6px;
+  }
+
+  .programme-detail-table-scroll {
+    display: none;
+  }
+
+  .programme-detail-mobile-periods {
+    display: block;
+  }
+
+  .programme-detail-mobile-period-tabs {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    margin-bottom: 7px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .programme-detail-mobile-period-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .programme-detail-mobile-period-tabs button {
+    min-width: 42px;
+    min-height: 28px;
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border: 1px solid #e5e5e5;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #737373;
+    font: inherit;
+    font-size: 8px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .programme-detail-mobile-period-tabs button.active {
+    border-color: #171717;
+    background: #171717;
+    color: #ffffff;
+  }
+
+  .programme-detail-mobile-card {
+    overflow: hidden;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .programme-detail-mobile-card > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+    padding: 7px 9px;
+    border-bottom: 1px solid #eeeeee;
+    background: #fafafa;
+  }
+
+  .programme-detail-mobile-card > header > div {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .programme-detail-mobile-card
+    > header
+    span {
+    color: #a3a3a3;
+    font-size: 7px;
+    font-weight: 650;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .programme-detail-mobile-card
+    > header
+    strong {
+    color: #171717;
+    font-size: 11px;
+  }
+
+  .programme-detail-mobile-values {
+    padding: 2px 9px 4px;
+  }
+
+  .programme-detail-mobile-row {
+    display: flex;
+    min-height: 30px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #f1f1f1;
+  }
+
+  .programme-detail-mobile-row:last-child {
+    border-bottom: 0;
+  }
+
+  .programme-detail-mobile-row span {
+    color: #737373;
+    font-size: 8px;
+  }
+
+  .programme-detail-mobile-row strong {
+    color: #262626;
+    font-size: 9px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .programme-detail-mobile-row.main {
+    margin-inline: -9px;
+    padding-inline: 9px;
+    background: #faf9ff;
+  }
+
+  .programme-detail-mobile-row.main span,
+  .programme-detail-mobile-row.main strong {
+    color: #171717;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .programme-detail-panel {
+    padding: 8px;
+  }
+
+  .programme-detail-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .programme-detail-close {
+    justify-self: auto;
+  }
+
+  .programme-detail-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .programme-detail-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .programme-detail-mobile-period-tabs button {
+    min-width: 40px;
+    padding-inline: 7px;
+  }
+}

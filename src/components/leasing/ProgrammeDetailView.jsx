@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { formatCurrency } from "../../lib/dashboardData";
 import "./ProgrammeDetailView.css";
@@ -291,6 +291,9 @@ export default function ProgrammeDetailView({
   const [viewMode, setViewMode] =
     useState("termly");
 
+  const [mobilePeriod, setMobilePeriod] =
+    useState("");
+
   const [detailFilters, setDetailFilters] =
     useState(() => ({
       school: "",
@@ -384,6 +387,31 @@ export default function ProgrammeDetailView({
     viewMode === "monthly"
       ? monthlyData
       : termlyData;
+
+  useEffect(() => {
+    if (displayedPeriods.length === 0) {
+      setMobilePeriod("");
+      return;
+    }
+
+    const currentStillExists =
+      displayedPeriods.some(
+        (period) =>
+          period.period === mobilePeriod
+      );
+
+    if (!currentStillExists) {
+      setMobilePeriod(
+        displayedPeriods[0].period
+      );
+    }
+  }, [displayedPeriods, mobilePeriod]);
+
+  const selectedMobilePeriod =
+    displayedPeriods.find(
+      (period) =>
+        period.period === mobilePeriod
+    ) || displayedPeriods[0];
 
   const totals = useMemo(() => {
     const measures = createEmptyMeasures();
@@ -554,7 +582,7 @@ export default function ProgrammeDetailView({
           </small>
         </div>
 
-        <div>
+        <div className="secondary-summary">
           <span>Sales</span>
 
           <strong>
@@ -562,7 +590,7 @@ export default function ProgrammeDetailView({
           </strong>
         </div>
 
-        <div>
+        <div className="secondary-summary">
           <span>Commission</span>
 
           <strong>
@@ -572,7 +600,7 @@ export default function ProgrammeDetailView({
           </strong>
         </div>
 
-        <div className="rental-summary">
+        <div className="rental-summary secondary-summary">
           <span>Rental Fees</span>
 
           <strong>
@@ -641,45 +669,73 @@ export default function ProgrammeDetailView({
       </div>
 
       <div className="programme-detail-mobile-periods">
-        {displayedPeriods.map((period) => (
-          <article
-            key={period.period}
-            className="programme-detail-period-card"
-          >
-            <header>
-              <span>
-                {viewMode === "monthly"
-                  ? "Month"
-                  : "Reporting period"}
-              </span>
+        <div className="programme-detail-mobile-period-tabs">
+          {displayedPeriods.map((period) => (
+            <button
+              key={period.period}
+              type="button"
+              className={
+                selectedMobilePeriod?.period ===
+                period.period
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setMobilePeriod(period.period)
+              }
+            >
+              {viewMode === "monthly"
+                ? period.label
+                : period.period.replace(
+                    "Term ",
+                    "T"
+                  )}
+            </button>
+          ))}
+        </div>
 
-              <strong>
-                {period.mobileLabel}
-              </strong>
+        {selectedMobilePeriod && (
+          <article className="programme-detail-mobile-card">
+            <header>
+              <div>
+                <span>
+                  {viewMode === "monthly"
+                    ? "Month"
+                    : "Reporting period"}
+                </span>
+
+                <strong>
+                  {
+                    selectedMobilePeriod.mobileLabel
+                  }
+                </strong>
+              </div>
             </header>
 
-            <div className="programme-detail-period-values">
+            <div className="programme-detail-mobile-values">
               {MEASURES.map((measure) => (
                 <div
-                  key={`${period.period}-${measure.key}`}
+                  key={`${selectedMobilePeriod.period}-${measure.key}`}
                   className={
                     measure.type === "main"
-                      ? "programme-detail-period-row main"
-                      : "programme-detail-period-row"
+                      ? "programme-detail-mobile-row main"
+                      : "programme-detail-mobile-row"
                   }
                 >
                   <span>{measure.label}</span>
 
                   <strong>
                     {formatDisplayValue(
-                      period[measure.key]
+                      selectedMobilePeriod[
+                        measure.key
+                      ]
                     )}
                   </strong>
                 </div>
               ))}
             </div>
           </article>
-        ))}
+        )}
       </div>
     </section>
   );
