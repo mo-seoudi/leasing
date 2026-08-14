@@ -1256,7 +1256,7 @@ export default function ProgrammeDirectoryPage() {
                               isSelected
                             }
                           >
-                            <span>
+                            <span className="directory-programme-text">
                               {item.programme}
                             </span>
 

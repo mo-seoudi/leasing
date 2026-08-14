@@ -468,7 +468,13 @@
 
 .directory-programme-button:hover {
   color: #004eeb;
+  text-decoration: none;
+}
+
+.directory-programme-button:hover
+  .directory-programme-text {
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .directory-programme-button:focus-visible {
@@ -483,14 +489,26 @@
   color: #98a2b3;
   font-size: 12px;
   line-height: 1;
+  text-decoration: none !important;
+  transform-origin: center;
   transition:
     transform 160ms ease,
     color 160ms ease;
 }
 
+.directory-programme-button:hover
+  .directory-row-arrow,
+.directory-programme-button:focus
+  .directory-row-arrow,
+.directory-programme-button:active
+  .directory-row-arrow {
+  text-decoration: none !important;
+}
+
 .directory-row-arrow.open {
   transform: rotate(90deg);
   color: #4f46e5;
+  text-decoration: none !important;
 }
 
 .directory-revenue-value {
