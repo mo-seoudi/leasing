@@ -83,13 +83,54 @@ function DashboardIcon() {
   );
 }
 
-function RevenueIcon() {
+function LeasingIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 19V9" />
-      <path d="M10 19V5" />
-      <path d="M16 19v-7" />
-      <path d="M22 19H2" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="m12 7 3 2.2-1.1 3.5h-3.8L9 9.2 12 7Z" />
+      <path d="m5.1 9.2 3.9.1" />
+      <path d="m15 9.3 3.9-.1" />
+      <path d="m10.1 12.7-2.3 3.1" />
+      <path d="m13.9 12.7 2.3 3.1" />
+      <path d="m7.8 15.8 1.4 3.1" />
+      <path d="m16.2 15.8-1.4 3.1" />
+    </svg>
+  );
+}
+
+function CateringIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 3v7" />
+      <path d="M3.5 3v4.5A2.5 2.5 0 0 0 6 10" />
+      <path d="M8.5 3v4.5A2.5 2.5 0 0 1 6 10" />
+      <path d="M6 10v11" />
+      <path d="M16 3v18" />
+      <path d="M16 3c3 2.2 4.5 5.1 4.5 8.5H16" />
+    </svg>
+  );
+}
+
+function UniformIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m8 4-5 3 2.5 4L8 9.5V21h8V9.5l2.5 1.5L21 7l-5-3" />
+      <path d="M8 4c.7 1.7 2 2.5 4 2.5S15.3 5.7 16 4" />
+    </svg>
+  );
+}
+
+function TransportIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="3" width="16" height="15" rx="3" />
+      <path d="M7 7h10" />
+      <path d="M7 11h10" />
+      <path d="M4 14h16" />
+      <circle cx="8" cy="18" r="2" />
+      <circle cx="16" cy="18" r="2" />
+      <path d="M2.5 10H4" />
+      <path d="M20 10h1.5" />
     </svg>
   );
 }
@@ -478,7 +519,7 @@ export default function PlatformLayout() {
             >
               <span className="navigation-link-content">
                 <span className="navigation-icon">
-                  <RevenueIcon />
+                  <LeasingIcon />
                 </span>
 
                 <span className="navigation-text">
@@ -540,7 +581,7 @@ export default function PlatformLayout() {
             >
               <span className="navigation-link-content">
                 <span className="navigation-icon">
-                  <RevenueIcon />
+                  <CateringIcon />
                 </span>
 
                 <span className="navigation-text">
@@ -603,7 +644,7 @@ export default function PlatformLayout() {
             >
               <span className="navigation-link-content">
                 <span className="navigation-icon">
-                  <RevenueIcon />
+                  <UniformIcon />
                 </span>
 
                 <span className="navigation-text">
@@ -654,6 +695,10 @@ export default function PlatformLayout() {
                   : undefined
               }
             >
+              <span className="navigation-icon">
+                <TransportIcon />
+              </span>
+
               <span className="future-module-name">
                 Transport
               </span>
