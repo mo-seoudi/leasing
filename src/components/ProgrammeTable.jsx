@@ -71,7 +71,9 @@ export default function ProgrammeTable({
                           }
                           aria-expanded={isSelected}
                         >
-                          <span>{item.programme}</span>
+                          <span className="programme-link-text">
+                            {item.programme}
+                          </span>
 
                           <span
                             className={
@@ -79,15 +81,20 @@ export default function ProgrammeTable({
                                 ? "programme-row-arrow open"
                                 : "programme-row-arrow"
                             }
+                            aria-hidden="true"
                           >
                             ▶
                           </span>
                         </button>
                       </td>
 
-                      <td>{item.programGroup || "—"}</td>
+                      <td>
+                        {item.programGroup || "—"}
+                      </td>
 
-                      <td>{item.provider || "—"}</td>
+                      <td>
+                        {item.provider || "—"}
+                      </td>
 
                       <td className="number-cell">
                         {formatCurrency(item.sales)}
