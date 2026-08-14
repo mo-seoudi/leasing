@@ -250,6 +250,13 @@ select {
   stroke-linejoin: round;
 }
 
+.navigation-icon .stream-react-icon {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  stroke: none;
+}
+
 .chevron {
   width: 14px;
   height: 14px;
@@ -319,9 +326,16 @@ select {
   min-height: 34px;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px 7px 38px;
+  padding: 7px 10px;
   color: #a3a3a3;
   font-size: 11px;
+}
+
+.future-module-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
 }
 
 .status-badge {
@@ -668,7 +682,7 @@ select {
 
   .platform-layout.sidebar-collapsed .future-module {
     min-height: 34px;
-    padding: 7px 10px 7px 38px;
+    padding: 7px 10px;
   }
 
   .platform-layout.sidebar-collapsed .sidebar-footer {
