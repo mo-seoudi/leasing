@@ -323,10 +323,11 @@ select {
 
 .future-module {
   display: flex;
-  min-height: 34px;
+  width: 100%;
+  min-height: 38px;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px;
+  padding: 8px 10px;
   color: #a3a3a3;
   font-size: 11px;
 }
@@ -591,8 +592,15 @@ select {
 }
 
 .platform-layout.sidebar-collapsed .future-module {
-  min-height: 10px;
-  padding: 0;
+  min-height: 38px;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.platform-layout.sidebar-collapsed
+  .future-module-content {
+  width: 100%;
+  justify-content: center;
 }
 
 .platform-layout.sidebar-collapsed .sidebar-footer {

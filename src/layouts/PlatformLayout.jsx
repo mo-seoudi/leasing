@@ -9,8 +9,7 @@ import {
   MdRestaurant,
   MdSportsTennis,
 } from "react-icons/md";
-import { IoShirtOutline } from "react-icons/io5";
-import { FaBusSimple } from "react-icons/fa6";
+import { FaBusSimple, FaShirt } from "react-icons/fa6";
 
 import "./PlatformLayout.css";
 
@@ -428,6 +427,11 @@ export default function PlatformLayout() {
                   ? "Dashboard"
                   : undefined
               }
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setSidebarCollapsed(false);
+                }
+              }}
               className={({
                 isActive,
               }) =>
@@ -600,7 +604,7 @@ export default function PlatformLayout() {
             >
               <span className="navigation-link-content">
                 <span className="navigation-icon">
-                  <IoShirtOutline className="stream-react-icon" />
+                  <FaShirt className="stream-react-icon" />
                 </span>
 
                 <span className="navigation-text">
