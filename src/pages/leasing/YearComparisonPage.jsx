@@ -3,9 +3,9 @@ import { useOutletContext } from "react-router-dom";
 
 import {
   Bar,
-  BarChart,
   CartesianGrid,
-  Legend,
+  ComposedChart,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -44,6 +44,19 @@ function formatGrowth(value) {
   return `${sign}${value.toFixed(0)}%`;
 }
 
+function formatCompactCurrency(value) {
+  const number = Number(value || 0);
+
+  if (!Number.isFinite(number)) {
+    return "AED 0";
+  }
+
+  return `AED ${new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(number)}`;
+}
+
 function GrowthValue({ value }) {
   const className =
     value === null
@@ -58,6 +71,52 @@ function GrowthValue({ value }) {
     <span className={`growth-value ${className}`}>
       {formatGrowth(value)}
     </span>
+  );
+}
+
+function ModernChartTooltip({
+  active,
+  payload,
+  label,
+}) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const revenue = payload.find(
+    (item) => item.dataKey === "totalRevenue"
+  );
+
+  const income = payload.find(
+    (item) => item.dataKey === "schoolIncome"
+  );
+
+  return (
+    <div className="modern-chart-tooltip">
+      <div className="modern-chart-tooltip-year">
+        {label}
+      </div>
+
+      <div className="modern-chart-tooltip-row">
+        <span className="modern-chart-tooltip-dot revenue" />
+
+        <span>Total Revenue</span>
+
+        <strong>
+          {formatCurrency(revenue?.value || 0)}
+        </strong>
+      </div>
+
+      <div className="modern-chart-tooltip-row">
+        <span className="modern-chart-tooltip-dot income" />
+
+        <span>School Income</span>
+
+        <strong>
+          {formatCurrency(income?.value || 0)}
+        </strong>
+      </div>
+    </div>
   );
 }
 
@@ -292,40 +351,103 @@ export default function YearComparisonPage() {
       </section>
 
       {yearData.length > 0 && (
-        <section className="year-chart-card">
-          <div className="year-card-heading">
+        <section className="year-chart-card modern-year-chart-card">
+          <div className="modern-year-chart-heading">
             <div>
+              <span className="modern-chart-kicker">
+                Performance trend
+              </span>
+
               <h2>Academic-Year Comparison</h2>
+
               <p>
-                Revenue and income comparison for{" "}
+                Revenue and school income performance for{" "}
                 {selectedProgrammeLabel}.
               </p>
             </div>
+
+            <div className="modern-chart-legend">
+              <div>
+                <span className="legend-swatch revenue" />
+                <span>Total Revenue</span>
+              </div>
+
+              <div>
+                <span className="legend-line income" />
+                <span>School Income</span>
+              </div>
+            </div>
           </div>
 
-          <div className="year-chart-container">
+          <div className="modern-chart-summary">
+            <div>
+              <span>Latest Revenue</span>
+              <strong>
+                {formatCompactCurrency(
+                  yearData[yearData.length - 1]
+                    ?.totalRevenue
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Latest School Income</span>
+              <strong>
+                {formatCompactCurrency(
+                  yearData[yearData.length - 1]
+                    ?.schoolIncome
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Revenue YoY</span>
+              <strong>
+                {formatGrowth(
+                  yearData[yearData.length - 1]
+                    ?.revenueGrowth ?? null
+                )}
+              </strong>
+            </div>
+          </div>
+
+          <div className="year-chart-container modern-chart-container">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <ComposedChart
                 data={yearData}
                 margin={{
-                  top: 15,
-                  right: 20,
-                  left: 15,
-                  bottom: 10,
+                  top: 24,
+                  right: 30,
+                  left: 6,
+                  bottom: 4,
                 }}
+                barCategoryGap="34%"
               >
                 <CartesianGrid
-                  strokeDasharray="3 3"
+                  stroke="#eef0f3"
+                  strokeDasharray="2 6"
                   vertical={false}
                 />
 
                 <XAxis
                   dataKey="academicYear"
-                  tick={{ fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#737373",
+                    fontSize: 11,
+                  }}
+                  dy={8}
                 />
 
                 <YAxis
-                  tick={{ fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={58}
+                  tick={{
+                    fill: "#a3a3a3",
+                    fontSize: 10,
+                  }}
                   tickFormatter={(value) =>
                     new Intl.NumberFormat("en-US", {
                       notation: "compact",
@@ -335,28 +457,41 @@ export default function YearComparisonPage() {
                 />
 
                 <Tooltip
-                  formatter={(value, name) => [
-                    formatCurrency(value),
-                    name,
-                  ]}
+                  cursor={{
+                    fill: "rgba(15, 23, 42, 0.025)",
+                    radius: 10,
+                  }}
+                  content={<ModernChartTooltip />}
                 />
-
-                <Legend />
 
                 <Bar
                   dataKey="totalRevenue"
                   name="Total Revenue"
-                  fill="#38a3d1"
-                  radius={[4, 4, 0, 0]}
+                  fill="#18181b"
+                  maxBarSize={72}
+                  radius={[9, 9, 3, 3]}
                 />
 
-                <Bar
+                <Line
+                  type="monotone"
                   dataKey="schoolIncome"
                   name="School Income"
-                  fill="#e97832"
-                  radius={[4, 4, 0, 0]}
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  dot={{
+                    r: 4,
+                    fill: "#ffffff",
+                    stroke: "#7c3aed",
+                    strokeWidth: 2.5,
+                  }}
+                  activeDot={{
+                    r: 6,
+                    fill: "#7c3aed",
+                    stroke: "#ffffff",
+                    strokeWidth: 3,
+                  }}
                 />
-              </BarChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </section>
