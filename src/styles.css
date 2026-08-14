@@ -488,6 +488,67 @@ button {
   font-weight: 700;
 }
 
+/* Programme clickable name */
+
+.programme-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 0;
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  color: var(--primary);
+  font: inherit;
+  font-weight: 700;
+
+  text-align: left;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+/* Underline ONLY the programme text */
+
+.programme-detail-link:hover .programme-link-text {
+  text-decoration: underline;
+}
+
+/* Never underline the triangular arrow */
+
+.programme-row-arrow {
+  display: inline-block;
+
+  color: var(--text-muted);
+
+  font-size: 0.65rem;
+  line-height: 1;
+
+  text-decoration: none !important;
+
+  transform-origin: center;
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+
+.programme-detail-link:hover .programme-row-arrow,
+.programme-detail-link:focus .programme-row-arrow,
+.programme-row-arrow:hover {
+  color: var(--primary);
+  text-decoration: none !important;
+}
+
+/* Rotate arrow when programme is open */
+
+.programme-row-arrow.open {
+  transform: rotate(90deg);
+  text-decoration: none !important;
+}
+
 .number-cell {
   text-align: right !important;
   white-space: nowrap;
