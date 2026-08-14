@@ -11,8 +11,10 @@
   padding: 18px;
   background: #ffffff;
   border: 1px solid #e4e7ec;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.03),
+    0 4px 12px rgba(16, 24, 40, 0.025);
 }
 
 .comparison-filter-heading,
@@ -28,15 +30,17 @@
 .year-card-heading h2 {
   margin: 0;
   color: #101828;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .comparison-filter-heading p,
 .year-card-heading p {
   margin: 5px 0 0;
   color: #667085;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .comparison-filter select:focus {
@@ -128,150 +132,13 @@
   color: #667085;
 }
 
-/* ==========================
-   Modern YoY chart
-========================== */
+/* Keep the same chart structure, only modernize its finish. */
 
-.modern-year-chart-card {
-  padding: 20px 20px 16px;
-  border-color: #e7e7e7;
+.year-chart-card {
   border-radius: 14px;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.03),
-    0 10px 28px rgba(15, 23, 42, 0.035);
-}
-
-.modern-year-chart-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 16px;
-}
-
-.modern-chart-kicker {
-  display: block;
-  margin-bottom: 5px;
-  color: #a3a3a3;
-  font-size: 8px;
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.modern-year-chart-heading h2 {
-  margin: 0;
-  color: #18181b;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.modern-year-chart-heading p {
-  margin: 5px 0 0;
-  color: #8a8a8a;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.modern-chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
-  padding-top: 3px;
-}
-
-.modern-chart-legend > div {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #737373;
-  font-size: 9px;
-  font-weight: 600;
-}
-
-.legend-swatch {
-  display: block;
-  width: 9px;
-  height: 9px;
-  border-radius: 3px;
-}
-
-.legend-swatch.revenue {
-  background: #18181b;
-}
-
-.legend-line {
-  position: relative;
-  display: block;
-  width: 18px;
-  height: 8px;
-}
-
-.legend-line::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 0;
-  left: 0;
-  height: 2px;
-  transform: translateY(-50%);
-  border-radius: 999px;
-}
-
-.legend-line::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  transform: translate(-50%, -50%);
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-}
-
-.legend-line.income::before,
-.legend-line.income::after {
-  background: #7c3aed;
-}
-
-.modern-chart-summary {
-  display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-  margin-bottom: 10px;
-  overflow: hidden;
-  border: 1px solid #eeeeee;
-  border-radius: 9px;
-  background: #fafafa;
-}
-
-.modern-chart-summary > div {
-  min-width: 0;
-  padding: 10px 12px;
-}
-
-.modern-chart-summary > div + div {
-  border-left: 1px solid #eeeeee;
-}
-
-.modern-chart-summary span {
-  display: block;
-  margin-bottom: 4px;
-  color: #a3a3a3;
-  font-size: 8px;
-  font-weight: 650;
-}
-
-.modern-chart-summary strong {
-  display: block;
-  color: #262626;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+    0 1px 2px rgba(16, 24, 40, 0.025),
+    0 8px 20px rgba(16, 24, 40, 0.025);
 }
 
 .year-chart-container {
@@ -279,60 +146,16 @@
   height: 390px;
 }
 
-.modern-chart-container {
-  height: 360px;
-  margin-top: 2px;
+.year-chart-container .recharts-cartesian-grid-horizontal line {
+  stroke: #edf1f5;
 }
 
-.modern-chart-tooltip {
-  min-width: 220px;
-  padding: 11px 12px;
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(10px);
+.year-chart-container .recharts-legend-item {
+  margin-right: 18px !important;
 }
 
-.modern-chart-tooltip-year {
-  margin-bottom: 8px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid #f0f0f0;
-  color: #171717;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.modern-chart-tooltip-row {
-  display: grid;
-  grid-template-columns:
-    7px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 7px;
-  min-height: 25px;
-  color: #737373;
-  font-size: 9px;
-}
-
-.modern-chart-tooltip-row strong {
-  color: #262626;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.modern-chart-tooltip-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.modern-chart-tooltip-dot.revenue {
-  background: #18181b;
-}
-
-.modern-chart-tooltip-dot.income {
-  background: #7c3aed;
+.year-chart-container .recharts-legend-item-text {
+  color: #667085 !important;
 }
 
 .empty-state {
@@ -365,16 +188,6 @@
   .comparison-filter-grid {
     grid-template-columns: 1fr;
   }
-
-  .modern-year-chart-heading {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .modern-chart-legend {
-    justify-content: flex-start;
-  }
 }
 
 @media (max-width: 650px) {
@@ -387,21 +200,7 @@
     width: 100%;
   }
 
-  .modern-chart-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .modern-chart-summary > div + div {
-    border-top: 1px solid #eeeeee;
-    border-left: 0;
-  }
-
-  .year-chart-container,
-  .modern-chart-container {
-    height: 320px;
-  }
-
-  .modern-year-chart-card {
-    padding: 14px 12px 12px;
+  .year-chart-container {
+    height: 330px;
   }
 }
