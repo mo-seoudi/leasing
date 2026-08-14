@@ -1,21 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { formatCurrency } from "../../lib/dashboardData";
 import "./ProgrammeDetailView.css";
 
 const MONTHS = [
-  "September",
-  "October",
-  "November",
-  "December",
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
+  "September", "October", "November", "December",
+  "January", "February", "March", "April",
+  "May", "June", "July", "August",
 ];
 
 const MONTH_LABELS = {
@@ -34,80 +29,52 @@ const MONTH_LABELS = {
 };
 
 const TERM_MONTHS = {
-  "Term 1": [
-    "September",
-    "October",
-    "November",
-    "December",
-  ],
-  "Term 2": [
-    "January",
-    "February",
-    "March",
-  ],
-  "Term 3": [
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-  ],
+  "Term 1": ["September", "October", "November", "December"],
+  "Term 2": ["January", "February", "March"],
+  "Term 3": ["April", "May", "June", "July", "August"],
 };
 
 const MEASURES = [
-  {
-    key: "sales",
-    label: "Sales",
-    type: "detail",
-  },
-  {
-    key: "commission",
-    label: "Commission",
-    type: "detail",
-  },
-  {
-    key: "rentalFees",
-    label: "Rental Fees",
-    type: "detail",
-  },
-  {
-    key: "totalRevenue",
-    label: "Total Revenue",
-    type: "main",
-  },
-  {
-    key: "schoolIncome",
-    label: "School Income",
-    type: "main",
-  },
+  { key: "sales", label: "Sales" },
+  { key: "commission", label: "Commission" },
+  { key: "rentalFees", label: "Rental Fees" },
+  { key: "totalRevenue", label: "Total Revenue", emphasis: true },
+  { key: "schoolIncome", label: "School Income", emphasis: true },
 ];
 
 function toNumber(value) {
   const number = Number(value);
-
   return Number.isFinite(number) ? number : 0;
 }
 
 function formatDisplayValue(value) {
   const number = toNumber(value);
+  return number === 0 ? "—" : formatCurrency(number);
+}
 
-  return number === 0 ? "-" : formatCurrency(number);
+function formatPeriodValue(value, viewMode) {
+  const number = toNumber(value);
+
+  if (number === 0) {
+    return "—";
+  }
+
+  if (viewMode === "monthly") {
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 0,
+    }).format(number);
+  }
+
+  return formatCurrency(number);
 }
 
 function normaliseMonth(month) {
-  if (!month) {
-    return "";
-  }
+  if (!month) return "";
 
   const rawValue = String(month).trim();
-
-  const isoDateMatch = rawValue.match(
-    /^(\d{4})-(\d{2})-(\d{2})$/
-  );
+  const isoDateMatch = rawValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (isoDateMatch) {
-    const monthNumber = Number(isoDateMatch[2]);
-
     const monthsByNumber = {
       1: "January",
       2: "February",
@@ -123,25 +90,16 @@ function normaliseMonth(month) {
       12: "December",
     };
 
-    return monthsByNumber[monthNumber] || "";
+    return monthsByNumber[Number(isoDateMatch[2])] || "";
   }
 
   const parsedDate = new Date(rawValue);
 
   if (!Number.isNaN(parsedDate.getTime())) {
     return [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April",
+      "May", "June", "July", "August",
+      "September", "October", "November", "December",
     ][parsedDate.getUTCMonth()];
   }
 
@@ -190,31 +148,20 @@ function createEmptyMeasures() {
 function finishMeasures(measures) {
   return {
     ...measures,
-    totalRevenue:
-      measures.sales + measures.rentalFees,
-    schoolIncome:
-      measures.commission + measures.rentalFees,
+    totalRevenue: measures.sales + measures.rentalFees,
+    schoolIncome: measures.commission + measures.rentalFees,
   };
 }
 
 function addRecord(measures, record) {
   const amount = toNumber(record.amount);
 
-  switch (record.incomeType) {
-    case "Sales":
-      measures.sales += amount;
-      break;
-
-    case "Commission":
-      measures.commission += amount;
-      break;
-
-    case "Rental Fees":
-      measures.rentalFees += amount;
-      break;
-
-    default:
-      break;
+  if (record.incomeType === "Sales") {
+    measures.sales += amount;
+  } else if (record.incomeType === "Commission") {
+    measures.commission += amount;
+  } else if (record.incomeType === "Rental Fees") {
+    measures.rentalFees += amount;
   }
 }
 
@@ -222,17 +169,14 @@ function getTermFromMonth(month) {
   const normalisedMonth = normaliseMonth(month);
 
   return (
-    Object.entries(TERM_MONTHS).find(
-      ([, months]) =>
-        months.includes(normalisedMonth)
+    Object.entries(TERM_MONTHS).find(([, months]) =>
+      months.includes(normalisedMonth)
     )?.[0] || "Unallocated"
   );
 }
 
 function getLatestAcademicYear(years) {
-  if (years.length === 0) {
-    return "";
-  }
+  if (years.length === 0) return "";
 
   return [...years].sort((a, b) =>
     String(a).localeCompare(String(b))
@@ -245,60 +189,41 @@ export default function ProgrammeDetailView({
   onClose,
 }) {
   const programmeSourceRecords = useMemo(
-    () =>
-      records.filter(
-        (record) => record.program === programme
-      ),
+    () => records.filter((record) => record.program === programme),
     [records, programme]
   );
 
   const availableSchools = useMemo(
     () =>
-      [
-        ...new Set(
-          programmeSourceRecords
-            .map((record) => record.school)
-            .filter(Boolean)
-        ),
-      ].sort((a, b) =>
-        String(a).localeCompare(String(b))
-      ),
+      [...new Set(
+        programmeSourceRecords
+          .map((record) => record.school)
+          .filter(Boolean)
+      )].sort((a, b) => String(a).localeCompare(String(b))),
     [programmeSourceRecords]
   );
 
   const availableAcademicYears = useMemo(
     () =>
-      [
-        ...new Set(
-          programmeSourceRecords
-            .map((record) => record.academicYear)
-            .filter(Boolean)
-        ),
-      ].sort((a, b) =>
-        String(a).localeCompare(String(b))
-      ),
+      [...new Set(
+        programmeSourceRecords
+          .map((record) => record.academicYear)
+          .filter(Boolean)
+      )].sort((a, b) => String(a).localeCompare(String(b))),
     [programmeSourceRecords]
   );
 
   const latestAcademicYear = useMemo(
-    () =>
-      getLatestAcademicYear(
-        availableAcademicYears
-      ),
+    () => getLatestAcademicYear(availableAcademicYears),
     [availableAcademicYears]
   );
 
-  const [viewMode, setViewMode] =
-    useState("termly");
-
-  const [mobilePeriod, setMobilePeriod] =
-    useState("");
-
-  const [detailFilters, setDetailFilters] =
-    useState(() => ({
-      school: "",
-      academicYear: latestAcademicYear,
-    }));
+  const [viewMode, setViewMode] = useState("termly");
+  const [mobilePeriod, setMobilePeriod] = useState("");
+  const [detailFilters, setDetailFilters] = useState(() => ({
+    school: "",
+    academicYear: latestAcademicYear,
+  }));
 
   const programmeRecords = useMemo(
     () =>
@@ -312,8 +237,7 @@ export default function ProgrammeDetailView({
 
         if (
           detailFilters.academicYear &&
-          record.academicYear !==
-            detailFilters.academicYear
+          record.academicYear !== detailFilters.academicYear
         ) {
           return false;
         }
@@ -329,20 +253,15 @@ export default function ProgrammeDetailView({
 
   const monthlyData = useMemo(() => {
     const grouped = Object.fromEntries(
-      MONTHS.map((month) => [
-        month,
-        createEmptyMeasures(),
-      ])
+      MONTHS.map((month) => [month, createEmptyMeasures()])
     );
 
     programmeRecords.forEach((record) => {
       const month = normaliseMonth(record.month);
 
-      if (!month || !grouped[month]) {
-        return;
+      if (month && grouped[month]) {
+        addRecord(grouped[month], record);
       }
-
-      addRecord(grouped[month], record);
     });
 
     return MONTHS.map((month) => ({
@@ -361,57 +280,26 @@ export default function ProgrammeDetailView({
     };
 
     programmeRecords.forEach((record) => {
-      const recordTerm =
+      const term =
         record.term && grouped[record.term]
           ? record.term
           : getTermFromMonth(record.month);
 
-      if (!grouped[recordTerm]) {
-        return;
+      if (grouped[term]) {
+        addRecord(grouped[term], record);
       }
-
-      addRecord(grouped[recordTerm], record);
     });
 
-    return Object.entries(grouped).map(
-      ([term, measures]) => ({
-        period: term,
-        label: term,
-        mobileLabel: term,
-        ...finishMeasures(measures),
-      })
-    );
+    return Object.entries(grouped).map(([period, measures]) => ({
+      period,
+      label: period,
+      mobileLabel: period,
+      ...finishMeasures(measures),
+    }));
   }, [programmeRecords]);
 
   const displayedPeriods =
-    viewMode === "monthly"
-      ? monthlyData
-      : termlyData;
-
-  useEffect(() => {
-    if (displayedPeriods.length === 0) {
-      setMobilePeriod("");
-      return;
-    }
-
-    const currentStillExists =
-      displayedPeriods.some(
-        (period) =>
-          period.period === mobilePeriod
-      );
-
-    if (!currentStillExists) {
-      setMobilePeriod(
-        displayedPeriods[0].period
-      );
-    }
-  }, [displayedPeriods, mobilePeriod]);
-
-  const selectedMobilePeriod =
-    displayedPeriods.find(
-      (period) =>
-        period.period === mobilePeriod
-    ) || displayedPeriods[0];
+    viewMode === "monthly" ? monthlyData : termlyData;
 
   const totals = useMemo(() => {
     const measures = createEmptyMeasures();
@@ -423,78 +311,94 @@ export default function ProgrammeDetailView({
     return finishMeasures(measures);
   }, [programmeRecords]);
 
-  function handleDetailFilterChange(
-    name,
-    value
-  ) {
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () =>
+      window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (displayedPeriods.length === 0) {
+      setMobilePeriod("");
+      return;
+    }
+
+    if (
+      !displayedPeriods.some(
+        (period) => period.period === mobilePeriod
+      )
+    ) {
+      setMobilePeriod(displayedPeriods[0].period);
+    }
+  }, [displayedPeriods, mobilePeriod]);
+
+  const selectedMobilePeriod =
+    displayedPeriods.find(
+      (period) => period.period === mobilePeriod
+    ) || displayedPeriods[0];
+
+  function handleDetailFilterChange(name, value) {
     setDetailFilters((current) => ({
       ...current,
       [name]: value,
     }));
   }
 
+  const matrixGridTemplate =
+    viewMode === "monthly"
+      ? "110px repeat(12, 60px) 100px"
+      : "118px repeat(3, minmax(92px, 1fr)) 104px";
+
   return (
-    <section className="programme-detail-panel">
-      <header className="programme-detail-header">
-        <div className="programme-detail-title">
-          <span className="programme-detail-eyebrow">
+    <section className="programme-detail-option2">
+      <header className="programme-detail-option2-header">
+        <div>
+          <span className="programme-detail-option2-kicker">
             Programme details
           </span>
-
           <h2>{programme}</h2>
-
-          <p>
-            Detailed income figures by school,
-            academic year, month, or term.
-          </p>
         </div>
 
         <button
           type="button"
-          className="programme-detail-close"
+          className="programme-detail-option2-close"
           onClick={onClose}
+          aria-label="Close programme details"
+          title="Close"
         >
-          Close details
+          ×
         </button>
       </header>
 
-      <div className="programme-detail-controls">
-        <div className="programme-detail-filters">
-          <div className="programme-detail-filter">
-            <label htmlFor="detail-school">
-              School
-            </label>
-
+      <div className="programme-detail-option2-toolbar">
+        <div className="programme-detail-option2-filters">
+          <label>
+            <span>School</span>
             <select
-              id="detail-school"
               value={detailFilters.school}
               onChange={(event) =>
-                handleDetailFilterChange(
-                  "school",
-                  event.target.value
-                )
+                handleDetailFilterChange("school", event.target.value)
               }
             >
               <option value="">All Schools</option>
-
               {availableSchools.map((school) => (
-                <option
-                  key={school}
-                  value={school}
-                >
+                <option key={school} value={school}>
                   {school}
                 </option>
               ))}
             </select>
-          </div>
+          </label>
 
-          <div className="programme-detail-filter">
-            <label htmlFor="detail-academic-year">
-              Academic Year
-            </label>
-
+          <label>
+            <span>Academic Year</span>
             <select
-              id="detail-academic-year"
               value={detailFilters.academicYear}
               onChange={(event) =>
                 handleDetailFilterChange(
@@ -503,238 +407,183 @@ export default function ProgrammeDetailView({
                 )
               }
             >
-              <option value="">
-                All Academic Years
-              </option>
-
-              {availableAcademicYears.map(
-                (academicYear) => (
-                  <option
-                    key={academicYear}
-                    value={academicYear}
-                  >
-                    {academicYear}
-                  </option>
-                )
-              )}
+              <option value="">All Academic Years</option>
+              {availableAcademicYears.map((academicYear) => (
+                <option
+                  key={academicYear}
+                  value={academicYear}
+                >
+                  {academicYear}
+                </option>
+              ))}
             </select>
-          </div>
+          </label>
         </div>
 
-        <div
-          className="programme-detail-tabs"
-          aria-label="Programme detail view"
-        >
+        <div className="programme-detail-option2-switch">
           <button
             type="button"
-            className={
-              viewMode === "termly"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setViewMode("termly")
-            }
+            className={viewMode === "termly" ? "active" : ""}
+            onClick={() => setViewMode("termly")}
           >
             Termly
           </button>
 
           <button
             type="button"
-            className={
-              viewMode === "monthly"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setViewMode("monthly")
-            }
+            className={viewMode === "monthly" ? "active" : ""}
+            onClick={() => setViewMode("monthly")}
           >
             Monthly
           </button>
         </div>
       </div>
 
-      <div className="programme-detail-summary">
-        <div className="main-summary">
+      <div className="programme-detail-option2-metrics">
+        <div className="headline">
           <span>Total Revenue</span>
-
-          <strong>
-            {formatDisplayValue(
-              totals.totalRevenue
-            )}
-          </strong>
-
-          <small>Sales + Rental Fees</small>
+          <strong>{formatDisplayValue(totals.totalRevenue)}</strong>
         </div>
 
-        <div className="main-summary">
+        <div className="headline">
           <span>School Income</span>
-
-          <strong>
-            {formatDisplayValue(
-              totals.schoolIncome
-            )}
-          </strong>
-
-          <small>
-            Commission + Rental Fees
-          </small>
+          <strong>{formatDisplayValue(totals.schoolIncome)}</strong>
         </div>
 
-        <div className="secondary-summary">
+        <div>
           <span>Sales</span>
-
-          <strong>
-            {formatDisplayValue(totals.sales)}
-          </strong>
+          <strong>{formatDisplayValue(totals.sales)}</strong>
         </div>
 
-        <div className="secondary-summary">
+        <div>
           <span>Commission</span>
-
-          <strong>
-            {formatDisplayValue(
-              totals.commission
-            )}
-          </strong>
+          <strong>{formatDisplayValue(totals.commission)}</strong>
         </div>
 
-        <div className="rental-summary secondary-summary">
+        <div>
           <span>Rental Fees</span>
-
-          <strong>
-            {formatDisplayValue(
-              totals.rentalFees
-            )}
-          </strong>
+          <strong>{formatDisplayValue(totals.rentalFees)}</strong>
         </div>
       </div>
 
       <div
         className={
           viewMode === "monthly"
-            ? "programme-detail-table-scroll monthly"
-            : "programme-detail-table-scroll termly"
+            ? "programme-detail-option2-matrix-wrap monthly"
+            : "programme-detail-option2-matrix-wrap termly"
         }
       >
-        <table className="programme-detail-table">
-          <thead>
-            <tr>
-              <th>Measure</th>
+        <div
+          className="programme-detail-option2-matrix"
+          style={{
+            gridTemplateColumns: matrixGridTemplate,
+          }}
+        >
+          <div className="programme-detail-option2-matrix-header label">
+            Measure
+          </div>
 
-              {displayedPeriods.map((period) => (
-                <th key={period.period}>
-                  {period.label}
-                </th>
-              ))}
+          {displayedPeriods.map((period) => (
+            <div
+              key={`header-${period.period}`}
+              className="programme-detail-option2-matrix-header"
+            >
+              {period.label}
+            </div>
+          ))}
 
-              <th>Total</th>
-            </tr>
-          </thead>
+          <div className="programme-detail-option2-matrix-header total-header">
+            Total
+          </div>
 
-          <tbody>
-            {MEASURES.map((measure) => (
-              <tr
-                key={measure.key}
-                className={
-                  measure.type === "main"
-                    ? "main-measure-row"
-                    : ""
-                }
+          {MEASURES.flatMap((measure) => {
+            const rowClass = measure.emphasis
+              ? " emphasis"
+              : "";
+
+            return [
+              <div
+                key={`label-${measure.key}`}
+                className={`programme-detail-option2-matrix-label${rowClass}`}
               >
-                <th>{measure.label}</th>
+                {measure.label}
+              </div>,
 
-                {displayedPeriods.map(
-                  (period) => (
-                    <td
-                      key={`${measure.key}-${period.period}`}
-                    >
-                      {formatDisplayValue(
-                        period[measure.key]
-                      )}
-                    </td>
-                  )
-                )}
-
-                <td className="detail-total-cell">
-                  {formatDisplayValue(
-                    totals[measure.key]
+              ...displayedPeriods.map((period) => (
+                <div
+                  key={`${measure.key}-${period.period}`}
+                  className={`programme-detail-option2-matrix-value${rowClass}`}
+                >
+                  {formatPeriodValue(
+                    period[measure.key],
+                    viewMode
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              )),
+
+              <div
+                key={`total-${measure.key}`}
+                className={`programme-detail-option2-matrix-value total${rowClass}`}
+              >
+                {formatDisplayValue(
+                  totals[measure.key]
+                )}
+              </div>,
+            ];
+          })}
+        </div>
       </div>
 
-      <div className="programme-detail-mobile-periods">
-        <div className="programme-detail-mobile-period-tabs">
+      <div className="programme-detail-option2-mobile">
+        <div className="programme-detail-option2-period-tabs">
           {displayedPeriods.map((period) => (
             <button
               key={period.period}
               type="button"
               className={
-                selectedMobilePeriod?.period ===
-                period.period
+                selectedMobilePeriod?.period === period.period
                   ? "active"
                   : ""
               }
-              onClick={() =>
-                setMobilePeriod(period.period)
-              }
+              onClick={() => setMobilePeriod(period.period)}
             >
               {viewMode === "monthly"
                 ? period.label
-                : period.period.replace(
-                    "Term ",
-                    "T"
-                  )}
+                : period.period.replace("Term ", "T")}
             </button>
           ))}
         </div>
 
         {selectedMobilePeriod && (
-          <article className="programme-detail-mobile-card">
-            <header>
-              <div>
-                <span>
-                  {viewMode === "monthly"
-                    ? "Month"
-                    : "Reporting period"}
-                </span>
+          <div className="programme-detail-option2-mobile-card">
+            <div className="programme-detail-option2-mobile-title">
+              <span>
+                {viewMode === "monthly"
+                  ? "Month"
+                  : "Reporting period"}
+              </span>
+              <strong>{selectedMobilePeriod.mobileLabel}</strong>
+            </div>
 
+            {MEASURES.map((measure) => (
+              <div
+                key={`${selectedMobilePeriod.period}-${measure.key}`}
+                className={
+                  measure.emphasis
+                    ? "programme-detail-option2-mobile-row emphasis"
+                    : "programme-detail-option2-mobile-row"
+                }
+              >
+                <span>{measure.label}</span>
                 <strong>
-                  {
-                    selectedMobilePeriod.mobileLabel
-                  }
+                  {formatPeriodValue(
+                    selectedMobilePeriod[measure.key],
+                    viewMode
+                  )}
                 </strong>
               </div>
-            </header>
-
-            <div className="programme-detail-mobile-values">
-              {MEASURES.map((measure) => (
-                <div
-                  key={`${selectedMobilePeriod.period}-${measure.key}`}
-                  className={
-                    measure.type === "main"
-                      ? "programme-detail-mobile-row main"
-                      : "programme-detail-mobile-row"
-                  }
-                >
-                  <span>{measure.label}</span>
-
-                  <strong>
-                    {formatDisplayValue(
-                      selectedMobilePeriod[
-                        measure.key
-                      ]
-                    )}
-                  </strong>
-                </div>
-              ))}
-            </div>
-          </article>
+            ))}
+          </div>
         )}
       </div>
     </section>

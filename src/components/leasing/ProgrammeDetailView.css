@@ -1,867 +1,439 @@
-.programme-detail-panel {
-  width: 100%;
-  max-width: none;
-  margin: 8px 0;
+.programme-detail-option2 {
+  width: min(100%, 900px);
+  margin: 10px 0;
   padding: 14px;
-  min-width: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
   background: #ffffff;
-  border: 1px solid #dcdfe4;
-  border-radius: 10px;
   box-shadow:
-    0 1px 2px rgba(16, 24, 40, 0.03),
-    0 8px 22px rgba(16, 24, 40, 0.05);
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 14px 34px rgba(15, 23, 42, 0.055);
 }
 
-/* Header */
-
-.programme-detail-header {
+.programme-detail-option2-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 11px;
 }
 
-.programme-detail-title {
-  min-width: 0;
-  text-align: left;
-}
-
-.programme-detail-eyebrow {
+.programme-detail-option2-kicker {
   display: block;
-  margin-bottom: 4px;
-  color: #7c3aed;
-  font-size: 9px;
+  margin-bottom: 3px;
+  color: #8b5cf6;
+  font-size: 8px;
   font-weight: 750;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
-.programme-detail-header h2 {
+.programme-detail-option2-header h2 {
   margin: 0;
-  overflow: hidden;
   color: #171717;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.programme-detail-header p {
-  margin: 4px 0 0;
-  color: #737373;
-  font-size: 10px;
-  line-height: 1.45;
-}
-
-.programme-detail-close {
-  min-height: 32px;
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  border: 1px solid #e5e5e5;
+.programme-detail-option2-close {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: 7px;
-  background: #ffffff;
-  color: #525252;
+  background: transparent;
+  color: #a3a3a3;
   font: inherit;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
   cursor: pointer;
   transition:
-    background 130ms ease,
-    border-color 130ms ease,
-    color 130ms ease;
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
 }
 
-.programme-detail-close:hover {
-  border-color: #d4d4d4;
-  background: #fafafa;
-  color: #171717;
+.programme-detail-option2-close:hover {
+  border-color: #eeeeee;
+  background: #f7f7f7;
+  color: #262626;
 }
 
-.programme-detail-close:focus-visible {
-  outline: 2px solid #a3a3a3;
+.programme-detail-option2-close:focus-visible {
+  outline: 2px solid #c4b5fd;
   outline-offset: 2px;
 }
 
-/* Filters + view switch */
+/* Compact toolbar */
 
-.programme-detail-controls {
+.programme-detail-option2-toolbar {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 10px;
 }
 
-.programme-detail-filters {
+.programme-detail-option2-filters {
   display: grid;
   grid-template-columns:
-    repeat(2, minmax(145px, 190px));
-  gap: 10px;
+    repeat(2, minmax(150px, 190px));
+  gap: 8px;
 }
 
-.programme-detail-filter {
+.programme-detail-option2-filters label {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 4px;
-  text-align: left;
+  gap: 3px;
 }
 
-.programme-detail-filter label {
+.programme-detail-option2-filters label > span {
   color: #737373;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 650;
 }
 
-.programme-detail-filter select {
+.programme-detail-option2-filters select {
   width: 100%;
-  min-height: 34px;
-  padding: 6px 30px 6px 9px;
+  min-height: 32px;
+  padding: 5px 26px 5px 8px;
   border: 1px solid #e5e5e5;
   border-radius: 7px;
   background: #ffffff;
   color: #262626;
   font: inherit;
-  font-size: 10px;
+  font-size: 9px;
   outline: none;
 }
 
-.programme-detail-filter select:focus {
-  border-color: #a3a3a3;
-  box-shadow: 0 0 0 2px rgba(163, 163, 163, 0.12);
+.programme-detail-option2-filters select:focus {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.08);
 }
 
-.programme-detail-tabs {
+.programme-detail-option2-switch {
   display: inline-flex;
   flex: 0 0 auto;
   gap: 2px;
   padding: 3px;
-  border: 1px solid #eeeeee;
   border-radius: 8px;
-  background: #f5f5f5;
+  background: #f4f4f5;
 }
 
-.programme-detail-tabs button {
-  min-width: 76px;
-  min-height: 30px;
-  padding: 5px 10px;
+.programme-detail-option2-switch button {
+  min-width: 70px;
+  min-height: 28px;
+  padding: 4px 9px;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: #737373;
   font: inherit;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 650;
   cursor: pointer;
 }
 
-.programme-detail-tabs button:hover {
-  color: #262626;
-}
-
-.programme-detail-tabs button.active {
+.programme-detail-option2-switch button.active {
   background: #ffffff;
   color: #171717;
   box-shadow:
-    0 1px 2px rgba(16, 24, 40, 0.08);
+    0 1px 2px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.03);
 }
 
-.programme-detail-tabs button:focus-visible {
-  outline: 2px solid #a3a3a3;
-  outline-offset: 1px;
-}
+/* KPI strip */
 
-/* Summary */
-
-.programme-detail-summary {
+.programme-detail-option2-metrics {
   display: grid;
   grid-template-columns:
-    repeat(5, minmax(140px, 1fr));
-  gap: 7px;
-  margin-bottom: 10px;
+    repeat(2, minmax(0, 1.15fr))
+    repeat(3, minmax(0, 0.9fr));
+  gap: 6px;
+  margin-bottom: 11px;
 }
 
-.programme-detail-summary > div {
-  display: flex;
+.programme-detail-option2-metrics > div {
   min-width: 0;
   min-height: 56px;
-  flex-direction: column;
-  justify-content: center;
-  padding: 7px 8px;
-  border: 1px solid #e8e8e8;
+  padding: 8px 9px;
+  border: 1px solid #eeeeee;
   border-radius: 8px;
   background: #fafafa;
-  text-align: left;
 }
 
-.programme-detail-summary .main-summary {
-  border-color: #ddd6fe;
-  background: #faf9ff;
+.programme-detail-option2-metrics > div.headline {
+  border-color: #e7e1ff;
+  background:
+    linear-gradient(
+      180deg,
+      #fcfbff 0%,
+      #f8f6ff 100%
+    );
 }
 
-.programme-detail-summary span {
+.programme-detail-option2-metrics span {
+  display: block;
+  margin-bottom: 4px;
   color: #737373;
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 650;
 }
 
-.programme-detail-summary strong {
-  margin-top: 4px;
+.programme-detail-option2-metrics strong {
+  display: block;
   overflow: hidden;
   color: #171717;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.programme-detail-summary .main-summary strong {
-  font-size: 14px;
-}
+/* =========================================================
+   Modern financial matrix
+   No boxed Excel-style grid. Each measure is a horizontal
+   analytics band, and each period reads as a compact value.
+   ========================================================= */
 
-.programme-detail-summary small {
-  margin-top: 3px;
-  overflow: hidden;
-  color: #a3a3a3;
-  font-size: 8px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Desktop/laptop detail table */
-
-.programme-detail-table-scroll {
+.programme-detail-option2-table-wrap {
   width: 100%;
-  max-width: 100%;
   overflow-x: auto;
-  overflow-y: visible;
-  overscroll-behavior-x: contain;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  background: #ffffff;
+  overflow-y: hidden;
+  padding: 5px;
+  border: 1px solid #ededed;
+  border-radius: 11px;
+  background: #fafafa;
   scrollbar-width: thin;
-  scrollbar-color: #cfcfcf #f5f5f5;
-  -webkit-overflow-scrolling: touch;
+  scrollbar-color: #c7c7c7 transparent;
 }
 
-.programme-detail-table-scroll::-webkit-scrollbar {
-  height: 8px;
+.programme-detail-option2-table-wrap::-webkit-scrollbar {
+  height: 7px;
 }
 
-.programme-detail-table-scroll::-webkit-scrollbar-track {
-  background: #f5f5f5;
+.programme-detail-option2-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.programme-detail-table-scroll::-webkit-scrollbar-thumb {
-  border: 2px solid #f5f5f5;
+.programme-detail-option2-table-wrap::-webkit-scrollbar-thumb {
+  border: 2px solid #fafafa;
   border-radius: 999px;
-  background: #cfcfcf;
+  background: #c7c7c7;
 }
 
-.programme-detail-table {
+.programme-detail-option2-table {
   width: 100%;
+  min-width: 560px;
   border-collapse: separate;
-  border-spacing: 0;
-  background: #ffffff;
-  font-size: 10px;
+  border-spacing: 0 4px;
+  table-layout: fixed;
+  font-size: 9px;
 }
 
-.programme-detail-table-scroll.termly
-  .programme-detail-table {
-  width: 100%;
-  min-width: 0;
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-table {
+  min-width: 980px;
+  table-layout: auto;
 }
 
-.programme-detail-table-scroll.monthly
-  .programme-detail-table {
-  width: 100%;
-  min-width: 1120px;
-}
+/* Header appears as labels floating above the bands. */
 
-.programme-detail-table th,
-.programme-detail-table td {
-  padding: 8px 9px;
-  border-right: 1px solid #eeeeee;
-  border-bottom: 1px solid #eeeeee;
+.programme-detail-option2-table thead th {
+  padding: 4px 8px 5px;
+  border: 0;
+  background: transparent;
+  color: #8a8a8a;
+  font-size: 8px;
+  font-weight: 650;
   text-align: center;
   white-space: nowrap;
 }
 
-.programme-detail-table th:last-child,
-.programme-detail-table td:last-child {
+.programme-detail-option2-table thead th:first-child {
+  min-width: 122px;
+  text-align: left;
+}
+
+/* Each row becomes a modern rounded band. */
+
+.programme-detail-option2-table tbody th,
+.programme-detail-option2-table tbody td {
+  height: 34px;
+  padding: 7px 9px;
+  border-top: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
   border-right: 0;
+  border-left: 0;
+  background: #ffffff;
+  color: #525252;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.programme-detail-table tbody tr:last-child th,
-.programme-detail-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.programme-detail-table thead th {
-  background: #fafafa;
-  color: #737373;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.programme-detail-table th:first-child {
+.programme-detail-option2-table tbody th {
   position: sticky;
   left: 0;
   z-index: 2;
-  min-width: 100px;
-  background: #ffffff;
-  color: #404040;
+  min-width: 122px;
+  border-left: 1px solid #eeeeee;
+  border-radius: 8px 0 0 8px;
+  color: #262626;
+  font-size: 9px;
+  font-weight: 650;
   text-align: left;
 }
 
-.programme-detail-table thead th:first-child {
-  z-index: 3;
-  background: #fafafa;
+.programme-detail-option2-table tbody td:last-child {
+  border-right: 1px solid #eeeeee;
+  border-radius: 0 8px 8px 0;
 }
 
-.programme-detail-table tbody tr:hover td,
-.programme-detail-table tbody tr:hover th {
+.programme-detail-option2-table tbody tr:hover th,
+.programme-detail-option2-table tbody tr:hover td {
+  border-color: #e4e4e7;
   background: #fcfcfc;
 }
 
-.programme-detail-table .main-measure-row th,
-.programme-detail-table .main-measure-row td {
+.programme-detail-option2-table tr.emphasis th,
+.programme-detail-option2-table tr.emphasis td {
+  border-color: #ebe7fb;
   background: #faf9ff;
-  color: #262626;
+  color: #27272a;
   font-weight: 700;
 }
 
-.programme-detail-table
-  .main-measure-row
-  th:first-child {
-  background: #f7f5ff;
+/*
+ * Total is presented as a subtle summary chip/cell instead of
+ * a spreadsheet-like yellow column.
+ */
+.programme-detail-option2-table td.total {
+  background: #f3f4f6;
+  color: #171717;
+  font-weight: 750;
 }
 
-.detail-total-cell {
-  background: #fff9db !important;
-  color: #171717 !important;
-  font-weight: 750 !important;
-  text-align: center !important;
+.programme-detail-option2-table tr.emphasis td.total {
+  background: #ede9fe;
 }
 
-/* Mobile-only period cards */
+/* Monthly period values are intentionally just numbers.
+   The Total column retains AED through formatDisplayValue(). */
 
-.programme-detail-mobile-periods {
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-table
+  tbody
+  td:not(.total) {
+  color: #525252;
+  font-size: 9px;
+}
+
+/* Mobile alternative */
+
+.programme-detail-option2-mobile {
   display: none;
 }
 
-/* Expanded row compatibility */
-
-.programme-expanded-row .programme-detail-panel,
-.programme-directory-expanded-row
-  .programme-detail-panel {
-  margin: 8px;
-}
-
-.programme-expanded-row
-  .programme-detail-table
-  th,
-.programme-expanded-row
-  .programme-detail-table
-  td,
-.programme-directory-expanded-row
-  .programme-detail-table
-  th,
-.programme-directory-expanded-row
-  .programme-detail-table
-  td {
-  text-align: center;
-}
-
-.programme-expanded-row
-  .programme-detail-table
-  th:first-child,
-.programme-directory-expanded-row
-  .programme-detail-table
-  th:first-child {
-  text-align: left;
-}
-
-/* Laptop / tablet */
-
-@media (max-width: 1250px) {
-  .programme-detail-panel {
+@media (max-width: 900px) {
+  .programme-detail-option2 {
     width: 100%;
-    max-width: none;
-    padding: 12px;
+    margin: 8px 0;
   }
 
-  .programme-detail-header {
-    margin-bottom: 9px;
-  }
-
-  .programme-detail-controls {
-    gap: 7px;
-  }
-
-  .programme-detail-summary {
+  .programme-detail-option2-metrics {
     grid-template-columns:
       repeat(3, minmax(0, 1fr));
-    gap: 6px;
   }
+}
 
-  .programme-detail-summary > div {
-    min-height: 54px;
-  }
-
-  .programme-detail-summary .main-summary {
-    grid-column: span 1;
-  }
-
-  .programme-detail-summary .rental-summary {
-    grid-column: auto;
-  }
-
-  .programme-detail-table-scroll.termly
-    .programme-detail-table {
+@media (max-width: 720px) {
+  .programme-detail-option2 {
     width: 100%;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 1080px) and (min-width: 821px) {
-  .programme-detail-table-scroll.termly
-    .programme-detail-table {
-    min-width: 620px;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns:
-      repeat(3, minmax(140px, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .programme-detail-panel {
-    width: 100%;
-    max-width: none;
-  }
-
-  .programme-detail-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .programme-detail-filters {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .programme-detail-tabs {
-    display: flex;
-    width: 100%;
-  }
-
-  .programme-detail-tabs button {
-    flex: 1;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .programme-detail-summary .main-summary {
-    grid-column: span 1;
-  }
-
-  .programme-detail-summary .rental-summary {
-    grid-column: span 2;
-  }
-}
-
-/* Mobile */
-
-@media (max-width: 820px) {
-  .programme-detail-panel {
-    width: 100%;
-    max-width: none;
-    margin: 0 auto;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: none;
-  }
-
-  .programme-detail-header {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr) auto;
-    align-items: start;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-
-  .programme-detail-header h2 {
-    font-size: 16px;
-    white-space: normal;
-  }
-
-  .programme-detail-header p {
-    max-width: 34ch;
-    font-size: 9px;
-  }
-
-  .programme-detail-eyebrow {
-    font-size: 8px;
-  }
-
-  .programme-detail-close {
-    min-height: 30px;
-    padding: 5px 8px;
-    font-size: 9px;
-  }
-
-  .programme-detail-controls {
-    margin-bottom: 10px;
-  }
-
-  .programme-detail-filters {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .programme-detail-filter select {
-    min-height: 36px;
-    font-size: 11px;
-  }
-
-  .programme-detail-tabs button {
-    min-height: 32px;
-    font-size: 10px;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .programme-detail-summary > div {
-    min-height: 50px;
-    padding: 7px 8px;
-  }
-
-  .programme-detail-summary
-    .main-summary {
-    grid-column: auto;
-  }
-
-  .programme-detail-summary
-    .rental-summary {
-    grid-column: span 2;
-  }
-
-  .programme-detail-summary span {
-    font-size: 8px;
-  }
-
-  .programme-detail-summary strong,
-  .programme-detail-summary
-    .main-summary
-    strong {
-    font-size: 12px;
-  }
-
-  .programme-detail-summary small {
-    font-size: 7px;
-  }
-
-  .programme-detail-table-scroll {
-    display: none;
-  }
-
-  .programme-detail-mobile-periods {
-    display: grid;
-    gap: 9px;
-  }
-
-  .programme-detail-period-card {
-    overflow: hidden;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .programme-detail-period-card > header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 7px 8px;
-    border-bottom: 1px solid #eeeeee;
-    background: #fafafa;
-  }
-
-  .programme-detail-period-card
-    > header
-    span {
-    color: #a3a3a3;
-    font-size: 8px;
-    font-weight: 650;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .programme-detail-period-card
-    > header
-    strong {
-    color: #171717;
-    font-size: 11px;
-  }
-
-  .programme-detail-period-values {
-    padding: 3px 8px 5px;
-  }
-
-  .programme-detail-period-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    min-height: 27px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .programme-detail-period-row:last-child {
-    border-bottom: 0;
-  }
-
-  .programme-detail-period-row span {
-    color: #737373;
-    font-size: 9px;
-  }
-
-  .programme-detail-period-row strong {
-    color: #262626;
-    font-size: 10px;
-    font-weight: 650;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .programme-detail-period-row.main {
-    margin-inline: -10px;
-    padding-inline: 10px;
-    background: #faf9ff;
-  }
-
-  .programme-detail-period-row.main span,
-  .programme-detail-period-row.main strong {
-    color: #171717;
-    font-weight: 700;
-  }
-}
-
-@media (max-width: 390px) {
-  .programme-detail-panel {
-    padding: 10px;
-  }
-
-  .programme-detail-header {
-    grid-template-columns: 1fr;
-  }
-
-  .programme-detail-close {
-    justify-self: start;
-  }
-}
-
-
-@media (max-width: 480px) {
-  .programme-detail-panel {
-    max-width: 100%;
-    padding: 8px;
-  }
-
-  .programme-detail-header {
-    grid-template-columns: 1fr;
-  }
-
-  .programme-detail-close {
-    justify-self: start;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .programme-detail-summary .rental-summary {
-    grid-column: span 2;
-  }
-
-  .programme-detail-period-card {
-    border-radius: 7px;
-  }
-
-  .programme-detail-period-row span {
-    font-size: 8px;
-  }
-
-  .programme-detail-period-row strong {
-    font-size: 9px;
-  }
-}
-
-
-/* =========================================================
-   MOBILE V3
-   A genuinely compact phone experience:
-   - only 2 headline KPIs
-   - period selector instead of a long stack of cards
-   - one financial card visible at a time
-   ========================================================= */
-
-@media (max-width: 820px) {
-  .programme-detail-panel {
-    width: 100%;
-    max-width: 100%;
     margin: 0;
-    padding: 10px;
-    border: 0;
-    border-radius: 0;
+    padding: 9px;
+    border-radius: 9px;
     box-shadow: none;
-    background: #ffffff;
   }
 
-  .programme-detail-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .programme-detail-header h2 {
-    font-size: 15px;
-    line-height: 1.2;
-  }
-
-  .programme-detail-header p {
-    display: none;
-  }
-
-  .programme-detail-eyebrow {
-    margin-bottom: 3px;
-    font-size: 7px;
-  }
-
-  .programme-detail-close {
-    min-height: 28px;
-    padding: 4px 7px;
-    font-size: 8px;
-  }
-
-  .programme-detail-controls {
-    gap: 8px;
+  .programme-detail-option2-header {
     margin-bottom: 8px;
   }
 
-  .programme-detail-filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+  .programme-detail-option2-header h2 {
+    font-size: 14px;
   }
 
-  .programme-detail-filter {
-    gap: 3px;
+  .programme-detail-option2-close {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+    font-size: 18px;
   }
 
-  .programme-detail-filter label {
-    font-size: 8px;
+  .programme-detail-option2-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
   }
 
-  .programme-detail-filter select {
-    min-height: 32px;
-    padding: 5px 24px 5px 7px;
-    font-size: 9px;
-    border-radius: 6px;
+  .programme-detail-option2-filters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
-  .programme-detail-tabs {
+  .programme-detail-option2-switch {
+    display: flex;
     width: 100%;
-    padding: 2px;
-    border-radius: 7px;
   }
 
-  .programme-detail-tabs button {
-    min-height: 30px;
-    min-width: 0;
-    padding: 4px 7px;
-    font-size: 9px;
+  .programme-detail-option2-switch button {
+    flex: 1;
   }
 
-  /* Only the two useful headline KPIs remain on mobile. */
-  .programme-detail-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    margin-bottom: 9px;
+  .programme-detail-option2-metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 8px;
   }
 
-  .programme-detail-summary > div {
-    min-height: 54px;
-    padding: 8px;
+  .programme-detail-option2-metrics
+    > div:nth-child(5) {
+    grid-column: span 2;
   }
 
-  .programme-detail-summary
-    .secondary-summary {
+  .programme-detail-option2-table-wrap {
     display: none;
   }
 
-  .programme-detail-summary
-    .main-summary {
-    grid-column: auto;
-  }
-
-  .programme-detail-summary span {
-    font-size: 7px;
-  }
-
-  .programme-detail-summary strong,
-  .programme-detail-summary
-    .main-summary
-    strong {
-    margin-top: 3px;
-    font-size: 13px;
-  }
-
-  .programme-detail-summary small {
-    margin-top: 2px;
-    font-size: 6px;
-  }
-
-  .programme-detail-table-scroll {
-    display: none;
-  }
-
-  .programme-detail-mobile-periods {
+  .programme-detail-option2-mobile {
     display: block;
   }
 
-  .programme-detail-mobile-period-tabs {
+  .programme-detail-option2-period-tabs {
     display: flex;
     gap: 5px;
     width: 100%;
-    margin-bottom: 7px;
-    padding-bottom: 2px;
+    margin-bottom: 6px;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
   }
 
-  .programme-detail-mobile-period-tabs::-webkit-scrollbar {
+  .programme-detail-option2-period-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .programme-detail-mobile-period-tabs button {
-    min-width: 42px;
-    min-height: 28px;
+  .programme-detail-option2-period-tabs button {
+    min-width: 40px;
+    min-height: 27px;
     flex: 0 0 auto;
     padding: 4px 8px;
     border: 1px solid #e5e5e5;
@@ -871,262 +443,97 @@
     font: inherit;
     font-size: 8px;
     font-weight: 650;
-    cursor: pointer;
   }
 
-  .programme-detail-mobile-period-tabs button.active {
-    border-color: #171717;
-    background: #171717;
+  .programme-detail-option2-period-tabs button.active {
+    border-color: #18181b;
+    background: #18181b;
     color: #ffffff;
   }
 
-  .programme-detail-mobile-card {
+  .programme-detail-option2-mobile-card {
+    width: 100%;
     overflow: hidden;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .programme-detail-mobile-card > header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 38px;
-    padding: 7px 9px;
-    border-bottom: 1px solid #eeeeee;
+    border: 1px solid #e8e8e8;
+    border-radius: 9px;
     background: #fafafa;
   }
 
-  .programme-detail-mobile-card > header > div {
+  .programme-detail-option2-mobile-title {
     display: flex;
-    align-items: baseline;
-    gap: 8px;
+    min-height: 34px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 8px;
   }
 
-  .programme-detail-mobile-card
-    > header
-    span {
+  .programme-detail-option2-mobile-title span {
     color: #a3a3a3;
     font-size: 7px;
     font-weight: 650;
-    letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
-  .programme-detail-mobile-card
-    > header
-    strong {
+  .programme-detail-option2-mobile-title strong {
     color: #171717;
-    font-size: 11px;
+    font-size: 10px;
   }
 
-  .programme-detail-mobile-values {
-    padding: 2px 9px 4px;
-  }
-
-  .programme-detail-mobile-row {
-    display: flex;
-    min-height: 30px;
+  .programme-detail-option2-mobile-row {
+    display: grid;
+    grid-template-columns:
+      minmax(105px, 135px)
+      max-content;
+    justify-content: start;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid #f1f1f1;
+    column-gap: 12px;
+    min-height: 30px;
+    margin: 0 5px 4px;
+    padding: 0 8px;
+    border: 1px solid #eeeeee;
+    border-radius: 7px;
+    background: #ffffff;
   }
 
-  .programme-detail-mobile-row:last-child {
-    border-bottom: 0;
-  }
-
-  .programme-detail-mobile-row span {
+  .programme-detail-option2-mobile-row span {
     color: #737373;
     font-size: 8px;
   }
 
-  .programme-detail-mobile-row strong {
+  .programme-detail-option2-mobile-row strong {
     color: #262626;
     font-size: 9px;
     font-weight: 650;
+    text-align: left;
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
-  .programme-detail-mobile-row.main {
-    margin-inline: -9px;
-    padding-inline: 9px;
+  .programme-detail-option2-mobile-row.emphasis {
+    border-color: #ebe7fb;
     background: #faf9ff;
   }
 
-  .programme-detail-mobile-row.main span,
-  .programme-detail-mobile-row.main strong {
+  .programme-detail-option2-mobile-row.emphasis span,
+  .programme-detail-option2-mobile-row.emphasis strong {
     color: #171717;
     font-weight: 700;
   }
 }
 
-@media (max-width: 480px) {
-  .programme-detail-panel {
+@media (max-width: 420px) {
+  .programme-detail-option2 {
     padding: 8px;
   }
 
-  .programme-detail-header {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .programme-detail-option2-filters {
+    grid-template-columns: 1fr;
   }
 
-  .programme-detail-close {
-    justify-self: auto;
-  }
-
-  .programme-detail-filters {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .programme-detail-mobile-period-tabs button {
-    min-width: 40px;
-    padding-inline: 7px;
-  }
-}
-
-
-/* =========================================================
-   MOBILE V4 - compact value alignment
-   Keeps values close to their labels instead of pushing them
-   to the far-right edge of a full-width financial card.
-   ========================================================= */
-
-@media (max-width: 820px) {
-  .programme-detail-mobile-card {
-    width: 100%;
-    max-width: 390px;
-    margin-right: auto;
-    margin-left: 0;
-  }
-
-  .programme-detail-mobile-card > header {
-    width: 100%;
-  }
-
-  .programme-detail-mobile-values {
-    width: 100%;
-    padding: 2px 8px 4px;
-  }
-
-  .programme-detail-mobile-row {
-    display: grid;
+  .programme-detail-option2-mobile-row {
     grid-template-columns:
-      minmax(110px, 1.15fr)
-      minmax(100px, 0.85fr);
-    align-items: center;
-    justify-content: start;
-    column-gap: 12px;
-    min-height: 29px;
-    width: 100%;
-  }
-
-  .programme-detail-mobile-row span {
-    min-width: 0;
-    text-align: left;
-  }
-
-  .programme-detail-mobile-row strong {
-    min-width: 0;
-    text-align: left;
-    justify-self: start;
-    white-space: nowrap;
-  }
-
-  .programme-detail-mobile-row.main {
-    margin-inline: -8px;
-    padding-inline: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .programme-detail-mobile-card {
-    max-width: 340px;
-  }
-
-  .programme-detail-mobile-row {
-    grid-template-columns:
-      minmax(100px, 1fr)
-      minmax(92px, 0.78fr);
-    column-gap: 10px;
-  }
-}
-
-@media (max-width: 370px) {
-  .programme-detail-mobile-card {
-    max-width: 310px;
-  }
-
-  .programme-detail-mobile-row {
-    grid-template-columns:
-      minmax(92px, 1fr)
-      minmax(86px, 0.75fr);
-    column-gap: 8px;
-  }
-}
-
-
-/* =========================================================
-   MOBILE V5 - full screen width, compact internal columns
-   The card fills the available phone width, but the label/value
-   content does not stretch to opposite edges.
-   ========================================================= */
-
-@media (max-width: 820px) {
-  .programme-detail-mobile-card {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-  }
-
-  .programme-detail-mobile-values {
-    width: 100%;
-  }
-
-  .programme-detail-mobile-row {
-    display: grid;
-    grid-template-columns:
-      minmax(105px, 145px)
-      max-content;
-    justify-content: start;
-    align-items: center;
-    column-gap: 14px;
-    width: 100%;
-  }
-
-  .programme-detail-mobile-row span {
-    text-align: left;
-  }
-
-  .programme-detail-mobile-row strong {
-    justify-self: start;
-    text-align: left;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 480px) {
-  .programme-detail-mobile-card {
-    width: 100%;
-    max-width: none;
-  }
-
-  .programme-detail-mobile-row {
-    grid-template-columns:
-      minmax(96px, 132px)
-      max-content;
-    column-gap: 12px;
-  }
-}
-
-@media (max-width: 370px) {
-  .programme-detail-mobile-row {
-    grid-template-columns:
-      minmax(88px, 120px)
+      minmax(96px, 122px)
       max-content;
     column-gap: 10px;
   }
@@ -1134,74 +541,331 @@
 
 
 /* =========================================================
-   FLUID DESKTOP / LARGE MONITOR
-   Let the detail panel use the full available directory width.
-   Internal content adapts instead of capping the panel itself.
+   OPTION 2 - COMPACT / ALIGNED MATRIX
+   Explicit column geometry fixes month/term misalignment and
+   keeps the detail card intentionally concise.
    ========================================================= */
 
-@media (min-width: 1251px) {
-  .programme-detail-panel {
+.programme-detail-option2 {
+  width: min(100%, 780px);
+}
+
+/*
+ * Do not let cell content decide column widths.
+ * Header and body now share the same colgroup widths.
+ */
+.programme-detail-option2-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.programme-detail-option2-measure-col {
+  width: 118px;
+}
+
+.programme-detail-option2-total-col {
+  width: 104px;
+}
+
+/* Termly: three compact, equal period columns. */
+.programme-detail-option2-table-wrap:not(.monthly)
+  .programme-detail-option2-period-col {
+  width: 126px;
+}
+
+/* Monthly: fixed equal-width months; scroll only inside the matrix. */
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-table {
+  width: 882px;
+  min-width: 882px;
+  table-layout: fixed;
+}
+
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-measure-col {
+  width: 116px;
+}
+
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-period-col {
+  width: 55px;
+}
+
+.programme-detail-option2-table-wrap.monthly
+  .programme-detail-option2-total-col {
+  width: 106px;
+}
+
+/* Exact same padding/alignment for headings and values. */
+.programme-detail-option2-table thead th,
+.programme-detail-option2-table tbody td {
+  padding-right: 6px;
+  padding-left: 6px;
+  text-align: center;
+}
+
+.programme-detail-option2-table thead th:first-child,
+.programme-detail-option2-table tbody th {
+  padding-right: 8px;
+  padding-left: 9px;
+  text-align: left;
+}
+
+/* Total is a compact summary cell, not a large terminal block. */
+.programme-detail-option2-table td.total {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+/* Slightly tighter matrix bands. */
+.programme-detail-option2-table tbody th,
+.programme-detail-option2-table tbody td {
+  height: 32px;
+}
+
+/* Make the KPI strip match the narrower card. */
+.programme-detail-option2-metrics {
+  grid-template-columns:
+    repeat(2, minmax(0, 1.08fr))
+    repeat(3, minmax(0, 0.84fr));
+}
+
+.programme-detail-option2-metrics > div {
+  min-height: 52px;
+  padding: 7px 8px;
+}
+
+.programme-detail-option2-metrics strong {
+  font-size: 11px;
+}
+
+/* Normal laptop: preserve concise width, only become fluid when needed. */
+@media (max-width: 900px) and (min-width: 721px) {
+  .programme-detail-option2 {
+    width: min(100%, 720px);
+  }
+
+  .programme-detail-option2-table-wrap:not(.monthly)
+    .programme-detail-option2-period-col {
+    width: 112px;
+  }
+
+  .programme-detail-option2-measure-col {
+    width: 110px;
+  }
+
+  .programme-detail-option2-total-col {
+    width: 98px;
+  }
+}
+
+/* Mobile remains screen-width and uses the dedicated mobile view. */
+@media (max-width: 720px) {
+  .programme-detail-option2 {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+
+
+/* =========================================================
+   OPTION 2 - RESULTS MATRIX (RESTORED)
+   All headers and values are direct children of one CSS grid.
+   This guarantees exact vertical alignment and keeps the
+   results visible in both Termly and Monthly modes.
+   ========================================================= */
+
+.programme-detail-option2 {
+  width: min(100%, 760px);
+}
+
+/* The legacy HTML table is no longer used. */
+.programme-detail-option2-table-wrap,
+.programme-detail-option2-table {
+  display: none !important;
+}
+
+.programme-detail-option2-matrix-wrap {
+  display: block !important;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 5px;
+  border: 1px solid #ededed;
+  border-radius: 11px;
+  background: #fafafa;
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.programme-detail-option2-matrix-wrap::-webkit-scrollbar {
+  height: 7px;
+}
+
+.programme-detail-option2-matrix-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.programme-detail-option2-matrix-wrap::-webkit-scrollbar-thumb {
+  border: 2px solid #fafafa;
+  border-radius: 999px;
+  background: #bdbdbd;
+}
+
+.programme-detail-option2-matrix {
+  display: grid !important;
+  grid-auto-flow: row;
+  width: 100%;
+  column-gap: 0;
+  row-gap: 4px;
+  align-items: stretch;
+}
+
+/* Termly stays compact. */
+.programme-detail-option2-matrix-wrap.termly
+  .programme-detail-option2-matrix {
+  min-width: 548px;
+}
+
+/* Monthly uses equal month tracks and scrolls only inside this area. */
+.programme-detail-option2-matrix-wrap.monthly
+  .programme-detail-option2-matrix {
+  width: 930px;
+  min-width: 930px;
+}
+
+.programme-detail-option2-matrix-header {
+  display: flex;
+  height: 28px;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  color: #737373;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.programme-detail-option2-matrix-header.label {
+  justify-content: flex-start;
+  padding-left: 9px;
+  text-align: left;
+}
+
+.programme-detail-option2-matrix-header.total-header {
+  color: #525252;
+}
+
+.programme-detail-option2-matrix-label,
+.programme-detail-option2-matrix-value {
+  display: flex;
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  border-top: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  background: #ffffff;
+}
+
+.programme-detail-option2-matrix-label {
+  justify-content: flex-start;
+  padding: 0 9px;
+  border-left: 1px solid #eeeeee;
+  border-radius: 8px 0 0 8px;
+  color: #262626;
+  font-size: 9px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.programme-detail-option2-matrix-value {
+  justify-content: center;
+  padding: 0 5px;
+  color: #525252;
+  font-size: 9px;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.programme-detail-option2-matrix-value.total {
+  padding: 0 7px;
+  border-right: 1px solid #eeeeee;
+  border-radius: 0 8px 8px 0;
+  background: #f3f4f6;
+  color: #171717;
+  font-weight: 750;
+}
+
+.programme-detail-option2-matrix-label.emphasis,
+.programme-detail-option2-matrix-value.emphasis {
+  border-color: #ebe7fb;
+  background: #faf9ff;
+  color: #171717;
+  font-weight: 700;
+}
+
+.programme-detail-option2-matrix-value.total.emphasis {
+  background: #ede9fe;
+}
+
+/* Keep the top summary concise. */
+.programme-detail-option2-metrics {
+  grid-template-columns:
+    repeat(2, minmax(0, 1.05fr))
+    repeat(3, minmax(0, 0.8fr));
+}
+
+.programme-detail-option2-metrics > div {
+  min-height: 50px;
+  padding: 7px 8px;
+}
+
+.programme-detail-option2-metrics strong {
+  font-size: 11px;
+}
+
+@media (max-width: 900px) and (min-width: 721px) {
+  .programme-detail-option2 {
+    width: min(100%, 700px);
+  }
+
+  .programme-detail-option2-matrix-wrap.termly
+    .programme-detail-option2-matrix {
+    min-width: 520px;
+  }
+}
+
+@media (max-width: 720px) {
+  .programme-detail-option2 {
     width: 100%;
     max-width: none;
   }
 
-  .programme-detail-controls {
-    width: 100%;
-  }
-
-  .programme-detail-summary {
-    grid-template-columns:
-      repeat(5, minmax(140px, 1fr));
-  }
-
-  .programme-detail-table-scroll.termly {
-    overflow-x: visible;
-  }
-
-  .programme-detail-table-scroll.termly
-    .programme-detail-table {
-    width: 100%;
-    min-width: 0;
-    table-layout: fixed;
-  }
-
-  .programme-detail-table-scroll.termly
-    .programme-detail-table
-    th:first-child {
-    width: 19%;
-  }
-
-  .programme-detail-table-scroll.termly
-    .programme-detail-table
-    th:not(:first-child),
-  .programme-detail-table-scroll.termly
-    .programme-detail-table
-    td:not(:first-child) {
-    width: 20.25%;
+  .programme-detail-option2-matrix-wrap {
+    display: none !important;
   }
 }
 
-@media (min-width: 1600px) {
-  .programme-detail-panel {
-    padding: 16px;
-  }
 
-  .programme-detail-summary > div {
-    min-height: 60px;
-  }
+/* =========================================================
+   LEFT-ALIGNED EXPANDED DETAIL CARD
+   Align the programme detail card with the programme-name
+   column instead of centering it inside the full table row.
+   ========================================================= */
 
-  .programme-detail-summary strong {
-    font-size: 14px;
-  }
+.programme-detail-option2 {
+  margin-left: 0;
+  margin-right: auto;
+}
 
-  .programme-detail-summary
-    .main-summary
-    strong {
-    font-size: 15px;
-  }
-
-  .programme-detail-table th,
-  .programme-detail-table td {
-    padding: 8px 10px;
+@media (min-width: 721px) {
+  .programme-detail-option2 {
+    justify-self: start;
   }
 }
