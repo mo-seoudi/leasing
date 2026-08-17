@@ -1,17 +1,83 @@
 import uniformData from "../data/uniform-data.json";
 
-const MONTH_ORDER = [9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8];
+const FINANCE_MONTH_ORDER = [9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8];
+const BACK_TO_SCHOOL_MONTH_ORDER = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7];
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
 }
 
+function getMonthNumber(month) {
+  if (!month || typeof month !== "string") {
+    return 0;
+  }
+
+  return Number(month.slice(5, 7));
+}
+
+function getCalendarYear(month) {
+  if (!month || typeof month !== "string") {
+    return 0;
+  }
+
+  return Number(month.slice(0, 4));
+}
+
+function getBackToSchoolAcademicYear(month) {
+  const calendarYear = getCalendarYear(month);
+
+  if (!calendarYear) {
+    return "";
+  }
+
+  return `AY${calendarYear}-${String((calendarYear + 1) % 100).padStart(2, "0")}`;
+}
+
+function applyUniformYearBasis(record, yearBasis = "finance") {
+  if (yearBasis !== "backToSchool") {
+    return record;
+  }
+
+  const monthNumber = getMonthNumber(record.month);
+
+  if (monthNumber !== 8) {
+    return record;
+  }
+
+  return {
+    ...record,
+    academicYear:
+      getBackToSchoolAcademicYear(record.month) ||
+      record.academicYear,
+    term: "Term 1",
+    termOrder: 1,
+  };
+}
+
+function getMonthOrder(yearBasis = "finance") {
+  return yearBasis === "backToSchool"
+    ? BACK_TO_SCHOOL_MONTH_ORDER
+    : FINANCE_MONTH_ORDER;
+}
+
 export const uniformRecords = uniformData.records || [];
 export const uniformMetadata = uniformData.metadata || {};
 
-export const uniformAcademicYears = unique(
-  uniformRecords.map((record) => record.academicYear)
-).sort((a, b) => a.localeCompare(b));
+export function getUniformAcademicYears(yearBasis = "finance") {
+  return unique(
+    uniformRecords.map(
+      (record) =>
+        applyUniformYearBasis(record, yearBasis).academicYear
+    )
+  ).sort((a, b) => a.localeCompare(b));
+}
+
+/*
+ * Kept for backwards compatibility with pages that still use
+ * the official Finance basis.
+ */
+export const uniformAcademicYears =
+  getUniformAcademicYears("finance");
 
 export const uniformSchools = Object.entries(
   uniformMetadata.schools || {}
@@ -46,21 +112,45 @@ export function filterUniformRecords({
   school = "",
   term = "",
   scenario = "Actual",
+  yearBasis = "finance",
 } = {}) {
-  return uniformRecords.filter((record) => {
-    if (academicYear && record.academicYear !== academicYear) return false;
-    if (school && record.school !== school) return false;
-    if (term && record.term !== term) return false;
-    if (scenario && record.scenario !== scenario) return false;
-    return true;
-  });
+  return uniformRecords
+    .map((record) =>
+      applyUniformYearBasis(record, yearBasis)
+    )
+    .filter((record) => {
+      if (
+        academicYear &&
+        record.academicYear !== academicYear
+      ) {
+        return false;
+      }
+
+      if (school && record.school !== school) {
+        return false;
+      }
+
+      if (term && record.term !== term) {
+        return false;
+      }
+
+      if (scenario && record.scenario !== scenario) {
+        return false;
+      }
+
+      return true;
+    });
 }
 
-export function getMonthlyUniformData(records) {
+export function getMonthlyUniformData(
+  records,
+  yearBasis = "finance"
+) {
   const grouped = new Map();
 
   records.forEach((record) => {
     const key = `${record.academicYear}|${record.month}`;
+
     const current = grouped.get(key) || {
       key,
       academicYear: record.academicYear,
@@ -70,26 +160,44 @@ export function getMonthlyUniformData(records) {
       commission: 0,
     };
 
-    if (record.metric === "Sales") current.sales += Number(record.amount || 0);
-    if (record.metric === "Commission") current.commission += Number(record.amount || 0);
+    if (record.metric === "Sales") {
+      current.sales += Number(record.amount || 0);
+    }
+
+    if (record.metric === "Commission") {
+      current.commission += Number(record.amount || 0);
+    }
+
     grouped.set(key, current);
   });
+
+  const monthOrder = getMonthOrder(yearBasis);
 
   return [...grouped.values()]
     .map((item) => ({
       ...item,
-      commissionRate: item.sales ? (item.commission / item.sales) * 100 : 0,
+      commissionRate: item.sales
+        ? (item.commission / item.sales) * 100
+        : 0,
       label: new Intl.DateTimeFormat("en-GB", {
         month: "short",
         year: "2-digit",
       }).format(new Date(`${item.month}T00:00:00`)),
-      monthNumber: Number(item.month.slice(5, 7)),
-      yearNumber: Number(item.month.slice(0, 4)),
+      monthNumber: getMonthNumber(item.month),
+      yearNumber: getCalendarYear(item.month),
     }))
     .sort((a, b) => {
-      const ay = a.academicYear.localeCompare(b.academicYear);
-      if (ay !== 0) return ay;
-      return MONTH_ORDER.indexOf(a.monthNumber) - MONTH_ORDER.indexOf(b.monthNumber);
+      const ay =
+        a.academicYear.localeCompare(b.academicYear);
+
+      if (ay !== 0) {
+        return ay;
+      }
+
+      return (
+        monthOrder.indexOf(a.monthNumber) -
+        monthOrder.indexOf(b.monthNumber)
+      );
     });
 }
 
@@ -104,15 +212,23 @@ export function getSchoolUniformData(records) {
       commission: 0,
     };
 
-    if (record.metric === "Sales") current.sales += Number(record.amount || 0);
-    if (record.metric === "Commission") current.commission += Number(record.amount || 0);
+    if (record.metric === "Sales") {
+      current.sales += Number(record.amount || 0);
+    }
+
+    if (record.metric === "Commission") {
+      current.commission += Number(record.amount || 0);
+    }
+
     grouped.set(record.school, current);
   });
 
   return [...grouped.values()]
     .map((item) => ({
       ...item,
-      commissionRate: item.sales ? (item.commission / item.sales) * 100 : 0,
+      commissionRate: item.sales
+        ? (item.commission / item.sales) * 100
+        : 0,
     }))
     .sort((a, b) => b.sales - a.sales);
 }
@@ -128,15 +244,23 @@ export function getTermUniformData(records) {
       commission: 0,
     };
 
-    if (record.metric === "Sales") current.sales += Number(record.amount || 0);
-    if (record.metric === "Commission") current.commission += Number(record.amount || 0);
+    if (record.metric === "Sales") {
+      current.sales += Number(record.amount || 0);
+    }
+
+    if (record.metric === "Commission") {
+      current.commission += Number(record.amount || 0);
+    }
+
     grouped.set(record.term, current);
   });
 
   return [...grouped.values()]
     .map((item) => ({
       ...item,
-      commissionRate: item.sales ? (item.commission / item.sales) * 100 : 0,
+      commissionRate: item.sales
+        ? (item.commission / item.sales) * 100
+        : 0,
     }))
     .sort((a, b) => a.termOrder - b.termOrder);
 }
@@ -146,19 +270,33 @@ export function getUniformSummary(records) {
   let commission = 0;
 
   records.forEach((record) => {
-    if (record.metric === "Sales") sales += Number(record.amount || 0);
-    if (record.metric === "Commission") commission += Number(record.amount || 0);
+    if (record.metric === "Sales") {
+      sales += Number(record.amount || 0);
+    }
+
+    if (record.metric === "Commission") {
+      commission += Number(record.amount || 0);
+    }
   });
 
-  const months = unique(records.map((record) => record.month)).length;
-  const schools = unique(records.map((record) => record.school)).length;
+  const months = unique(
+    records.map((record) => record.month)
+  ).length;
+
+  const schools = unique(
+    records.map((record) => record.school)
+  ).length;
 
   return {
     sales,
     commission,
-    commissionRate: sales ? (commission / sales) * 100 : 0,
+    commissionRate: sales
+      ? (commission / sales) * 100
+      : 0,
     averageMonthlySales: months ? sales / months : 0,
-    averageMonthlyCommission: months ? commission / months : 0,
+    averageMonthlyCommission: months
+      ? commission / months
+      : 0,
     months,
     schools,
   };
