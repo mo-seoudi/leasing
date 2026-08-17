@@ -114,12 +114,7 @@ export default function CateringComparisonPage() {
     }));
   }
 
-  function clearFilters() {
-    setFilters({
-      school: "",
-      term: "",
-    });
-  }
+
 
   const selectedSchool =
     cateringSchools.find(
@@ -178,13 +173,7 @@ export default function CateringComparisonPage() {
           </select>
         </label>
 
-        <button
-          type="button"
-          className="header-clear-button"
-          onClick={clearFilters}
-        >
-          Clear
-        </button>
+
       </div>
     );
 
