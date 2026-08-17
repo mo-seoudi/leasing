@@ -14,13 +14,13 @@ import {
 } from "recharts";
 
 import {
-  uniformAcademicYears,
   uniformSchools,
   uniformTerms,
   filterUniformRecords,
   formatCompactCurrency,
   formatCurrency,
   formatPercentage,
+  getUniformAcademicYears,
   getUniformSummary,
   getMonthlyUniformData,
   getSchoolUniformData,
@@ -57,6 +57,14 @@ function CurrencyTooltip({ active, payload, label }) {
 
 export default function UniformDashboardPage() {
   const { setHeaderControls } = useOutletContext();
+
+  const [yearBasis, setYearBasis] = useState("finance");
+
+  const uniformAcademicYears = useMemo(
+    () => getUniformAcademicYears(yearBasis),
+    [yearBasis]
+  );
+
   const latestAcademicYear =
     uniformAcademicYears[uniformAcademicYears.length - 1] || "";
 
@@ -69,8 +77,12 @@ export default function UniformDashboardPage() {
   const [trendMetric, setTrendMetric] = useState("Sales");
 
   const filteredRecords = useMemo(
-    () => filterUniformRecords(filters),
-    [filters]
+    () =>
+      filterUniformRecords({
+        ...filters,
+        yearBasis,
+      }),
+    [filters, yearBasis]
   );
 
   const summary = useMemo(
@@ -79,8 +91,8 @@ export default function UniformDashboardPage() {
   );
 
   const monthlyData = useMemo(
-    () => getMonthlyUniformData(filteredRecords),
-    [filteredRecords]
+    () => getMonthlyUniformData(filteredRecords, yearBasis),
+    [filteredRecords, yearBasis]
   );
 
   const schoolData = useMemo(
@@ -95,6 +107,10 @@ export default function UniformDashboardPage() {
 
   function handleFilterChange(name, value) {
     setFilters((current) => ({ ...current, [name]: value }));
+  }
+
+  function handleYearBasisChange(nextBasis) {
+    setYearBasis(nextBasis);
   }
 
   function clearFilters() {
@@ -157,6 +173,33 @@ export default function UniformDashboardPage() {
           </select>
         </label>
 
+        <div className="uniform-year-basis-control">
+          <span>Academic Year Basis</span>
+
+          <div
+            className="uniform-year-basis-toggle"
+            aria-label="Academic year basis"
+          >
+            <button
+              type="button"
+              className={yearBasis === "finance" ? "active" : ""}
+              onClick={() => handleYearBasisChange("finance")}
+              title="Finance reporting: September to August"
+            >
+              Sep–Aug
+            </button>
+
+            <button
+              type="button"
+              className={yearBasis === "backToSchool" ? "active" : ""}
+              onClick={() => handleYearBasisChange("backToSchool")}
+              title="Back-to-school view: August to July"
+            >
+              Aug–Jul
+            </button>
+          </div>
+        </div>
+
         <button
           type="button"
           className="header-clear-button"
@@ -170,6 +213,8 @@ export default function UniformDashboardPage() {
     return () => setHeaderControls(null);
   }, [
     filters,
+    yearBasis,
+    uniformAcademicYears,
     setHeaderControls,
   ]);
 
@@ -244,7 +289,11 @@ export default function UniformDashboardPage() {
           <div className="uniform-card-heading">
             <div>
               <h2>Term Performance</h2>
-              <p>Financial reporting terms, including July and August in Term 3.</p>
+              <p>
+                {yearBasis === "finance"
+                  ? "Finance basis: September to August, with July and August in Term 3."
+                  : "Back-to-school basis: August to July, with August included in Term 1."}
+              </p>
             </div>
           </div>
 
@@ -327,7 +376,12 @@ export default function UniformDashboardPage() {
         <div className="uniform-card-heading">
           <div>
             <h2>Monthly Results</h2>
-            <p>Detailed sales, commission and effective rate for each month.</p>
+            <p>
+              Detailed sales, commission and effective rate for each month —{" "}
+              {yearBasis === "finance"
+                ? "Finance basis (Sep–Aug)."
+                : "Back-to-school basis (Aug–Jul)."}
+            </p>
           </div>
           <span className="uniform-record-count">{monthlyData.length} months</span>
         </div>

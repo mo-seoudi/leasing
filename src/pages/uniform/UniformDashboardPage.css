@@ -527,3 +527,63 @@
 
 /* Filters now live in the fixed platform header. */
 .uniform-dashboard-page { padding-top: 0; }
+
+
+/* ==========================
+   Academic Year Basis Toggle
+========================== */
+
+.uniform-year-basis-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 154px;
+}
+
+.uniform-year-basis-control > span {
+  color: #737373;
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.uniform-year-basis-toggle {
+  display: inline-flex;
+  min-height: 34px;
+  padding: 3px;
+  border: 1px solid #e5e5e5;
+  border-radius: 7px;
+  background: #f5f5f5;
+}
+
+.uniform-year-basis-toggle button {
+  min-width: 68px;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #737373;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.uniform-year-basis-toggle button:hover {
+  color: #262626;
+}
+
+.uniform-year-basis-toggle button.active {
+  background: #ffffff;
+  color: #171717;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.10);
+}
+
+@media (max-width: 800px) {
+  .uniform-year-basis-control {
+    min-width: 150px;
+  }
+}
