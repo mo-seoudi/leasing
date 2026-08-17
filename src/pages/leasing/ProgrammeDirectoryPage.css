@@ -1153,3 +1153,176 @@
 
 /* Directory filters now live in the fixed platform header. */
 .programme-directory-page { padding-top: 0; }
+
+
+/* ==========================
+   Programme Directory Header Refinements
+   - icon-only reset in fixed header
+   - search moved beside Table / Chart / Pie
+========================== */
+
+.header-reset-icon-button {
+  display: grid;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
+  align-self: flex-end;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #667085;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.header-reset-icon-button:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #344054;
+}
+
+.header-reset-icon-button:active {
+  transform: rotate(-12deg);
+}
+
+.header-reset-icon-button:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.18);
+  outline-offset: 2px;
+}
+
+.header-reset-icon-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.directory-header-controls {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.directory-list-actions {
+  display: flex;
+  min-width: 0;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.directory-list-search {
+  position: relative;
+  display: flex;
+  width: clamp(190px, 22vw, 290px);
+  min-width: 170px;
+  align-items: center;
+}
+
+.directory-list-search-icon {
+  position: absolute;
+  left: 10px;
+  z-index: 1;
+  display: grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  color: #98a2b3;
+  pointer-events: none;
+}
+
+.directory-list-search-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.directory-list-search input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 30px 6px 31px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-size: 10px;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.directory-list-search input::placeholder {
+  color: #98a2b3;
+}
+
+.directory-list-search input:hover {
+  border-color: #b8c0cc;
+}
+
+.directory-list-search input:focus {
+  border-color: #98a2b3;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(71, 84, 103, 0.08);
+}
+
+.directory-list-search:focus-within
+  .directory-list-search-icon {
+  color: #475467;
+}
+
+@media (max-width: 1100px) {
+  .directory-header-controls {
+    gap: 10px;
+  }
+
+  .directory-list-actions {
+    width: 100%;
+  }
+
+  .directory-list-search {
+    width: 100%;
+    flex: 1;
+  }
+
+  .directory-view-toggle {
+    align-self: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .directory-list-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .directory-list-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .directory-view-toggle {
+    width: 100%;
+  }
+
+  .header-reset-icon-button {
+    align-self: flex-end;
+  }
+}

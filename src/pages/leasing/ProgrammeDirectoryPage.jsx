@@ -507,6 +507,24 @@ function PieIcon() {
   );
 }
 
+function RefreshIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 6v5h-5" />
+      <path d="M19 11a7 7 0 1 0 1 5" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4 4" />
+    </svg>
+  );
+}
+
 function DirectoryPieCard({
   title,
   description,
@@ -943,24 +961,14 @@ export default function ProgrammeDirectoryPage() {
           </select>
         </label>
 
-        <label className="header-filter-control search">
-          <span>Search</span>
-          <input
-            type="search"
-            value={filters.searchText}
-            placeholder="Programme or provider"
-            onChange={(event) =>
-              handleFilterChange("searchText", event.target.value)
-            }
-          />
-        </label>
-
         <button
           type="button"
-          className="header-clear-button"
+          className="header-reset-icon-button"
           onClick={clearFilters}
+          aria-label="Reset filters"
+          title="Reset filters"
         >
-          Clear
+          <RefreshIcon />
         </button>
       </div>
     );
@@ -1050,11 +1058,31 @@ export default function ProgrammeDirectoryPage() {
               })}
             </div>
 
-            <div
-              className="directory-view-toggle"
-              role="group"
-              aria-label="Programme directory view"
-            >
+            <div className="directory-list-actions">
+              <label className="directory-list-search">
+                <span className="directory-list-search-icon">
+                  <SearchIcon />
+                </span>
+
+                <input
+                  type="search"
+                  value={filters.searchText}
+                  placeholder="Search programme or provider"
+                  aria-label="Search programme or provider"
+                  onChange={(event) =>
+                    handleFilterChange(
+                      "searchText",
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <div
+                className="directory-view-toggle"
+                role="group"
+                aria-label="Programme directory view"
+              >
               <button
                 type="button"
                 className={
@@ -1112,6 +1140,7 @@ export default function ProgrammeDirectoryPage() {
 
                 <span>Pie</span>
               </button>
+              </div>
             </div>
           </div>
         </div>
