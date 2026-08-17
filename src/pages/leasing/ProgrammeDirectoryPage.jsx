@@ -894,7 +894,7 @@ export default function ProgrammeDirectoryPage() {
 
   useEffect(() => {
     setHeaderControls(
-      <div className="header-page-filters">
+      <div className="header-page-filters programme-directory-header-filters">
         <label className="header-filter-control">
           <span>Academic Year</span>
           <select
