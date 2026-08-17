@@ -62,25 +62,6 @@ function GrowthValue({ value }) {
   );
 }
 
-function ComparisonTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) {
-    return null;
-  }
-
-  return (
-    <div className="uniform-comparison-tooltip">
-      <strong>{label}</strong>
-
-      {payload.map((item) => (
-        <div key={item.dataKey}>
-          <span>{item.name}</span>
-          <b>{formatCurrency(item.value)}</b>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function UniformComparisonPage() {
   const { setHeaderControls } = useOutletContext();
 
@@ -306,45 +287,96 @@ export default function UniformComparisonPage() {
               <BarChart
                 data={yearData}
                 margin={{
-                  top: 15,
+                  top: 18,
                   right: 20,
-                  left: 15,
-                  bottom: 10,
+                  left: 10,
+                  bottom: 8,
                 }}
+                barGap={8}
+                barCategoryGap="28%"
               >
                 <CartesianGrid
-                  strokeDasharray="3 3"
+                  stroke="#edf1f5"
+                  strokeDasharray="3 5"
                   vertical={false}
                 />
 
                 <XAxis
                   dataKey="academicYear"
-                  tick={{ fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#667085",
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}
+                  dy={8}
                 />
 
                 <YAxis
-                  tick={{ fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#98a2b3",
+                    fontSize: 11,
+                    fontWeight: 500,
+                  }}
                   tickFormatter={formatCompactCurrency}
                 />
 
                 <Tooltip
-                  content={<ComparisonTooltip />}
+                  cursor={{
+                    fill: "rgba(15, 23, 42, 0.025)",
+                  }}
+                  contentStyle={{
+                    border: "1px solid #e4e7ec",
+                    borderRadius: "10px",
+                    background: "#ffffff",
+                    boxShadow:
+                      "0 10px 26px rgba(16, 24, 40, 0.10)",
+                    padding: "10px 12px",
+                  }}
+                  labelStyle={{
+                    color: "#101828",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    marginBottom: "6px",
+                  }}
+                  itemStyle={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                  }}
+                  formatter={(value, name) => [
+                    formatCurrency(value),
+                    name,
+                  ]}
                 />
 
-                <Legend />
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{
+                    paddingTop: "12px",
+                    color: "#667085",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                  }}
+                />
 
                 <Bar
                   dataKey="sales"
                   name="Sales"
-                  fill="#1679a7"
-                  radius={[4, 4, 0, 0]}
+                  fill="#2f80ed"
+                  radius={[8, 8, 2, 2]}
+                  maxBarSize={58}
                 />
 
                 <Bar
                   dataKey="commission"
                   name="Commission"
-                  fill="#d85f1b"
-                  radius={[4, 4, 0, 0]}
+                  fill="#f2994a"
+                  radius={[8, 8, 2, 2]}
+                  maxBarSize={58}
                 />
               </BarChart>
             </ResponsiveContainer>
