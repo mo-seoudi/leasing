@@ -36,7 +36,7 @@ export default function ProgrammeTable({
             <thead>
               <tr>
                 <th>Programme</th>
-                <th>Group</th>
+                <th>Category</th>
                 <th>Provider</th>
                 <th className="number-cell">Sales</th>
                 <th className="number-cell">Commission</th>

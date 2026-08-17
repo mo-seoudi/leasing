@@ -209,7 +209,7 @@ export default function ProgrammeDirectoryTable({
               <tr>
                 <th>Programme</th>
                 <th>Provider</th>
-                <th>Programme Group</th>
+                <th>Category</th>
                 <th>Total Revenue</th>
                 <th>School Income</th>
                 <th>% of Revenue</th>

@@ -58,7 +58,7 @@ export default function DashboardFilters({
 
         <div className="filter">
 
-          <label>Programme Group</label>
+          <label>Category</label>
 
           <select
             value={filters.programGroup}
@@ -66,7 +66,7 @@ export default function DashboardFilters({
               onChange("programGroup", e.target.value)
             }
           >
-            <option value="">All Groups</option>
+            <option value="">All Leasing</option>
 
             {programmeGroups.map((group) => (
               <option key={group} value={group}>
