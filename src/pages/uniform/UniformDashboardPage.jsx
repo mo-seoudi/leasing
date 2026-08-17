@@ -174,7 +174,7 @@ export default function UniformDashboardPage() {
         </label>
 
         <div className="uniform-year-basis-control">
-          <span>Academic Year Basis</span>
+          <span>Uniform Year Basis</span>
 
           <div
             className="uniform-year-basis-toggle"
@@ -200,13 +200,6 @@ export default function UniformDashboardPage() {
           </div>
         </div>
 
-        <button
-          type="button"
-          className="header-clear-button"
-          onClick={clearFilters}
-        >
-          Clear
-        </button>
       </div>
     );
 
