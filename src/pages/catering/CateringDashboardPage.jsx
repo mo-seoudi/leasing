@@ -97,13 +97,7 @@ export default function CateringDashboardPage() {
     setFilters((current) => ({ ...current, [name]: value }));
   }
 
-  function clearFilters() {
-    setFilters({
-      academicYear: latestAcademicYear,
-      school: "",
-      term: "",
-    });
-  }
+
 
   const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
 
@@ -157,13 +151,7 @@ export default function CateringDashboardPage() {
           </select>
         </label>
 
-        <button
-          type="button"
-          className="header-clear-button"
-          onClick={clearFilters}
-        >
-          Clear
-        </button>
+
       </div>
     );
 
