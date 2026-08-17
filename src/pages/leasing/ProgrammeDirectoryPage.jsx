@@ -73,7 +73,7 @@ const AGGREGATE_TABS = [
   },
   {
     key: "all-groups",
-    label: "All Groups",
+    label: "All Leasing",
     programGroup: "",
   },
 ];
@@ -930,14 +930,14 @@ export default function ProgrammeDirectoryPage() {
         </label>
 
         <label className="header-filter-control">
-          <span>Group</span>
+          <span>Category</span>
           <select
             value={filters.programGroup}
             onChange={(event) =>
               handleFilterChange("programGroup", event.target.value)
             }
           >
-            <option value="">All Groups</option>
+            <option value="">All Leasing</option>
             {programmeGroups.map((group) => (
               <option key={group} value={group}>{group}</option>
             ))}
@@ -1249,7 +1249,7 @@ export default function ProgrammeDirectoryPage() {
                 <tr>
                   <th>Programme</th>
                   <th>Provider</th>
-                  <th>Programme Group</th>
+                  <th>Category</th>
                   <th>Total Revenue</th>
                   <th>School Income</th>
                   <th>% of Revenue</th>

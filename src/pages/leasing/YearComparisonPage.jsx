@@ -162,7 +162,7 @@ export default function YearComparisonPage() {
         </label>
 
         <label className="header-filter-control wide">
-          <span>Programme Group</span>
+          <span>Category</span>
 
           <select
             value={filters.programGroup}
@@ -173,7 +173,7 @@ export default function YearComparisonPage() {
               )
             }
           >
-            <option value="">All Groups</option>
+            <option value="">All Leasing</option>
 
             {programmeGroups.map((group) => (
               <option key={group} value={group}>
