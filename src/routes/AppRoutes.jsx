@@ -10,10 +10,7 @@ import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
 import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
 import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
-
-function SettingsPage() {
-  return <h1>Settings</h1>;
-}
+import SettingsPage from "../pages/settings/SettingsPage";
 
 export default function AppRoutes() {
   return (
