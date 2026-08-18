@@ -1,0 +1,147 @@
+.settings-page {
+  width: min(100%, 820px);
+}
+
+.settings-card {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.settings-card-header {
+  padding: 20px 22px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.settings-card-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.settings-card-header p {
+  margin: 5px 0 0;
+  color: #737373;
+  font-size: 11px;
+}
+
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.settings-avatar {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 50%;
+  background: #171717;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.settings-profile-copy {
+  min-width: 0;
+}
+
+.settings-profile-copy strong {
+  display: block;
+  color: #171717;
+  font-size: 14px;
+}
+
+.settings-profile-copy span {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #737373;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-details {
+  padding: 4px 22px;
+}
+
+.settings-detail-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.settings-detail-row:last-child {
+  border-bottom: 0;
+}
+
+.settings-detail-row span {
+  color: #737373;
+  font-size: 11px;
+}
+
+.settings-detail-row strong {
+  color: #262626;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 22px;
+  border-top: 1px solid #eeeeee;
+  background: #fafafa;
+}
+
+.settings-signout-button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #d4d4d4;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #262626;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.settings-signout-button:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.settings-signout-button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+@media (max-width: 640px) {
+  .settings-card-header,
+  .settings-profile,
+  .settings-details,
+  .settings-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .settings-detail-row {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .settings-actions {
+    justify-content: stretch;
+  }
+
+  .settings-signout-button {
+    width: 100%;
+  }
+}
