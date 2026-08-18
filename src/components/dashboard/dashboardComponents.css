@@ -32,14 +32,16 @@
 
 .dashboard-record-count { flex:0 0 auto; padding:5px 8px; border-radius:999px; background:#f2f4f7; color:#667085; font-size:9px; font-weight:700; }
 .dashboard-table-scroll { width:100%; overflow-x:auto; }
-.dashboard-results-table { width:100%; min-width:690px; border-collapse:collapse; }
+.dashboard-results-table { width:100%; min-width:690px; border-collapse:collapse; table-layout:fixed; }
 .dashboard-results-table th,
-.dashboard-results-table td { padding:10px 12px; border-bottom:1px solid #eaecf0; color:#344054; font-size:10px; text-align:left; white-space:nowrap; }
+.dashboard-results-table td { padding:10px 12px; border-bottom:1px solid #eaecf0; color:#344054; font-size:10px; line-height:1.35; text-align:left; white-space:nowrap; vertical-align:middle; font-variant-numeric:tabular-nums; }
 .dashboard-results-table thead th { color:#667085; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; background:#f9fafb; }
-.dashboard-results-table .dashboard-numeric-cell { text-align:right; }
-.dashboard-results-table tfoot th { background:#f9fafb; color:#101828; font-weight:800; }
-.dashboard-results-table tfoot th:first-child { text-align:left; }
+.dashboard-results-table thead .dashboard-numeric-cell,
+.dashboard-results-table tbody .dashboard-numeric-cell,
 .dashboard-results-table tfoot .dashboard-numeric-cell { text-align:right; }
+.dashboard-results-table tfoot th { padding-top:11px; padding-bottom:11px; background:#f9fafb; color:#101828; border-bottom:0; font-family:inherit; font-size:10px; line-height:1.35; font-weight:700; letter-spacing:0; text-transform:none; }
+.dashboard-results-table tfoot .dashboard-total-label { text-align:left; }
+.dashboard-results-table tfoot .dashboard-total-value { color:#101828; font-family:inherit; font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
 .dashboard-empty-state { padding:30px 16px; text-align:center; color:#98a2b3; font-size:11px; }
 
 .dashboard-results-pagination { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding-top:12px; }
