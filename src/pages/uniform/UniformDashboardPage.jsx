@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
   Bar,
@@ -69,6 +69,7 @@ export default function UniformDashboardPage() {
     term: "",
   });
   const [trendMetric, setTrendMetric] = useState("Sales");
+  const hasInitialisedAcademicYear = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -109,13 +110,18 @@ export default function UniformDashboardPage() {
     uniformAcademicYears[uniformAcademicYears.length - 1] || "";
 
   useEffect(() => {
-    if (!filters.academicYear && latestAcademicYear) {
+    if (
+      !hasInitialisedAcademicYear.current &&
+      latestAcademicYear
+    ) {
       setFilters((current) => ({
         ...current,
         academicYear: latestAcademicYear,
       }));
+
+      hasInitialisedAcademicYear.current = true;
     }
-  }, [latestAcademicYear, filters.academicYear]);
+  }, [latestAcademicYear]);
 
   useEffect(() => {
     if (
