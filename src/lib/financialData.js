@@ -46,10 +46,30 @@ export async function fetchDataEntryOptions() {
   };
 }
 
+async function getCurrentUserId() {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!user?.id) {
+    throw new Error(
+      "You must be signed in to modify financial records."
+    );
+  }
+
+  return user.id;
+}
+
 export function getAcademicYearFromMonth(month) {
   if (!month) return "";
 
-  const [yearString, monthString] = month.split("-");
+  const [yearString, monthString] =
+    month.split("-");
 
   const year = Number(yearString);
   const monthNumber = Number(monthString);
@@ -67,7 +87,9 @@ export function getAcademicYearFromMonth(month) {
 export function getFinanceTermFromMonth(month) {
   if (!month) return "";
 
-  const monthNumber = Number(month.split("-")[1]);
+  const monthNumber = Number(
+    month.split("-")[1]
+  );
 
   if ([9, 10, 11, 12].includes(monthNumber)) {
     return "Term 1";
@@ -91,6 +113,8 @@ export async function saveFinancialRecords({
   scenario,
   metricValues,
 }) {
+  const userId = await getCurrentUserId();
+
   const academicYear =
     getAcademicYearFromMonth(month);
 
@@ -101,12 +125,18 @@ export async function saveFinancialRecords({
     .filter(([, value]) => value !== "")
     .map(([metricId, value]) => ({
       school_id: Number(schoolId),
-      revenue_stream_id: Number(revenueStreamId),
+
+      revenue_stream_id:
+        Number(revenueStreamId),
+
       metric_id: Number(metricId),
 
       academic_year: academicYear,
+
       month: `${month}-01`,
+
       term,
+
       scenario,
 
       amount: Number(value),
@@ -121,53 +151,76 @@ export async function saveFinancialRecords({
     );
   }
 
-  /*
-   * Check for existing non-programme/non-provider records.
-   *
-   * This lets the form behave like an editor:
-   * existing records are updated; new records are inserted.
-   */
   for (const row of rows) {
-    const { data: existing, error: lookupError } =
-      await supabase
-        .from("financial_records")
-        .select("id")
-        .eq("school_id", row.school_id)
-        .eq(
-          "revenue_stream_id",
-          row.revenue_stream_id
-        )
-        .eq("metric_id", row.metric_id)
-        .eq(
-          "academic_year",
-          row.academic_year
-        )
-        .eq("month", row.month)
-        .eq("scenario", row.scenario)
-        .is("programme_id", null)
-        .is("provider_id", null)
-        .maybeSingle();
+    /*
+     * Look for an ACTIVE matching record first.
+     *
+     * An archived/deleted record is deliberately
+     * ignored here. This prevents an old archived
+     * record from silently becoming active again.
+     */
+    const {
+      data: existing,
+      error: lookupError,
+    } = await supabase
+      .from("financial_records")
+      .select("id")
+      .eq("school_id", row.school_id)
+      .eq(
+        "revenue_stream_id",
+        row.revenue_stream_id
+      )
+      .eq("metric_id", row.metric_id)
+      .eq(
+        "academic_year",
+        row.academic_year
+      )
+      .eq("month", row.month)
+      .eq("scenario", row.scenario)
+      .eq("is_deleted", false)
+      .is("programme_id", null)
+      .is("provider_id", null)
+      .maybeSingle();
 
     if (lookupError) {
       throw lookupError;
     }
 
     if (existing?.id) {
+      /*
+       * Existing active record:
+       * update it and record who changed it.
+       */
       const { error } = await supabase
         .from("financial_records")
         .update({
           amount: row.amount,
           term: row.term,
+          updated_by: userId,
         })
-        .eq("id", existing.id);
+        .eq("id", existing.id)
+        .eq("is_deleted", false);
 
       if (error) {
         throw error;
       }
     } else {
+      /*
+       * Brand-new record.
+       */
       const { error } = await supabase
         .from("financial_records")
-        .insert(row);
+        .insert({
+          ...row,
+
+          is_deleted: false,
+
+          created_by: userId,
+          updated_by: userId,
+
+          deleted_by: null,
+          deleted_at: null,
+        });
 
       if (error) {
         throw error;
@@ -180,4 +233,215 @@ export async function saveFinancialRecords({
     term,
     savedCount: rows.length,
   };
+}
+
+/*
+ * =========================================================
+ * MANAGE RECORDS
+ * =========================================================
+ *
+ * These functions are intentionally added now so that the
+ * next Manage Records interface uses the same data layer.
+ */
+
+export async function fetchFinancialRecords({
+  schoolId = "",
+  revenueStreamId = "",
+  academicYear = "",
+  month = "",
+  scenario = "",
+  includeDeleted = false,
+} = {}) {
+  let query = supabase
+    .from("financial_records")
+    .select(`
+      id,
+      academic_year,
+      month,
+      term,
+      scenario,
+      amount,
+      programme_id,
+      provider_id,
+      created_at,
+      updated_at,
+      created_by,
+      updated_by,
+      deleted_at,
+      deleted_by,
+      is_deleted,
+
+      school:schools(
+        id,
+        code,
+        name,
+        short_name
+      ),
+
+      revenue_stream:revenue_streams(
+        id,
+        code,
+        name
+      ),
+
+      metric:revenue_metrics(
+        id,
+        code,
+        name
+      )
+    `)
+    .order("month", {
+      ascending: false,
+    });
+
+  if (!includeDeleted) {
+    query = query.eq(
+      "is_deleted",
+      false
+    );
+  }
+
+  if (schoolId) {
+    query = query.eq(
+      "school_id",
+      Number(schoolId)
+    );
+  }
+
+  if (revenueStreamId) {
+    query = query.eq(
+      "revenue_stream_id",
+      Number(revenueStreamId)
+    );
+  }
+
+  if (academicYear) {
+    query = query.eq(
+      "academic_year",
+      academicYear
+    );
+  }
+
+  if (month) {
+    query = query.eq(
+      "month",
+      `${month}-01`
+    );
+  }
+
+  if (scenario) {
+    query = query.eq(
+      "scenario",
+      scenario
+    );
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function updateFinancialRecord(
+  recordId,
+  {
+    amount,
+    scenario,
+    month,
+  }
+) {
+  const userId = await getCurrentUserId();
+
+  const changes = {
+    updated_by: userId,
+  };
+
+  if (
+    amount !== undefined &&
+    amount !== ""
+  ) {
+    changes.amount = Number(amount);
+  }
+
+  if (scenario) {
+    changes.scenario = scenario;
+  }
+
+  if (month) {
+    changes.month = `${month}-01`;
+
+    changes.academic_year =
+      getAcademicYearFromMonth(month);
+
+    changes.term =
+      getFinanceTermFromMonth(month);
+  }
+
+  const { data, error } = await supabase
+    .from("financial_records")
+    .update(changes)
+    .eq("id", recordId)
+    .eq("is_deleted", false)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function archiveFinancialRecord(
+  recordId
+) {
+  const userId = await getCurrentUserId();
+
+  const { data, error } = await supabase
+    .from("financial_records")
+    .update({
+      is_deleted: true,
+      deleted_at:
+        new Date().toISOString(),
+      deleted_by: userId,
+      updated_by: userId,
+    })
+    .eq("id", recordId)
+    .eq("is_deleted", false)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function restoreFinancialRecord(
+  recordId
+) {
+  const userId = await getCurrentUserId();
+
+  const { data, error } = await supabase
+    .from("financial_records")
+    .update({
+      is_deleted: false,
+      deleted_at: null,
+      deleted_by: null,
+      updated_by: userId,
+    })
+    .eq("id", recordId)
+    .eq("is_deleted", true)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
