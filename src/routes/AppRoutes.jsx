@@ -2,14 +2,21 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../auth/ProtectedRoute";
 import PlatformLayout from "../layouts/PlatformLayout";
+
 import LoginPage from "../pages/auth/LoginPage";
+
+import DashboardPage from "../pages/dashboard/DashboardPage";
+
 import ProgrammeDirectoryPage from "../pages/leasing/ProgrammeDirectoryPage";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
+
 import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
+
 import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
 import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
-import DashboardPage from "../pages/dashboard/DashboardPage";
+
+import DataEntryPage from "../pages/admin/DataEntryPage";
 import SettingsPage from "../pages/settings/SettingsPage";
 
 export default function AppRoutes() {
@@ -30,7 +37,10 @@ export default function AppRoutes() {
           element={<Navigate to="/dashboard" replace />}
         />
 
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route
+          path="dashboard"
+          element={<DashboardPage />}
+        />
 
         <Route
           path="catering"
@@ -64,15 +74,33 @@ export default function AppRoutes() {
 
         <Route
           path="leasing/summary"
-          element={<Navigate to="/leasing/programmes" replace />}
+          element={
+            <Navigate
+              to="/leasing/programmes"
+              replace
+            />
+          }
         />
 
         <Route
           path="leasing/program-comparison"
-          element={<Navigate to="/leasing/programmes" replace />}
+          element={
+            <Navigate
+              to="/leasing/programmes"
+              replace
+            />
+          }
         />
 
-        <Route path="settings" element={<SettingsPage />} />
+        <Route
+          path="data-entry"
+          element={<DataEntryPage />}
+        />
+
+        <Route
+          path="settings"
+          element={<SettingsPage />}
+        />
       </Route>
 
       <Route
