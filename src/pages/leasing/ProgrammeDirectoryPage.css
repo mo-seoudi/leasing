@@ -1465,3 +1465,57 @@
     min-width: 0;
   }
 }
+
+
+/* =========================================================
+   MOBILE INDIVIDUAL PROGRAMME DETAIL WIDTH FIX
+   Individual programme details are rendered inside the wide
+   desktop directory table. On mobile, size the actual detail
+   card to the viewport rather than to that 1120px table cell.
+   Aggregate details already live outside the table, so this
+   makes both versions behave consistently without changing
+   desktop/tablet layout.
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .directory-expanded-row > td {
+    padding: 0 !important;
+  }
+
+  .directory-expanded-row
+    .programme-detail-option2 {
+    width: calc(100dvw - 52px) !important;
+    max-width: calc(100dvw - 52px) !important;
+    min-width: 0 !important;
+    margin: 8px 8px 10px !important;
+  }
+
+  /*
+   * Fallback for browsers that do not support dynamic viewport units.
+   */
+  @supports not (width: 100dvw) {
+    .directory-expanded-row
+      .programme-detail-option2 {
+      width: calc(100vw - 52px) !important;
+      max-width: calc(100vw - 52px) !important;
+    }
+  }
+}
+
+@media (max-width: 390px) {
+  .directory-expanded-row
+    .programme-detail-option2 {
+    width: calc(100dvw - 44px) !important;
+    max-width: calc(100dvw - 44px) !important;
+    margin-right: 6px !important;
+    margin-left: 6px !important;
+  }
+
+  @supports not (width: 100dvw) {
+    .directory-expanded-row
+      .programme-detail-option2 {
+      width: calc(100vw - 44px) !important;
+      max-width: calc(100vw - 44px) !important;
+    }
+  }
+}
