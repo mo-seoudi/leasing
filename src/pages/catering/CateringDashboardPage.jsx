@@ -110,8 +110,8 @@ export default function CateringDashboardPage() {
     { key: "academicYear", label: "Academic Year" },
     { key: "label", label: "Month" },
     { key: "term", label: "Term" },
-    { key: "sales", label: "Sales", numeric: true, render: (value) => formatCurrency(value) },
-    { key: "commission", label: "Commission", numeric: true, render: (value) => formatCurrency(value) },
+    { key: "sales", label: "Sales", numeric: true, tone: "sales", render: (value) => formatCurrency(value) },
+    { key: "commission", label: "Commission", numeric: true, tone: "commission", render: (value) => formatCurrency(value) },
     { key: "commissionRate", label: "Commission Rate", numeric: true, render: (value) => formatPercentage(value) },
   ];
 
