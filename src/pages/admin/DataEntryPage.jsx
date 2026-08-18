@@ -540,7 +540,7 @@ export default function DataEntryPage() {
       <div className="data-entry-intro">
         <div>
           <span className="data-entry-eyebrow">FINANCIAL RECORDS</span>
-          <h2>Commercial data workspace</h2>
+          <h2>Commercial Data Workspace</h2>
           <p>
             Create, review and maintain monthly financial performance across
             schools and revenue streams.
@@ -702,7 +702,7 @@ export default function DataEntryPage() {
               <div className="metrics-heading">
                 <div>
                   <span className="entry-step">VALUES</span>
-                  <h3>Financial metrics</h3>
+                  <h3>Financial Metrics</h3>
                   <p>
                     Metrics are determined dynamically by the selected revenue
                     stream.
@@ -760,7 +760,7 @@ export default function DataEntryPage() {
           <aside className="data-entry-review-card">
             <div className="review-header">
               <span className="entry-step">REVIEW</span>
-              <h3>Record summary</h3>
+              <h3>Record Summary</h3>
               <p>Review the reporting context before saving.</p>
             </div>
 
