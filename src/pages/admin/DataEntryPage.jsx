@@ -20,6 +20,7 @@ import {
 import "./DataEntryPage.css";
 
 const SCENARIOS = ["Actual", "Budget", "Forecast"];
+const PAGE_SIZE = 25;
 
 const MONTHS = [
   { value: "01", label: "January" },
@@ -56,17 +57,6 @@ function combineMonthYear(year, month) {
   return `${year}-${month}`;
 }
 
-function splitRecordMonth(value = "") {
-  if (!value) {
-    return { year: "", month: "" };
-  }
-
-  return {
-    year: value.slice(0, 4),
-    month: value.slice(5, 7),
-  };
-}
-
 function formatRecordMonth(value) {
   if (!value) return "—";
 
@@ -82,6 +72,27 @@ function formatMoney(value) {
     currency: "AED",
     maximumFractionDigits: 2,
   }).format(Number(value || 0));
+}
+
+function buildPaginationItems(currentPage, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const items = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+
+  if (start > 2) items.push("start-ellipsis");
+
+  for (let page = start; page <= end; page += 1) {
+    items.push(page);
+  }
+
+  if (end < totalPages - 1) items.push("end-ellipsis");
+  items.push(totalPages);
+
+  return items;
 }
 
 export default function DataEntryPage() {
@@ -114,19 +125,16 @@ export default function DataEntryPage() {
   const [recordFilters, setRecordFilters] = useState({
     schoolId: "",
     revenueStreamId: "",
+    metricId: "",
     academicYear: "",
     scenario: "",
     search: "",
     includeDeleted: false,
   });
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [editingRecord, setEditingRecord] = useState(null);
-  const [editForm, setEditForm] = useState({
-    amount: "",
-    scenario: "Actual",
-    reportingMonth: "",
-    reportingYear: "",
-  });
+  const [editAmount, setEditAmount] = useState("");
   const [recordActionLoading, setRecordActionLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
@@ -195,6 +203,18 @@ export default function DataEntryPage() {
     [options.metrics, form.revenueStreamId]
   );
 
+  const managementMetrics = useMemo(() => {
+    if (!recordFilters.revenueStreamId) {
+      return options.metrics;
+    }
+
+    return options.metrics.filter(
+      (metric) =>
+        String(metric.revenue_stream_id) ===
+        String(recordFilters.revenueStreamId)
+    );
+  }, [options.metrics, recordFilters.revenueStreamId]);
+
   const combinedMonth = combineMonthYear(
     form.reportingYear,
     form.reportingMonth
@@ -229,6 +249,13 @@ export default function DataEntryPage() {
         recordFilters.revenueStreamId &&
         String(record.revenue_stream?.id) !==
           String(recordFilters.revenueStreamId)
+      ) {
+        return false;
+      }
+
+      if (
+        recordFilters.metricId &&
+        String(record.metric?.id) !== String(recordFilters.metricId)
       ) {
         return false;
       }
@@ -269,6 +296,41 @@ export default function DataEntryPage() {
     });
   }, [records, recordFilters]);
 
+  const totalPages = Math.max(1, Math.ceil(visibleRecords.length / PAGE_SIZE));
+
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return visibleRecords.slice(start, start + PAGE_SIZE);
+  }, [visibleRecords, currentPage]);
+
+  const paginationItems = useMemo(
+    () => buildPaginationItems(currentPage, totalPages),
+    [currentPage, totalPages]
+  );
+
+  const pageStart = visibleRecords.length
+    ? (currentPage - 1) * PAGE_SIZE + 1
+    : 0;
+  const pageEnd = Math.min(currentPage * PAGE_SIZE, visibleRecords.length);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    recordFilters.schoolId,
+    recordFilters.revenueStreamId,
+    recordFilters.metricId,
+    recordFilters.academicYear,
+    recordFilters.scenario,
+    recordFilters.search,
+    recordFilters.includeDeleted,
+  ]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   async function loadRecords() {
     try {
       setRecordsLoading(true);
@@ -308,6 +370,21 @@ export default function DataEntryPage() {
     if (name === "revenueStreamId") {
       setMetricValues({});
     }
+  }
+
+  function updateRecordFilter(name, value) {
+    setRecordFilters((current) => {
+      const next = {
+        ...current,
+        [name]: value,
+      };
+
+      if (name === "revenueStreamId") {
+        next.metricId = "";
+      }
+
+      return next;
+    });
   }
 
   function updateMetric(metricId, value) {
@@ -384,15 +461,8 @@ export default function DataEntryPage() {
   }
 
   function openEdit(record) {
-    const parts = splitRecordMonth(record.month);
-
     setEditingRecord(record);
-    setEditForm({
-      amount: String(record.amount ?? ""),
-      scenario: record.scenario || "Actual",
-      reportingMonth: parts.month,
-      reportingYear: parts.year,
-    });
+    setEditAmount(String(record.amount ?? ""));
   }
 
   async function saveEdit() {
@@ -403,12 +473,7 @@ export default function DataEntryPage() {
       setRecordsError("");
 
       await updateFinancialRecord(editingRecord.id, {
-        amount: editForm.amount,
-        scenario: editForm.scenario,
-        month: combineMonthYear(
-          editForm.reportingYear,
-          editForm.reportingMonth
-        ),
+        amount: editAmount,
       });
 
       setEditingRecord(null);
@@ -488,7 +553,11 @@ export default function DataEntryPage() {
         </div>
       </div>
 
-      <div className="records-mode-switch" role="tablist" aria-label="Financial records mode">
+      <div
+        className="records-mode-switch"
+        role="tablist"
+        aria-label="Financial records mode"
+      >
         <button
           type="button"
           className={mode === "new" ? "active" : ""}
@@ -708,7 +777,11 @@ export default function DataEntryPage() {
                 <span>Reporting Period</span>
                 <strong>
                   {form.reportingMonth && form.reportingYear
-                    ? `${MONTHS.find((item) => item.value === form.reportingMonth)?.label} ${form.reportingYear}`
+                    ? `${
+                        MONTHS.find(
+                          (item) => item.value === form.reportingMonth
+                        )?.label
+                      } ${form.reportingYear}`
                     : "—"}
                 </strong>
               </div>
@@ -762,7 +835,8 @@ export default function DataEntryPage() {
               <span className="entry-step">RECORD LIBRARY</span>
               <h3>Manage financial records</h3>
               <p>
-                Search, review, edit or archive existing financial records.
+                Search, filter and update individual financial records without
+                changing their reporting period.
               </p>
             </div>
 
@@ -779,10 +853,7 @@ export default function DataEntryPage() {
                 placeholder="School, stream, metric…"
                 value={recordFilters.search}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    search: event.target.value,
-                  }))
+                  updateRecordFilter("search", event.target.value)
                 }
               />
             </label>
@@ -792,10 +863,7 @@ export default function DataEntryPage() {
               <select
                 value={recordFilters.schoolId}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    schoolId: event.target.value,
-                  }))
+                  updateRecordFilter("schoolId", event.target.value)
                 }
               >
                 <option value="">All Schools</option>
@@ -812,10 +880,7 @@ export default function DataEntryPage() {
               <select
                 value={recordFilters.revenueStreamId}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    revenueStreamId: event.target.value,
-                  }))
+                  updateRecordFilter("revenueStreamId", event.target.value)
                 }
               >
                 <option value="">All Streams</option>
@@ -828,14 +893,28 @@ export default function DataEntryPage() {
             </label>
 
             <label className="entry-field">
+              <span>Metric</span>
+              <select
+                value={recordFilters.metricId}
+                onChange={(event) =>
+                  updateRecordFilter("metricId", event.target.value)
+                }
+              >
+                <option value="">All Metrics</option>
+                {managementMetrics.map((metric) => (
+                  <option key={metric.id} value={metric.id}>
+                    {metric.name || metric.code}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="entry-field">
               <span>Academic Year</span>
               <select
                 value={recordFilters.academicYear}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    academicYear: event.target.value,
-                  }))
+                  updateRecordFilter("academicYear", event.target.value)
                 }
               >
                 <option value="">All Years</option>
@@ -852,10 +931,7 @@ export default function DataEntryPage() {
               <select
                 value={recordFilters.scenario}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    scenario: event.target.value,
-                  }))
+                  updateRecordFilter("scenario", event.target.value)
                 }
               >
                 <option value="">All Scenarios</option>
@@ -872,10 +948,7 @@ export default function DataEntryPage() {
                 type="checkbox"
                 checked={recordFilters.includeDeleted}
                 onChange={(event) =>
-                  setRecordFilters((current) => ({
-                    ...current,
-                    includeDeleted: event.target.checked,
-                  }))
+                  updateRecordFilter("includeDeleted", event.target.checked)
                 }
               />
               <span>Show archived</span>
@@ -896,92 +969,162 @@ export default function DataEntryPage() {
               <span>Try changing the filters or search terms.</span>
             </div>
           ) : (
-            <div className="records-table-wrap">
-              <table className="records-table">
-                <thead>
-                  <tr>
-                    <th>Period</th>
-                    <th>School</th>
-                    <th>Revenue Stream</th>
-                    <th>Metric</th>
-                    <th>Scenario</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th aria-label="Actions" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleRecords.map((record) => (
-                    <tr
-                      key={record.id}
-                      className={record.is_deleted ? "archived-row" : ""}
-                    >
-                      <td>
-                        <strong>{formatRecordMonth(record.month)}</strong>
-                        <span>{record.academic_year}</span>
-                      </td>
-                      <td>
-                        <strong>{record.school?.name || "—"}</strong>
-                        <span>{record.school?.code || ""}</span>
-                      </td>
-                      <td>{record.revenue_stream?.name || "—"}</td>
-                      <td>{record.metric?.name || record.metric?.code || "—"}</td>
-                      <td>
-                        <span className={`scenario-pill ${String(record.scenario || "").toLowerCase()}`}>
-                          {record.scenario || "—"}
-                        </span>
-                      </td>
-                      <td className="record-amount">{formatMoney(record.amount)}</td>
-                      <td>
-                        <span className={`record-status ${record.is_deleted ? "archived" : "active"}`}>
-                          {record.is_deleted ? "Archived" : "Active"}
-                        </span>
-                      </td>
-                      <td className="record-actions-cell">
-                        {record.is_deleted ? (
-                          canRestore && (
-                            <button
-                              type="button"
-                              className="record-action restore"
-                              onClick={() => handleRestore(record)}
-                              disabled={recordActionLoading}
-                            >
-                              Restore
-                            </button>
-                          )
-                        ) : (
-                          <div className="record-actions">
-                            <button
-                              type="button"
-                              className="record-action"
-                              onClick={() => openEdit(record)}
-                              disabled={!canEdit || recordActionLoading}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="record-action danger"
-                              onClick={() => setDeleteRecord(record)}
-                              disabled={!canEdit || recordActionLoading}
-                            >
-                              Archive
-                            </button>
-                          </div>
-                        )}
-                      </td>
+            <>
+              <div className="records-table-wrap">
+                <table className="records-table">
+                  <thead>
+                    <tr>
+                      <th>Period</th>
+                      <th>School</th>
+                      <th>Revenue Stream</th>
+                      <th>Metric</th>
+                      <th>Scenario</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th aria-label="Actions" />
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {paginatedRecords.map((record) => (
+                      <tr
+                        key={record.id}
+                        className={record.is_deleted ? "archived-row" : ""}
+                      >
+                        <td>
+                          <strong>{formatRecordMonth(record.month)}</strong>
+                          <span>{record.academic_year}</span>
+                        </td>
+                        <td>
+                          <strong>{record.school?.name || "—"}</strong>
+                          <span>{record.school?.code || ""}</span>
+                        </td>
+                        <td>{record.revenue_stream?.name || "—"}</td>
+                        <td>
+                          {record.metric?.name || record.metric?.code || "—"}
+                        </td>
+                        <td>
+                          <span
+                            className={`scenario-pill ${String(
+                              record.scenario || ""
+                            ).toLowerCase()}`}
+                          >
+                            {record.scenario || "—"}
+                          </span>
+                        </td>
+                        <td className="record-amount">
+                          {formatMoney(record.amount)}
+                        </td>
+                        <td>
+                          <span
+                            className={`record-status ${
+                              record.is_deleted ? "archived" : "active"
+                            }`}
+                          >
+                            {record.is_deleted ? "Archived" : "Active"}
+                          </span>
+                        </td>
+                        <td className="record-actions-cell">
+                          {record.is_deleted ? (
+                            canRestore && (
+                              <button
+                                type="button"
+                                className="record-action restore"
+                                onClick={() => handleRestore(record)}
+                                disabled={recordActionLoading}
+                              >
+                                Restore
+                              </button>
+                            )
+                          ) : (
+                            <div className="record-actions">
+                              <button
+                                type="button"
+                                className="record-action"
+                                onClick={() => openEdit(record)}
+                                disabled={!canEdit || recordActionLoading}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="record-action danger"
+                                onClick={() => setDeleteRecord(record)}
+                                disabled={!canEdit || recordActionLoading}
+                              >
+                                Archive
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="records-pagination">
+                <div className="pagination-summary">
+                  Showing <strong>{pageStart}–{pageEnd}</strong> of{" "}
+                  <strong>{visibleRecords.length}</strong> records
+                </div>
+
+                <div className="pagination-controls" aria-label="Record pages">
+                  <button
+                    type="button"
+                    className="pagination-arrow"
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+
+                  {paginationItems.map((item) =>
+                    typeof item === "number" ? (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`pagination-page ${
+                          currentPage === item ? "active" : ""
+                        }`}
+                        onClick={() => setCurrentPage(item)}
+                        aria-current={currentPage === item ? "page" : undefined}
+                      >
+                        {item}
+                      </button>
+                    ) : (
+                      <span key={item} className="pagination-ellipsis">
+                        …
+                      </span>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    className="pagination-arrow"
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(totalPages, page + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </section>
       )}
 
       {editingRecord && (
         <div className="record-modal-backdrop" role="presentation">
-          <div className="record-modal" role="dialog" aria-modal="true" aria-labelledby="edit-record-title">
+          <div
+            className="record-modal edit-record-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-record-title"
+          >
             <div className="record-modal-header">
               <div>
                 <span className="entry-step">EDIT RECORD</span>
@@ -989,7 +1132,8 @@ export default function DataEntryPage() {
                   {editingRecord.metric?.name || "Financial record"}
                 </h3>
                 <p>
-                  {editingRecord.school?.name} · {editingRecord.revenue_stream?.name}
+                  Change the amount for this existing record. Its reporting
+                  period and classification remain fixed.
                 </p>
               </div>
               <button
@@ -1002,83 +1146,50 @@ export default function DataEntryPage() {
               </button>
             </div>
 
-            <div className="record-modal-fields">
-              <label className="entry-field">
-                <span>Amount</span>
-                <div className="money-input">
-                  <span>AED</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={editForm.amount}
-                    onChange={(event) =>
-                      setEditForm((current) => ({
-                        ...current,
-                        amount: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </label>
-
-              <label className="entry-field">
+            <div className="edit-record-context">
+              <div>
+                <span>School</span>
+                <strong>{editingRecord.school?.name || "—"}</strong>
+              </div>
+              <div>
+                <span>Revenue Stream</span>
+                <strong>{editingRecord.revenue_stream?.name || "—"}</strong>
+              </div>
+              <div>
+                <span>Metric</span>
+                <strong>
+                  {editingRecord.metric?.name || editingRecord.metric?.code ||
+                    "—"}
+                </strong>
+              </div>
+              <div>
+                <span>Period</span>
+                <strong>{formatRecordMonth(editingRecord.month)}</strong>
+              </div>
+              <div>
+                <span>Academic Year</span>
+                <strong>{editingRecord.academic_year || "—"}</strong>
+              </div>
+              <div>
                 <span>Scenario</span>
-                <select
-                  value={editForm.scenario}
-                  onChange={(event) =>
-                    setEditForm((current) => ({
-                      ...current,
-                      scenario: event.target.value,
-                    }))
-                  }
-                >
-                  {SCENARIOS.map((scenario) => (
-                    <option key={scenario} value={scenario}>
-                      {scenario}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="entry-field">
-                <span>Month</span>
-                <select
-                  value={editForm.reportingMonth}
-                  onChange={(event) =>
-                    setEditForm((current) => ({
-                      ...current,
-                      reportingMonth: event.target.value,
-                    }))
-                  }
-                >
-                  {MONTHS.map((month) => (
-                    <option key={month.value} value={month.value}>
-                      {month.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="entry-field">
-                <span>Year</span>
-                <select
-                  value={editForm.reportingYear}
-                  onChange={(event) =>
-                    setEditForm((current) => ({
-                      ...current,
-                      reportingYear: event.target.value,
-                    }))
-                  }
-                >
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <strong>{editingRecord.scenario || "—"}</strong>
+              </div>
             </div>
+
+            <label className="entry-field edit-amount-field">
+              <span>Amount</span>
+              <div className="money-input">
+                <span>AED</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editAmount}
+                  onChange={(event) => setEditAmount(event.target.value)}
+                  autoFocus
+                />
+              </div>
+            </label>
 
             <div className="record-modal-actions">
               <button
@@ -1092,9 +1203,9 @@ export default function DataEntryPage() {
                 type="button"
                 className="entry-save-button"
                 onClick={saveEdit}
-                disabled={recordActionLoading}
+                disabled={recordActionLoading || editAmount === ""}
               >
-                {recordActionLoading ? "Saving…" : "Save Changes"}
+                {recordActionLoading ? "Saving…" : "Save Amount"}
               </button>
             </div>
           </div>
@@ -1103,7 +1214,12 @@ export default function DataEntryPage() {
 
       {deleteRecord && (
         <div className="record-modal-backdrop" role="presentation">
-          <div className="record-modal delete-modal" role="dialog" aria-modal="true" aria-labelledby="archive-record-title">
+          <div
+            className="record-modal delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="archive-record-title"
+          >
             <div className="delete-icon">!</div>
             <h3 id="archive-record-title">Archive financial record?</h3>
             <p>
