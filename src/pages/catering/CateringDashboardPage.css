@@ -527,3 +527,91 @@
 
 /* Filters now live in the fixed platform header. */
 .catering-dashboard-page { padding-top: 0; }
+
+/* ==========================
+   Monthly Results Pagination
+========================== */
+
+.catering-results-table tfoot th:first-child {
+  text-align: left;
+}
+
+.catering-results-table tfoot th:nth-child(2),
+.catering-results-table tfoot th:nth-child(3),
+.catering-results-table tfoot th:nth-child(4) {
+  text-align: right;
+}
+
+.catering-results-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding-top: 12px;
+}
+
+.catering-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.catering-pagination-arrow,
+.catering-pagination-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #e4e7ec;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475467;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.catering-pagination-arrow {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.catering-pagination-page:hover,
+.catering-pagination-arrow:not(:disabled):hover {
+  background: #f8fafc;
+  border-color: #d0d5dd;
+}
+
+.catering-pagination-page.active {
+  border-color: #b9ddf2;
+  background: #eaf4ff;
+  color: #1679a7;
+}
+
+.catering-pagination-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.catering-pagination-label {
+  min-width: 72px;
+  margin-left: 5px;
+  color: #98a2b3;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+@media (max-width: 560px) {
+  .catering-results-pagination {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .catering-pagination-label {
+    display: none;
+  }
+}
