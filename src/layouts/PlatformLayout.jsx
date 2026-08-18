@@ -9,7 +9,11 @@ import {
   MdRestaurant,
   MdSportsTennis,
 } from "react-icons/md";
-import { FaBusSimple, FaShirt } from "react-icons/fa6";
+
+import {
+  FaBusSimple,
+  FaShirt,
+} from "react-icons/fa6";
 
 import { useAuth } from "../auth/AuthProvider";
 import "./PlatformLayout.css";
@@ -90,6 +94,15 @@ function DashboardIcon() {
   );
 }
 
+function DataEntryIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20h9" />
+
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+    </svg>
+  );
+}
 
 function SettingsIcon() {
   return (
@@ -182,7 +195,10 @@ function getPageDetails(pathname) {
     };
   }
 
-  if (pathname === "/catering/comparison") {
+  if (
+    pathname ===
+    "/catering/comparison"
+  ) {
     return {
       section: "Catering",
       title: "Year-on-Year Comparison",
@@ -196,10 +212,20 @@ function getPageDetails(pathname) {
     };
   }
 
-  if (pathname === "/uniform/comparison") {
+  if (
+    pathname ===
+    "/uniform/comparison"
+  ) {
     return {
       section: "Uniform",
       title: "Year-on-Year Comparison",
+    };
+  }
+
+  if (pathname === "/data-entry") {
+    return {
+      section: "Administration",
+      title: "Data Entry",
     };
   }
 
@@ -242,7 +268,10 @@ function getInitials(name = "") {
       .split(" ")
       .filter(Boolean)
       .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
+      .map(
+        (part) =>
+          part[0]?.toUpperCase(),
+      )
       .join("") || "U"
   );
 }
@@ -252,13 +281,20 @@ function formatRole(role) {
     return "User";
   }
 
-  return role.charAt(0).toUpperCase() + role.slice(1);
+  return (
+    role.charAt(0).toUpperCase() +
+    role.slice(1)
+  );
 }
 
 export default function PlatformLayout() {
   const { user, profile, role } = useAuth();
 
-  const [headerControls, setHeaderControls] = useState(null);
+  const [
+    headerControls,
+    setHeaderControls,
+  ] = useState(null);
+
   const location = useLocation();
 
   const userName =
@@ -267,38 +303,56 @@ export default function PlatformLayout() {
     user?.email?.split("@")[0] ||
     "User";
 
-  const userInitials = getInitials(userName);
-  const userRole = formatRole(role);
+  const userInitials =
+    getInitials(userName);
+
+  const userRole =
+    formatRole(role);
 
   const isLeasingRoute =
-    location.pathname.startsWith("/leasing");
+    location.pathname.startsWith(
+      "/leasing",
+    );
 
   const isCateringRoute =
-    location.pathname.startsWith("/catering");
+    location.pathname.startsWith(
+      "/catering",
+    );
 
   const isUniformRoute =
-    location.pathname.startsWith("/uniform");
+    location.pathname.startsWith(
+      "/uniform",
+    );
 
-  const [leasingOpen, setLeasingOpen] =
-    useState(isLeasingRoute);
+  const [
+    leasingOpen,
+    setLeasingOpen,
+  ] = useState(isLeasingRoute);
 
-  const [cateringOpen, setCateringOpen] =
-    useState(isCateringRoute);
+  const [
+    cateringOpen,
+    setCateringOpen,
+  ] = useState(isCateringRoute);
 
-  const [uniformOpen, setUniformOpen] =
-    useState(isUniformRoute);
+  const [
+    uniformOpen,
+    setUniformOpen,
+  ] = useState(isUniformRoute);
 
-  const [mobileOpen, setMobileOpen] =
-    useState(false);
+  const [
+    mobileOpen,
+    setMobileOpen,
+  ] = useState(false);
 
   const [
     sidebarCollapsed,
     setSidebarCollapsed,
-  ] = useState(getInitialCollapsedState);
-
-  const pageDetails = getPageDetails(
-    location.pathname,
+  ] = useState(
+    getInitialCollapsedState,
   );
+
+  const pageDetails =
+    getPageDetails(location.pathname);
 
   useEffect(() => {
     if (isLeasingRoute) {
@@ -460,7 +514,9 @@ export default function PlatformLayout() {
               }
               onClick={() => {
                 if (sidebarCollapsed) {
-                  setSidebarCollapsed(false);
+                  setSidebarCollapsed(
+                    false,
+                  );
                 }
               }}
               className={({
@@ -529,7 +585,9 @@ export default function PlatformLayout() {
                   {leasingLinks.map(
                     (link) => (
                       <NavLink
-                        key={link.path}
+                        key={
+                          link.path
+                        }
                         to={link.path}
                         className={({
                           isActive,
@@ -544,7 +602,9 @@ export default function PlatformLayout() {
                         <span className="submenu-dot" />
 
                         <span>
-                          {link.label}
+                          {
+                            link.label
+                          }
                         </span>
                       </NavLink>
                     ),
@@ -559,7 +619,9 @@ export default function PlatformLayout() {
                   ? "module-active"
                   : ""
               }`}
-              onClick={handleCateringToggle}
+              onClick={
+                handleCateringToggle
+              }
               aria-expanded={
                 !sidebarCollapsed &&
                 cateringOpen
@@ -591,9 +653,14 @@ export default function PlatformLayout() {
                   {cateringLinks.map(
                     (link) => (
                       <NavLink
-                        key={link.path}
+                        key={
+                          link.path
+                        }
                         to={link.path}
-                        end={link.path === "/catering"}
+                        end={
+                          link.path ===
+                          "/catering"
+                        }
                         className={({
                           isActive,
                         }) =>
@@ -607,7 +674,9 @@ export default function PlatformLayout() {
                         <span className="submenu-dot" />
 
                         <span>
-                          {link.label}
+                          {
+                            link.label
+                          }
                         </span>
                       </NavLink>
                     ),
@@ -622,7 +691,9 @@ export default function PlatformLayout() {
                   ? "module-active"
                   : ""
               }`}
-              onClick={handleUniformToggle}
+              onClick={
+                handleUniformToggle
+              }
               aria-expanded={
                 !sidebarCollapsed &&
                 uniformOpen
@@ -654,9 +725,14 @@ export default function PlatformLayout() {
                   {uniformLinks.map(
                     (link) => (
                       <NavLink
-                        key={link.path}
+                        key={
+                          link.path
+                        }
                         to={link.path}
-                        end={link.path === "/uniform"}
+                        end={
+                          link.path ===
+                          "/uniform"
+                        }
                         className={({
                           isActive,
                         }) =>
@@ -670,7 +746,9 @@ export default function PlatformLayout() {
                         <span className="submenu-dot" />
 
                         <span>
-                          {link.label}
+                          {
+                            link.label
+                          }
                         </span>
                       </NavLink>
                     ),
@@ -706,6 +784,32 @@ export default function PlatformLayout() {
             <span className="navigation-label">
               Administration
             </span>
+
+            <NavLink
+              to="/data-entry"
+              title={
+                sidebarCollapsed
+                  ? "Data Entry"
+                  : undefined
+              }
+              className={({
+                isActive,
+              }) =>
+                `navigation-link ${
+                  isActive
+                    ? "active"
+                    : ""
+                }`
+              }
+            >
+              <span className="navigation-icon">
+                <DataEntryIcon />
+              </span>
+
+              <span className="navigation-text">
+                Data Entry
+              </span>
+            </NavLink>
 
             <NavLink
               to="/settings"
@@ -807,7 +911,9 @@ export default function PlatformLayout() {
                   </span>
 
                   <span>
-                    {pageDetails.section}
+                    {
+                      pageDetails.section
+                    }
                   </span>
                 </div>
               )}
@@ -817,6 +923,7 @@ export default function PlatformLayout() {
               </h1>
             </div>
           </div>
+
           <div
             className={`header-actions ${
               headerControls
@@ -833,7 +940,11 @@ export default function PlatformLayout() {
         </header>
 
         <main className="platform-content">
-          <Outlet context={{ setHeaderControls }} />
+          <Outlet
+            context={{
+              setHeaderControls,
+            }}
+          />
         </main>
       </div>
     </div>
