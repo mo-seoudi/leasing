@@ -67,6 +67,7 @@ export default function CateringDashboardPage() {
   });
 
   const [trendMetric, setTrendMetric] = useState("Sales");
+  const [resultsPage, setResultsPage] = useState(0);
 
   const filteredRecords = useMemo(
     () => filterCateringRecords(filters),
@@ -83,6 +84,42 @@ export default function CateringDashboardPage() {
     [filteredRecords]
   );
 
+  const monthlyResultPages = useMemo(() => {
+    const grouped = new Map();
+
+    monthlyData.forEach((item) => {
+      const key = item.academicYear || "Other";
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(item);
+    });
+
+    return [...grouped.entries()]
+      .sort(([yearA], [yearB]) => yearB.localeCompare(yearA))
+      .map(([academicYear, rows]) => ({
+        academicYear,
+        rows,
+      }));
+  }, [monthlyData]);
+
+  const safeResultsPage = Math.min(
+    resultsPage,
+    Math.max(monthlyResultPages.length - 1, 0)
+  );
+
+  const visibleMonthlyData =
+    monthlyResultPages[safeResultsPage]?.rows || [];
+
+  const visibleResultsYear =
+    monthlyResultPages[safeResultsPage]?.academicYear || "";
+
+  useEffect(() => {
+    setResultsPage(0);
+  }, [
+    filters.academicYear,
+    filters.school,
+    filters.term,
+  ]);
+
   const schoolData = useMemo(
     () => getSchoolCateringData(filteredRecords),
     [filteredRecords]
@@ -97,7 +134,13 @@ export default function CateringDashboardPage() {
     setFilters((current) => ({ ...current, [name]: value }));
   }
 
-
+  function clearFilters() {
+    setFilters({
+      academicYear: latestAcademicYear,
+      school: "",
+      term: "",
+    });
+  }
 
   const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
 
@@ -151,7 +194,13 @@ export default function CateringDashboardPage() {
           </select>
         </label>
 
-
+        <button
+          type="button"
+          className="header-clear-button"
+          onClick={clearFilters}
+        >
+          Clear
+        </button>
       </div>
     );
 
@@ -317,7 +366,10 @@ export default function CateringDashboardPage() {
             <h2>Monthly Results</h2>
             <p>Detailed sales, commission and effective rate for each month.</p>
           </div>
-          <span className="catering-record-count">{monthlyData.length} months</span>
+          <span className="catering-record-count">
+            {visibleResultsYear ? `${visibleResultsYear} · ` : ""}
+            {visibleMonthlyData.length} months
+          </span>
         </div>
 
         {monthlyData.length === 0 ? (
@@ -336,7 +388,7 @@ export default function CateringDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {monthlyData.map((item) => (
+                {visibleMonthlyData.map((item) => (
                   <tr key={item.key}>
                     <td>{item.academicYear}</td>
                     <td>{item.label}</td>
@@ -356,6 +408,58 @@ export default function CateringDashboardPage() {
                 </tr>
               </tfoot>
             </table>
+          </div>
+        )}
+
+        {monthlyResultPages.length > 1 && (
+          <div className="catering-results-pagination">
+            <button
+              type="button"
+              className="catering-pagination-arrow"
+              onClick={() =>
+                setResultsPage((page) => Math.max(0, page - 1))
+              }
+              disabled={safeResultsPage === 0}
+              aria-label="Previous academic year"
+            >
+              ‹
+            </button>
+
+            <div className="catering-pagination-pages">
+              {monthlyResultPages.map((page, index) => (
+                <button
+                  key={page.academicYear}
+                  type="button"
+                  className={
+                    safeResultsPage === index
+                      ? "catering-pagination-page active"
+                      : "catering-pagination-page"
+                  }
+                  onClick={() => setResultsPage(index)}
+                  title={page.academicYear}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="catering-pagination-arrow"
+              onClick={() =>
+                setResultsPage((page) =>
+                  Math.min(monthlyResultPages.length - 1, page + 1)
+                )
+              }
+              disabled={safeResultsPage === monthlyResultPages.length - 1}
+              aria-label="Next academic year"
+            >
+              ›
+            </button>
+
+            <span className="catering-pagination-label">
+              {visibleResultsYear}
+            </span>
           </div>
         )}
       </section>
