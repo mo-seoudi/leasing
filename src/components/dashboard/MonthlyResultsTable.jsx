@@ -21,6 +21,16 @@ function groupByAcademicYear(data) {
     }));
 }
 
+function getCellClass(column, extraClass = "") {
+  return [
+    column.numeric ? "dashboard-numeric-cell" : "",
+    column.tone ? `dashboard-value-${column.tone}` : "",
+    extraClass,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export default function MonthlyResultsTable({
   data = [],
   columns = [],
@@ -83,11 +93,7 @@ export default function MonthlyResultsTable({
                 {columns.map((column) => (
                   <th
                     key={column.key}
-                    className={
-                      column.numeric
-                        ? "dashboard-numeric-cell"
-                        : ""
-                    }
+                    className={getCellClass(column)}
                   >
                     {column.label}
                   </th>
@@ -106,11 +112,7 @@ export default function MonthlyResultsTable({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={
-                        column.numeric
-                          ? "dashboard-numeric-cell"
-                          : ""
-                      }
+                      className={getCellClass(column)}
                     >
                       {column.render
                         ? column.render(
@@ -133,14 +135,23 @@ export default function MonthlyResultsTable({
                   {totalLabel}
                 </th>
 
-                {totalEntries.map(([key, value]) => (
-                  <th
-                    key={key}
-                    className="dashboard-numeric-cell dashboard-total-value"
-                  >
-                    {value}
-                  </th>
-                ))}
+                {totalEntries.map(([key, value]) => {
+                  const column = columns.find(
+                    (item) => item.key === key
+                  ) || { numeric: true };
+
+                  return (
+                    <th
+                      key={key}
+                      className={getCellClass(
+                        column,
+                        "dashboard-total-value"
+                      )}
+                    >
+                      {value}
+                    </th>
+                  );
+                })}
               </tr>
             </tfoot>
           </table>
