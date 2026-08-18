@@ -1,4 +1,4 @@
-import uniformData from "../data/uniform-data.json";
+import { supabase } from "./supabase";
 
 const FINANCE_MONTH_ORDER = [9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8];
 const BACK_TO_SCHOOL_MONTH_ORDER = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7];
@@ -21,6 +21,13 @@ function getCalendarYear(month) {
   }
 
   return Number(month.slice(0, 4));
+}
+
+function getTermOrder(term) {
+  if (term === "Term 1") return 1;
+  if (term === "Term 2") return 2;
+  if (term === "Term 3") return 3;
+  return 0;
 }
 
 function getBackToSchoolAcademicYear(month) {
@@ -60,35 +67,91 @@ function getMonthOrder(yearBasis = "finance") {
     : FINANCE_MONTH_ORDER;
 }
 
-export const uniformRecords = uniformData.records || [];
-export const uniformMetadata = uniformData.metadata || {};
+export const uniformTerms = ["Term 1", "Term 2", "Term 3"];
 
-export function getUniformAcademicYears(yearBasis = "finance") {
+export async function fetchUniformRecords() {
+  const { data: stream, error: streamError } = await supabase
+    .from("revenue_streams")
+    .select("id")
+    .eq("code", "uniform")
+    .single();
+
+  if (streamError) {
+    throw streamError;
+  }
+
+  const { data, error } = await supabase
+    .from("financial_records")
+    .select(`
+      id,
+      academic_year,
+      month,
+      term,
+      scenario,
+      amount,
+      school:schools(code, name),
+      metric:revenue_metrics(code, name)
+    `)
+    .eq("revenue_stream_id", stream.id)
+    .order("month", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    school: row.school?.code || "",
+    schoolName: row.school?.name || row.school?.code || "",
+    revenueStream: "Uniform",
+    metric: row.metric?.name || row.metric?.code || "",
+    metricCode: row.metric?.code || "",
+    scenario: row.scenario || "Actual",
+    month: row.month,
+    academicYear: row.academic_year,
+    term: row.term || "",
+    termOrder: getTermOrder(row.term),
+    amount: Number(row.amount || 0),
+  }));
+}
+
+export function getUniformAcademicYears(
+  records = [],
+  yearBasis = "finance"
+) {
   return unique(
-    uniformRecords.map(
+    records.map(
       (record) =>
         applyUniformYearBasis(record, yearBasis).academicYear
     )
   ).sort((a, b) => a.localeCompare(b));
 }
 
-/*
- * Kept for backwards compatibility with pages that still use
- * the official Finance basis.
- */
-export const uniformAcademicYears =
-  getUniformAcademicYears("finance");
+export function getUniformSchools(records = []) {
+  const schools = new Map();
 
-export const uniformSchools = Object.entries(
-  uniformMetadata.schools || {}
-).map(([code, name]) => ({ code, name }));
+  records.forEach((record) => {
+    if (!record.school) {
+      return;
+    }
 
-export const uniformTerms = ["Term 1", "Term 2", "Term 3"];
+    if (!schools.has(record.school)) {
+      schools.set(record.school, {
+        code: record.school,
+        name: record.schoolName || record.school,
+      });
+    }
+  });
+
+  return [...schools.values()].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+}
 
 export function formatCurrency(value) {
   return new Intl.NumberFormat("en-AE", {
     style: "currency",
-    currency: uniformMetadata.currency || "AED",
+    currency: "AED",
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
 }
@@ -96,7 +159,7 @@ export function formatCurrency(value) {
 export function formatCompactCurrency(value) {
   return new Intl.NumberFormat("en-AE", {
     style: "currency",
-    currency: uniformMetadata.currency || "AED",
+    currency: "AED",
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(Number(value || 0));
@@ -107,14 +170,17 @@ export function formatPercentage(value, digits = 1) {
   return `${value.toFixed(digits)}%`;
 }
 
-export function filterUniformRecords({
-  academicYear = "",
-  school = "",
-  term = "",
-  scenario = "Actual",
-  yearBasis = "finance",
-} = {}) {
-  return uniformRecords
+export function filterUniformRecords(
+  records = [],
+  {
+    academicYear = "",
+    school = "",
+    term = "",
+    scenario = "Actual",
+    yearBasis = "finance",
+  } = {}
+) {
+  return records
     .map((record) =>
       applyUniformYearBasis(record, yearBasis)
     )
