@@ -109,7 +109,50 @@
 .edit-record-context span { display:block; margin-bottom:3px; color:#98a2b3; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.035em; }
 .edit-record-context strong { display:block; overflow:hidden; color:#344054; font-size:.75rem; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
 .edit-amount-field { margin-top:18px; }
-.edit-amount-field .money-input input { font-size:1.05rem; }
+.edit-money-input {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #d0d5dd;
+  border-radius:8px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.edit-money-input:focus-within {
+  border-color:#2f80ed;
+  box-shadow:0 0 0 3px rgba(47,128,237,.09);
+}
+.edit-money-input .edit-currency {
+  display:block;
+  padding:0 0 0 11px;
+  margin:0;
+  color:#98a2b3;
+  font-size:.7rem;
+  font-weight:800;
+  line-height:1;
+}
+.edit-money-input input {
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  margin:0;
+  padding:11px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  outline:0;
+  box-shadow:none;
+  color:#101828;
+  font-size:1.05rem;
+  font-weight:700;
+  text-align:right;
+}
+.edit-money-input input:hover,
+.edit-money-input input:focus {
+  border:0;
+  box-shadow:none;
+}
 .archive-confirm-button { background:#d92d20; border:1px solid #d92d20; color:#fff; }
 .archive-confirm-button:hover:not(:disabled) { background:#b42318; }
 .delete-modal { max-width:430px; text-align:center; }
