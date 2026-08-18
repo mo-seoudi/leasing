@@ -39,9 +39,9 @@
 .dashboard-results-table thead .dashboard-numeric-cell,
 .dashboard-results-table tbody .dashboard-numeric-cell,
 .dashboard-results-table tfoot .dashboard-numeric-cell { text-align:right; }
-.dashboard-results-table tfoot th { padding-top:12px; padding-bottom:12px; background:#f8fafc; color:#101828; border-top:1px solid #dfe3e8; border-bottom:0; font-family:inherit; font-size:10px; line-height:1.35; font-weight:700; letter-spacing:0; text-transform:none; }
+.dashboard-results-table tfoot th { padding-top:12px; padding-bottom:12px; background:#f8fafc; color:#101828; border-top:1px solid #dfe3e8; border-bottom:0; font-family:inherit; font-size:11px; line-height:1.35; font-weight:700; letter-spacing:0; text-transform:none; }
 .dashboard-results-table tfoot .dashboard-total-label { text-align:left; color:#101828; font-weight:700; }
-.dashboard-results-table tfoot .dashboard-total-value { color:#101828; font-family:inherit; font-size:10px; font-weight:700; line-height:1.35; letter-spacing:0; font-variant-numeric:tabular-nums; }
+.dashboard-results-table tfoot .dashboard-total-value { color:#101828; font-family:inherit; font-size:11px; font-weight:700; line-height:1.35; letter-spacing:0; font-variant-numeric:tabular-nums; }
 .dashboard-empty-state { padding:30px 16px; text-align:center; color:#98a2b3; font-size:11px; }
 
 .dashboard-results-pagination { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding-top:12px; }
