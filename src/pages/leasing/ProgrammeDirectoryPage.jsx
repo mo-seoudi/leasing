@@ -2,6 +2,7 @@ import {
   Fragment,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -611,6 +612,8 @@ export default function ProgrammeDirectoryPage() {
     setSelectedProgrammeDetail,
   ] = useState("");
 
+  const selectedProgrammeRowRef = useRef(null);
+
   const [
     selectedAggregateDetail,
     setSelectedAggregateDetail,
@@ -833,6 +836,44 @@ export default function ProgrammeDirectoryPage() {
     [aggregateTabs, selectedAggregateDetail]
   );
 
+  useEffect(() => {
+    if (!selectedProgrammeDetail) {
+      return undefined;
+    }
+
+    if (window.innerWidth > 720) {
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const row = selectedProgrammeRowRef.current;
+
+      if (!row) {
+        return;
+      }
+
+      const platformHeader =
+        document.querySelector(".platform-header");
+
+      const headerBottom =
+        platformHeader?.getBoundingClientRect().bottom || 0;
+
+      const rowTop =
+        row.getBoundingClientRect().top;
+
+      const offset = 8;
+
+      window.scrollBy({
+        top: rowTop - headerBottom - offset,
+        behavior: "smooth",
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [selectedProgrammeDetail]);
+
   function handleFilterChange(name, value) {
     setFilters((current) => {
       const updatedFilters = {
@@ -894,7 +935,7 @@ export default function ProgrammeDirectoryPage() {
 
   useEffect(() => {
     setHeaderControls(
-      <div className="header-page-filters programme-directory-header-filters">
+      <div className="header-page-filters">
         <label className="header-filter-control">
           <span>Academic Year</span>
           <select
@@ -1266,6 +1307,11 @@ export default function ProgrammeDirectoryPage() {
                   return (
                     <Fragment key={item.programme}>
                       <tr
+                        ref={
+                          isSelected
+                            ? selectedProgrammeRowRef
+                            : null
+                        }
                         className={
                           isSelected
                             ? "directory-selected-row"
