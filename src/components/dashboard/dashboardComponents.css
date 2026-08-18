@@ -42,90 +42,25 @@
   white-space: nowrap;
 }
 
-.dashboard-table-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.dashboard-results-table {
-  width: 100%;
-  min-width: 690px;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 12px;
-}
-
+.dashboard-table-scroll { width:100%; overflow-x:auto; }
+.dashboard-results-table { width:100%; min-width:690px; border-collapse:collapse; table-layout:fixed; font-size:12px; }
 .dashboard-results-table th,
-.dashboard-results-table td {
-  padding: 11px 13px;
-  border-bottom: 1px solid #eaecf0;
-  color: #344054;
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: left;
-  white-space: nowrap;
-  vertical-align: middle;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-results-table thead th {
-  background: #f8fafc;
-  color: #475467;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
+.dashboard-results-table td { padding:11px 13px; border-bottom:1px solid #eaecf0; color:#344054; font-size:12px; line-height:1.4; text-align:left; white-space:nowrap; vertical-align:middle; font-variant-numeric:tabular-nums; }
+.dashboard-results-table thead th { background:#f8fafc; color:#475467; font-size:10px; font-weight:700; letter-spacing:0; text-transform:none; }
 .dashboard-results-table thead .dashboard-numeric-cell,
 .dashboard-results-table tbody .dashboard-numeric-cell,
-.dashboard-results-table tfoot .dashboard-numeric-cell {
-  text-align: right;
-}
+.dashboard-results-table tfoot .dashboard-numeric-cell { text-align:right; }
+.dashboard-results-table tbody tr:hover { background:#f9fafb; }
 
-.dashboard-results-table tbody tr:hover {
-  background: #f9fafb;
-}
+/* Shared semantic financial colours. Streams opt in through the column tone. */
+.dashboard-results-table tbody .dashboard-value-sales { color:#1679a7; font-weight:700; }
+.dashboard-results-table tbody .dashboard-value-commission { color:#d85f1b; font-weight:700; }
 
-.dashboard-results-table tfoot th {
-  padding: 12px 13px;
-  border-top: 1px solid #dfe3e8;
-  border-bottom: 0;
-  background: #f8fafc;
-  color: #101828;
-  font-family: inherit;
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: none;
-}
+.dashboard-results-table tfoot th { padding:12px 13px; border-top:1px solid #dfe3e8; border-bottom:0; background:#f8fafc; color:#101828; font-family:inherit; font-size:12px; line-height:1.4; font-weight:800; letter-spacing:0; text-transform:none; }
+.dashboard-results-table tfoot .dashboard-total-label { text-align:left; color:#101828; font-size:12px; font-weight:800; }
+.dashboard-results-table tfoot .dashboard-total-value { color:#101828; font-family:inherit; font-size:12px; font-weight:800; line-height:1.4; letter-spacing:0; font-variant-numeric:tabular-nums; }
 
-.dashboard-results-table tfoot .dashboard-total-label {
-  text-align: left;
-  color: #101828;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.dashboard-results-table tfoot .dashboard-total-value {
-  color: #101828;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-empty-state {
-  padding: 36px 20px;
-  border: 1px dashed #d0d5dd;
-  border-radius: 8px;
-  color: #667085;
-  font-size: 13px;
-  text-align: center;
-}
+.dashboard-empty-state { padding:36px 20px; border:1px dashed #d0d5dd; border-radius:8px; color:#667085; font-size:13px; text-align:center; }
 
 .dashboard-results-pagination { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding-top:12px; }
 .dashboard-results-pagination button { display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 8px; border:1px solid #e4e7ec; border-radius:7px; background:#fff; color:#475467; font:inherit; font-size:10px; font-weight:700; cursor:pointer; }
