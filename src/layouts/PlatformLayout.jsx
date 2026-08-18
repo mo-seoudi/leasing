@@ -11,6 +11,7 @@ import {
 } from "react-icons/md";
 import { FaBusSimple, FaShirt } from "react-icons/fa6";
 
+import { useAuth } from "../auth/AuthProvider";
 import "./PlatformLayout.css";
 
 const LAPTOP_BREAKPOINT = 1450;
@@ -235,9 +236,39 @@ function getInitialCollapsedState() {
   );
 }
 
+function getInitials(name = "") {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "U"
+  );
+}
+
+function formatRole(role) {
+  if (!role) {
+    return "User";
+  }
+
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
 export default function PlatformLayout() {
+  const { user, profile, role } = useAuth();
+
   const [headerControls, setHeaderControls] = useState(null);
   const location = useLocation();
+
+  const userName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+  const userInitials = getInitials(userName);
+  const userRole = formatRole(role);
 
   const isLeasingRoute =
     location.pathname.startsWith("/leasing");
@@ -708,21 +739,21 @@ export default function PlatformLayout() {
           className="sidebar-footer"
           title={
             sidebarCollapsed
-              ? "Mohammed Seoudi"
+              ? userName
               : undefined
           }
         >
           <div className="user-avatar">
-            MS
+            {userInitials}
           </div>
 
           <div className="user-details">
             <strong>
-              Mohammed Seoudi
+              {userName}
             </strong>
 
             <span>
-              Commercial Operations
+              {userRole}
             </span>
           </div>
         </div>
