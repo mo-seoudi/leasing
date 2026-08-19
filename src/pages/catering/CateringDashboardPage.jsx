@@ -193,7 +193,7 @@ export default function CateringDashboardPage() {
 
         <PerformanceChart
           title="Term Performance"
-          description="Financial reporting terms, including July and August in Term 3."
+          description="Performance across finance terms."
           data={termData}
           categoryKey="term"
           formatAxis={formatCompactCurrency}
