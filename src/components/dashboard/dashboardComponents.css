@@ -16,12 +16,29 @@
 .dashboard-table-card { padding: 16px; min-width:0; }
 .dashboard-card-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
 .dashboard-card-heading h2 { margin:0; color:#101828; font-size:14px; }
-.dashboard-card-heading p { margin:4px 0 0; color:#98a2b3; font-size:10px; }
+.dashboard-card-heading p { margin:4px 0 0; color:#98a2b3; font-size:9px; }
 .dashboard-card-action { flex:0 0 auto; }
 .dashboard-chart-canvas { width:100%; min-width:0; }
 
+.dashboard-chart-canvas .recharts-cartesian-axis-tick-value,
+.dashboard-chart-canvas .recharts-legend-item-text {
+  font-size: 10px;
+}
+
+.dashboard-chart-canvas .recharts-cartesian-grid line {
+  stroke: #e4e7ec;
+}
+
+.dashboard-chart-controls {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
 .dashboard-metric-toggle { display:flex; padding:2px; border:1px solid #e4e7ec; border-radius:7px; background:#f9fafb; }
-.dashboard-metric-toggle button { border:0; background:transparent; color:#667085; padding:6px 10px; border-radius:5px; font:inherit; font-size:9px; font-weight:700; cursor:pointer; }
+.dashboard-metric-toggle button { border:0; background:transparent; color:#667085; padding:5px 8px; border-radius:5px; font:inherit; font-size:9px; font-weight:700; cursor:pointer; }
 .dashboard-metric-toggle button.active { background:#fff; color:#1679a7; box-shadow:0 1px 2px rgba(16,24,40,.08); }
 
 .dashboard-chart-tooltip { min-width:140px; padding:10px 12px; border:1px solid #e4e7ec; border-radius:8px; background:#fff; box-shadow:0 8px 20px rgba(16,24,40,.12); }
@@ -29,6 +46,47 @@
 .dashboard-chart-tooltip div { display:flex; justify-content:space-between; gap:16px; margin-top:4px; font-size:10px; }
 .dashboard-chart-tooltip span { color:#667085; }
 .dashboard-chart-tooltip b { color:#101828; }
+
+.dashboard-pie-canvas {
+  position:relative;
+}
+
+.dashboard-pie-centre {
+  position:absolute;
+  left:50%;
+  top:47%;
+  width:120px;
+  transform:translate(-50%, -50%);
+  pointer-events:none;
+  text-align:center;
+}
+
+.dashboard-pie-centre span {
+  display:block;
+  color:#98a2b3;
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.dashboard-pie-centre strong {
+  display:block;
+  margin-top:4px;
+  color:#101828;
+  font-size:13px;
+  font-weight:750;
+  line-height:1.2;
+}
+
+.dashboard-chart-empty {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  color:#98a2b3;
+  font-size:10px;
+}
 
 .dashboard-record-count {
   flex: 0 0 auto;
@@ -51,8 +109,6 @@
 .dashboard-results-table tbody .dashboard-numeric-cell,
 .dashboard-results-table tfoot .dashboard-numeric-cell { text-align:right; }
 .dashboard-results-table tbody tr:hover { background:#f9fafb; }
-
-/* Shared semantic financial colours. Streams opt in through the column tone. */
 .dashboard-results-table tbody .dashboard-value-sales { color:#1679a7; font-weight:700; }
 .dashboard-results-table tbody .dashboard-value-commission { color:#d85f1b; font-weight:700; }
 
@@ -70,10 +126,25 @@
 .dashboard-pagination-pages { display:flex; gap:5px; }
 .dashboard-results-pagination > span { min-width:72px; margin-left:5px; color:#98a2b3; font-size:9px; font-weight:650; }
 
+@media (max-width: 700px) {
+  .dashboard-card-heading {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .dashboard-card-action,
+  .dashboard-chart-controls {
+    width:100%;
+  }
+
+  .dashboard-chart-controls {
+    justify-content:flex-start;
+  }
+}
+
 @media (max-width: 560px) {
   .dashboard-chart-card,
   .dashboard-table-card { padding:13px; }
-  .dashboard-card-heading { align-items:center; }
   .dashboard-results-pagination { justify-content:flex-start; overflow-x:auto; }
   .dashboard-results-pagination > span { display:none; }
 }
