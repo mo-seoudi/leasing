@@ -334,13 +334,8 @@ export default function UniformDashboardPage() {
 
   const termDescription =
     yearBasis === "finance"
-      ? "Finance basis: September to August, with July and August in Term 3."
-      : "Back-to-school basis: August to July, with August included in Term 1.";
-
-  const monthlyResultsDescription =
-    yearBasis === "finance"
-      ? "Finance basis (Sep–Aug)."
-      : "Back-to-school basis (Aug–Jul).";
+      ? "Performance across finance terms."
+      : "Performance across back-to-school terms.";
 
   return (
     <section className="dashboard-page uniform-dashboard-page">
@@ -416,10 +411,6 @@ export default function UniformDashboardPage() {
         emptyMessage="No uniform records match the selected filters."
         resetKey={tableResetKey}
       />
-
-      <p className="uniform-results-basis-note" hidden>
-        {monthlyResultsDescription}
-      </p>
     </section>
   );
 }
