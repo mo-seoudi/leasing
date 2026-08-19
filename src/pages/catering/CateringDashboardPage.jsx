@@ -11,7 +11,6 @@ import "../../components/dashboard/dashboardComponents.css";
 import {
   cateringAcademicYears,
   cateringSchools,
-  cateringTerms,
   filterCateringRecords,
   formatCompactCurrency,
   formatCurrency,
@@ -32,7 +31,6 @@ export default function CateringDashboardPage() {
   const [filters, setFilters] = useState({
     academicYear: latestAcademicYear,
     school: "",
-    term: "",
   });
 
   const filteredRecords = useMemo(
@@ -60,7 +58,7 @@ export default function CateringDashboardPage() {
     [filteredRecords]
   );
 
-  const tableResetKey = `${filters.academicYear}|${filters.school}|${filters.term}`;
+  const tableResetKey = `${filters.academicYear}|${filters.school}`;
 
   function handleFilterChange(name, value) {
     setFilters((current) => ({ ...current, [name]: value }));
@@ -102,23 +100,6 @@ export default function CateringDashboardPage() {
             ))}
           </select>
         </label>
-
-        <label className="header-filter-control">
-          <span>Term</span>
-          <select
-            value={filters.term}
-            onChange={(event) =>
-              handleFilterChange("term", event.target.value)
-            }
-          >
-            <option value="">All Terms</option>
-            {cateringTerms.map((term) => (
-              <option key={term} value={term}>
-                {term}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
     );
 
@@ -133,92 +114,31 @@ export default function CateringDashboardPage() {
     { key: "academicYear", label: "Academic Year" },
     { key: "label", label: "Month" },
     { key: "term", label: "Term" },
-    {
-      key: "sales",
-      label: "Sales",
-      numeric: true,
-      tone: "sales",
-      render: (value) => formatCurrency(value),
-    },
-    {
-      key: "commission",
-      label: "Commission",
-      numeric: true,
-      tone: "commission",
-      render: (value) => formatCurrency(value),
-    },
-    {
-      key: "commissionRate",
-      label: "Commission Rate",
-      numeric: true,
-      render: (value) => formatPercentage(value),
-    },
+    { key: "sales", label: "Sales", numeric: true, tone: "sales", render: (value) => formatCurrency(value) },
+    { key: "commission", label: "Commission", numeric: true, tone: "commission", render: (value) => formatCurrency(value) },
+    { key: "commissionRate", label: "Commission Rate", numeric: true, render: (value) => formatPercentage(value) },
   ];
 
   return (
     <section className="catering-dashboard-page">
       <section className="catering-kpi-grid">
-        <KpiCard
-          label="Total Sales"
-          value={formatCurrency(summary.sales)}
-          detail={`${summary.months} reporting months`}
-        />
-        <KpiCard
-          label="Total Commission"
-          value={formatCurrency(summary.commission)}
-          detail={`${summary.schools} schools included`}
-        />
-        <KpiCard
-          label="Effective Commission Rate"
-          value={formatPercentage(summary.commissionRate)}
-          detail="Commission divided by catering sales"
-        />
-        <KpiCard
-          label="Average Monthly Sales"
-          value={formatCurrency(summary.averageMonthlySales)}
-          detail="Average across the selected period"
-        />
+        <KpiCard label="Total Sales" value={formatCurrency(summary.sales)} detail={`${summary.months} reporting months`} />
+        <KpiCard label="Total Commission" value={formatCurrency(summary.commission)} detail={`${summary.schools} schools included`} />
+        <KpiCard label="Effective Commission Rate" value={formatPercentage(summary.commissionRate)} detail="Commission divided by catering sales" />
+        <KpiCard label="Average Monthly Sales" value={formatCurrency(summary.averageMonthlySales)} detail="Average across the selected period" />
       </section>
 
       <section className="catering-two-column-grid">
-        <PerformanceChart
-          title="School Performance"
-          description="Sales and commission by school."
-          data={schoolData}
-          categoryKey="school"
-          formatAxis={formatCompactCurrency}
-          formatValue={formatCurrency}
-          tooltipContent={currencyTooltip}
-        />
-
-        <PerformanceChart
-          title="Term Performance"
-          description="Performance across finance terms."
-          data={termData}
-          categoryKey="term"
-          formatAxis={formatCompactCurrency}
-          formatValue={formatCurrency}
-          tooltipContent={currencyTooltip}
-          defaultMetric="Sales"
-          defaultView="Pie"
-        />
+        <PerformanceChart title="School Performance" description="Sales and commission by school." data={schoolData} categoryKey="school" formatAxis={formatCompactCurrency} formatValue={formatCurrency} tooltipContent={currencyTooltip} />
+        <PerformanceChart title="Term Performance" description="Performance across finance terms." data={termData} categoryKey="term" formatAxis={formatCompactCurrency} formatValue={formatCurrency} tooltipContent={currencyTooltip} defaultMetric="Sales" defaultView="Pie" />
       </section>
 
-      <MonthlyTrendChart
-        data={monthlyData}
-        formatAxis={formatCompactCurrency}
-        tooltipContent={currencyTooltip}
-        className="catering-wide-card"
-      />
+      <MonthlyTrendChart data={monthlyData} formatAxis={formatCompactCurrency} tooltipContent={currencyTooltip} className="catering-wide-card" />
 
       <MonthlyResultsTable
         data={monthlyData}
         columns={monthlyColumns}
-        totals={{
-          sales: formatCurrency(summary.sales),
-          commission: formatCurrency(summary.commission),
-          commissionRate: formatPercentage(summary.commissionRate),
-        }}
+        totals={{ sales: formatCurrency(summary.sales), commission: formatCurrency(summary.commission), commissionRate: formatPercentage(summary.commissionRate) }}
         emptyMessage="No catering records match the selected filters."
         resetKey={tableResetKey}
       />
