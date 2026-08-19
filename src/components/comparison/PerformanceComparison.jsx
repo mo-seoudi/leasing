@@ -4,16 +4,29 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+
 import "./performanceComparison.css";
 
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 const MODES = [
   ["yoy", "Year on Year"],
   ["ytm", "Year to Month"],
@@ -21,43 +34,80 @@ const MODES = [
   ["tot", "Term on Term"],
 ];
 
-function growth(current, comparison) {
-  if (!comparison) return null;
+function calculateGrowth(currentValue, comparisonValue) {
+  const current = Number(currentValue || 0);
+  const comparison = Number(comparisonValue || 0);
+
+  if (comparison === 0) {
+    return null;
+  }
+
   return ((current - comparison) / comparison) * 100;
 }
-function growthText(value) {
-  if (value === null || !Number.isFinite(value)) return "—";
-  return `${value > 0 ? "+" : ""}${value.toFixed(1)}%`;
+
+function formatGrowth(value) {
+  if (value === null || !Number.isFinite(value)) {
+    return "—";
+  }
+
+  return `${value > 0 ? "+" : ""}${value.toFixed(0)}%`;
 }
-function monthNumber(value) {
+
+function getGrowthClass(value) {
+  if (value === null || !Number.isFinite(value) || value === 0) {
+    return "neutral";
+  }
+
+  return value > 0 ? "positive" : "negative";
+}
+
+function getMonthNumber(value) {
   return Number(String(value || "").slice(5, 7));
 }
-function calendarYear(value) {
-  return Number(String(value || "").slice(0, 4));
-}
-function ayStart(ay) {
-  const match = String(ay || "").match(/(20\d{2})/);
+
+function getAcademicYearStartYear(academicYear) {
+  const match = String(academicYear || "").match(/(20\d{2})/);
   return match ? Number(match[1]) : 0;
 }
-function monthKeyForAY(ay, month, startMonth) {
-  const start = ayStart(ay);
-  if (!start || !month) return "";
-  const year = month >= startMonth ? start : start + 1;
-  return `${year}-${String(month).padStart(2, "0")}`;
+
+function getMonthKeyForAcademicYear(
+  academicYear,
+  monthNumber,
+  startMonth
+) {
+  const startYear = getAcademicYearStartYear(academicYear);
+
+  if (!startYear || !monthNumber) {
+    return "";
+  }
+
+  const calendarYear =
+    monthNumber >= startMonth ? startYear : startYear + 1;
+
+  return `${calendarYear}-${String(monthNumber).padStart(2, "0")}`;
 }
-function orderedMonths(startMonth) {
-  return Array.from({ length: 12 }, (_, index) => ((startMonth - 1 + index) % 12) + 1);
+
+function getOrderedMonths(startMonth) {
+  return Array.from(
+    { length: 12 },
+    (_, index) => ((startMonth - 1 + index) % 12) + 1
+  );
 }
-function previousAY(ay, years) {
-  const index = years.indexOf(ay);
-  return index > 0 ? years[index - 1] : "";
+
+function sumMetric(records, metricKey, metricValue) {
+  return records.reduce((total, record) => {
+    if (record[metricKey] !== metricValue) {
+      return total;
+    }
+
+    return total + Number(record.amount || 0);
+  }, 0);
 }
-function nextAY(ay, years) {
-  const index = years.indexOf(ay);
-  return index >= 0 && index < years.length - 1 ? years[index + 1] : "";
-}
-function sum(records, metricKey, metricValue) {
-  return records.reduce((total, record) => total + (record[metricKey] === metricValue ? Number(record.amount || 0) : 0), 0);
+
+function getYearRecords(records, academicYear) {
+  return records.filter(
+    (record) => record.academicYear === academicYear
+  );
 }
 
 export default function PerformanceComparison({
@@ -71,111 +121,467 @@ export default function PerformanceComparison({
   yearBasis = "finance",
   onYearBasisChange,
   extraControls = null,
+  scopeLabel = "All Schools",
 }) {
-  const years = [...academicYears].sort((a, b) => a.localeCompare(b));
-  const latestYear = years[years.length - 1] || "";
+  const years = useMemo(
+    () =>
+      [...academicYears].sort((a, b) =>
+        a.localeCompare(b)
+      ),
+    [academicYears]
+  );
+
+  const monthOrder = useMemo(
+    () => getOrderedMonths(startMonth),
+    [startMonth]
+  );
+
   const [mode, setMode] = useState("yoy");
-  const [selectedYear, setSelectedYear] = useState(latestYear);
-  const [direction, setDirection] = useState("previous");
   const [selectedMonth, setSelectedMonth] = useState(3);
   const [selectedTerm, setSelectedTerm] = useState("Term 2");
   const [comparisonTerm, setComparisonTerm] = useState("Term 1");
-  const [comparisonTermYear, setComparisonTermYear] = useState(latestYear);
 
-  const comparisonYear = direction === "next" ? nextAY(selectedYear, years) : previousAY(selectedYear, years);
-  const monthOrder = orderedMonths(startMonth);
+  const rows = useMemo(() => {
+    return years.map((academicYear, yearIndex) => {
+      const yearRecords = getYearRecords(records, academicYear);
+      const previousAcademicYear = years[yearIndex - 1] || "";
+      const previousYearRecords = previousAcademicYear
+        ? getYearRecords(records, previousAcademicYear)
+        : [];
 
-  const result = useMemo(() => {
-    const byYear = (year) => records.filter((record) => record.academicYear === year);
-    let currentRecords = [];
-    let comparisonRecords = [];
-    let currentLabel = selectedYear;
-    let comparisonLabel = comparisonYear || "No comparison period";
+      let currentRecords = yearRecords;
+      let baselineRecords = previousYearRecords;
 
-    if (mode === "yoy") {
-      currentRecords = byYear(selectedYear);
-      comparisonRecords = byYear(comparisonYear);
-    }
+      if (mode === "ytm") {
+        const selectedIndex = monthOrder.indexOf(selectedMonth);
+        const allowedMonths = monthOrder.slice(
+          0,
+          selectedIndex + 1
+        );
 
+        currentRecords = yearRecords.filter((record) =>
+          allowedMonths.includes(getMonthNumber(record.month))
+        );
+
+        baselineRecords = previousYearRecords.filter((record) =>
+          allowedMonths.includes(getMonthNumber(record.month))
+        );
+      }
+
+      if (mode === "mom") {
+        const selectedMonthKey = getMonthKeyForAcademicYear(
+          academicYear,
+          selectedMonth,
+          startMonth
+        );
+
+        const selectedDate = selectedMonthKey
+          ? new Date(`${selectedMonthKey}-01T00:00:00Z`)
+          : null;
+
+        const previousDate = selectedDate
+          ? new Date(
+              Date.UTC(
+                selectedDate.getUTCFullYear(),
+                selectedDate.getUTCMonth() - 1,
+                1
+              )
+            )
+          : null;
+
+        const previousMonthKey = previousDate
+          ? `${previousDate.getUTCFullYear()}-${String(
+              previousDate.getUTCMonth() + 1
+            ).padStart(2, "0")}`
+          : "";
+
+        currentRecords = yearRecords.filter((record) =>
+          String(record.month || "").startsWith(
+            selectedMonthKey
+          )
+        );
+
+        baselineRecords = yearRecords.filter((record) =>
+          String(record.month || "").startsWith(
+            previousMonthKey
+          )
+        );
+      }
+
+      if (mode === "tot") {
+        currentRecords = yearRecords.filter(
+          (record) => record.term === selectedTerm
+        );
+
+        baselineRecords = yearRecords.filter(
+          (record) => record.term === comparisonTerm
+        );
+      }
+
+      const values = {};
+
+      metrics.forEach((metric) => {
+        const currentValue = sumMetric(
+          currentRecords,
+          metricKey,
+          metric.source
+        );
+
+        const baselineValue = sumMetric(
+          baselineRecords,
+          metricKey,
+          metric.source
+        );
+
+        values[metric.key] = currentValue;
+        values[`${metric.key}Growth`] = calculateGrowth(
+          currentValue,
+          baselineValue
+        );
+      });
+
+      return {
+        academicYear,
+        ...values,
+      };
+    });
+  }, [
+    records,
+    years,
+    mode,
+    monthOrder,
+    selectedMonth,
+    selectedTerm,
+    comparisonTerm,
+    metrics,
+    metricKey,
+    startMonth,
+  ]);
+
+  const modeDescription = useMemo(() => {
     if (mode === "ytm") {
-      const allowed = monthOrder.slice(0, monthOrder.indexOf(selectedMonth) + 1);
-      currentRecords = byYear(selectedYear).filter((record) => allowed.includes(monthNumber(record.month)));
-      comparisonRecords = byYear(comparisonYear).filter((record) => allowed.includes(monthNumber(record.month)));
-      currentLabel = `${MONTH_NAMES[startMonth - 1]}–${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`;
-      comparisonLabel = comparisonYear ? `${MONTH_NAMES[startMonth - 1]}–${MONTH_NAMES[selectedMonth - 1]} ${comparisonYear}` : "No comparison period";
+      return `${MONTH_NAMES[startMonth - 1]}–${MONTH_NAMES[selectedMonth - 1]} performance across all available academic years.`;
     }
 
     if (mode === "mom") {
-      const currentKey = monthKeyForAY(selectedYear, selectedMonth, startMonth);
-      const currentDate = new Date(`${currentKey}-01T00:00:00`);
-      const previousDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() - 1, 1));
-      const previousKey = `${previousDate.getUTCFullYear()}-${String(previousDate.getUTCMonth() + 1).padStart(2, "0")}`;
-      currentRecords = records.filter((record) => String(record.month || "").startsWith(currentKey));
-      comparisonRecords = records.filter((record) => String(record.month || "").startsWith(previousKey));
-      currentLabel = `${MONTH_NAMES[selectedMonth - 1]} ${currentDate.getUTCFullYear()}`;
-      comparisonLabel = `${MONTH_NAMES[previousDate.getUTCMonth()]} ${previousDate.getUTCFullYear()}`;
+      const selectedIndex = monthOrder.indexOf(selectedMonth);
+      const previousMonth =
+        monthOrder[
+          selectedIndex > 0
+            ? selectedIndex - 1
+            : monthOrder.length - 1
+        ];
+
+      return `${MONTH_NAMES[selectedMonth - 1]} performance with growth versus ${MONTH_NAMES[previousMonth - 1]} in each academic year.`;
     }
 
     if (mode === "tot") {
-      currentRecords = byYear(selectedYear).filter((record) => record.term === selectedTerm);
-      comparisonRecords = byYear(comparisonTermYear).filter((record) => record.term === comparisonTerm);
-      currentLabel = `${selectedTerm} · ${selectedYear}`;
-      comparisonLabel = `${comparisonTerm} · ${comparisonTermYear}`;
+      return `${selectedTerm} performance with growth versus ${comparisonTerm} in each academic year.`;
     }
 
-    const values = metrics.map((metric) => {
-      const current = sum(currentRecords, metricKey, metric.source);
-      const comparison = sum(comparisonRecords, metricKey, metric.source);
-      return { ...metric, current, comparison, growth: growth(current, comparison) };
-    });
-
-    return { currentLabel, comparisonLabel, values };
-  }, [records, metrics, metricKey, mode, selectedYear, comparisonYear, selectedMonth, selectedTerm, comparisonTerm, comparisonTermYear, monthOrder, startMonth]);
-
-  const progression = useMemo(() => {
-    if (mode !== "ytm" || !comparisonYear) return [];
-    const allowed = monthOrder.slice(0, monthOrder.indexOf(selectedMonth) + 1);
-    return allowed.map((month) => {
-      const currentKey = monthKeyForAY(selectedYear, month, startMonth);
-      const comparisonKey = monthKeyForAY(comparisonYear, month, startMonth);
-      const currentRecords = records.filter((record) => String(record.month || "").startsWith(currentKey));
-      const comparisonRecords = records.filter((record) => String(record.month || "").startsWith(comparisonKey));
-      const row = { month: MONTH_NAMES[month - 1] };
-      metrics.forEach((metric) => {
-        row[`${metric.key}Current`] = sum(currentRecords, metricKey, metric.source);
-        row[`${metric.key}Comparison`] = sum(comparisonRecords, metricKey, metric.source);
-      });
-      return row;
-    });
-  }, [mode, comparisonYear, monthOrder, selectedMonth, selectedYear, startMonth, records, metrics, metricKey]);
+    return "Performance across all available academic years.";
+  }, [
+    mode,
+    monthOrder,
+    selectedMonth,
+    selectedTerm,
+    comparisonTerm,
+    startMonth,
+  ]);
 
   return (
     <section className="performance-comparison">
       <div className="comparison-mode-bar">
-        {MODES.map(([key, label]) => <button key={key} type="button" className={mode === key ? "active" : ""} onClick={() => setMode(key)}>{label}</button>)}
+        {MODES.map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            className={mode === key ? "active" : ""}
+            onClick={() => setMode(key)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      <section className="comparison-control-card">
-        <label><span>Academic Year</span><select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>{years.map((year) => <option key={year}>{year}</option>)}</select></label>
-        {(mode === "yoy" || mode === "ytm") && <label><span>Compare With</span><select value={direction} onChange={(e) => setDirection(e.target.value)}><option value="previous">Previous Year</option><option value="next">Next Year</option></select></label>}
-        {(mode === "ytm" || mode === "mom") && <label><span>{mode === "ytm" ? "Through Month" : "Month"}</span><select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>{monthOrder.map((month) => <option key={month} value={month}>{MONTH_NAMES[month - 1]}</option>)}</select></label>}
-        {mode === "tot" && <><label><span>Term</span><select value={selectedTerm} onChange={(e) => setSelectedTerm(e.target.value)}><option>Term 1</option><option>Term 2</option><option>Term 3</option></select></label><label><span>Compare Year</span><select value={comparisonTermYear} onChange={(e) => setComparisonTermYear(e.target.value)}>{years.map((year) => <option key={year}>{year}</option>)}</select></label><label><span>Compare Term</span><select value={comparisonTerm} onChange={(e) => setComparisonTerm(e.target.value)}><option>Term 1</option><option>Term 2</option><option>Term 3</option></select></label></>}
-        {allowYearBasis && <div className="comparison-basis"><span>Year Basis</span><div><button type="button" className={yearBasis === "finance" ? "active" : ""} onClick={() => onYearBasisChange?.("finance")}>Sep–Aug</button><button type="button" className={yearBasis === "backToSchool" ? "active" : ""} onClick={() => onYearBasisChange?.("backToSchool")}>Aug–Jul</button></div></div>}
-        {extraControls}
+      {(mode !== "yoy" || allowYearBasis || extraControls) && (
+        <section className="comparison-control-card">
+          {(mode === "ytm" || mode === "mom") && (
+            <label>
+              <span>
+                {mode === "ytm" ? "Through Month" : "Month"}
+              </span>
+              <select
+                value={selectedMonth}
+                onChange={(event) =>
+                  setSelectedMonth(Number(event.target.value))
+                }
+              >
+                {monthOrder.map((month) => (
+                  <option key={month} value={month}>
+                    {MONTH_NAMES[month - 1]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {mode === "tot" && (
+            <>
+              <label>
+                <span>Term</span>
+                <select
+                  value={selectedTerm}
+                  onChange={(event) =>
+                    setSelectedTerm(event.target.value)
+                  }
+                >
+                  <option>Term 1</option>
+                  <option>Term 2</option>
+                  <option>Term 3</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Compare With</span>
+                <select
+                  value={comparisonTerm}
+                  onChange={(event) =>
+                    setComparisonTerm(event.target.value)
+                  }
+                >
+                  <option>Term 1</option>
+                  <option>Term 2</option>
+                  <option>Term 3</option>
+                </select>
+              </label>
+            </>
+          )}
+
+          {allowYearBasis && (
+            <div className="comparison-basis">
+              <span>Year Basis</span>
+              <div>
+                <button
+                  type="button"
+                  className={
+                    yearBasis === "finance" ? "active" : ""
+                  }
+                  onClick={() =>
+                    onYearBasisChange?.("finance")
+                  }
+                >
+                  Sep–Aug
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    yearBasis === "backToSchool"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    onYearBasisChange?.("backToSchool")
+                  }
+                >
+                  Aug–Jul
+                </button>
+              </div>
+            </div>
+          )}
+
+          {extraControls}
+        </section>
+      )}
+
+      <section className="comparison-summary-card">
+        <div className="comparison-card-heading">
+          <div>
+            <h2>{scopeLabel}</h2>
+            <p>{modeDescription}</p>
+          </div>
+
+          <span className="comparison-year-count">
+            {rows.length} academic years
+          </span>
+        </div>
+
+        {!rows.length ? (
+          <div className="comparison-empty-state">
+            No records are available for the selected filters.
+          </div>
+        ) : (
+          <div className="comparison-table-scroll">
+            <table className="comparison-table">
+              <thead>
+                <tr>
+                  <th>Academic Year</th>
+
+                  {metrics.map((metric) => (
+                    <>
+                      <th key={`${metric.key}-value`}>
+                        {metric.label}
+                      </th>
+                      <th key={`${metric.key}-growth`}>
+                        {metric.label} Growth
+                      </th>
+                    </>
+                  ))}
+
+                  {metrics.length === 2 && (
+                    <th>
+                      {metrics[1].label === "Commission"
+                        ? "Commission Rate"
+                        : "Income Rate"}
+                    </th>
+                  )}
+                </tr>
+              </thead>
+
+              <tbody>
+                {rows.map((row) => {
+                  const rate =
+                    metrics.length === 2 && row[metrics[0].key]
+                      ? (row[metrics[1].key] /
+                          row[metrics[0].key]) *
+                        100
+                      : 0;
+
+                  return (
+                    <tr key={row.academicYear}>
+                      <th>{row.academicYear}</th>
+
+                      {metrics.map((metric, metricIndex) => (
+                        <>
+                          <td
+                            key={`${metric.key}-value`}
+                            className={
+                              metricIndex === 0
+                                ? "comparison-primary-value"
+                                : "comparison-secondary-value"
+                            }
+                          >
+                            {formatCurrency(row[metric.key])}
+                          </td>
+
+                          <td key={`${metric.key}-growth`}>
+                            <span
+                              className={`comparison-growth-value ${getGrowthClass(
+                                row[`${metric.key}Growth`]
+                              )}`}
+                            >
+                              {formatGrowth(
+                                row[`${metric.key}Growth`]
+                              )}
+                            </span>
+                          </td>
+                        </>
+                      ))}
+
+                      {metrics.length === 2 && (
+                        <td>{rate.toFixed(1)}%</td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
-      <div className="comparison-period-heading"><strong>{result.currentLabel}</strong><span>vs</span><strong>{result.comparisonLabel}</strong></div>
+      {rows.length > 0 && (
+        <section className="comparison-chart-card">
+          <div className="comparison-card-heading">
+            <div>
+              <h2>
+                {mode === "yoy"
+                  ? "Academic-Year Comparison"
+                  : mode === "ytm"
+                    ? "Year-to-Month Comparison"
+                    : mode === "mom"
+                      ? "Month Comparison"
+                      : "Term Comparison"}
+              </h2>
+              <p>{modeDescription}</p>
+            </div>
+          </div>
 
-      <section className="comparison-kpi-grid">
-        {result.values.map((item) => <article key={item.key} className="comparison-kpi"><span>{item.label}</span><strong>{formatCurrency(item.current)}</strong><small>vs {formatCurrency(item.comparison)}</small><b className={item.growth > 0 ? "positive" : item.growth < 0 ? "negative" : "neutral"}>{growthText(item.growth)}</b></article>)}
-      </section>
+          <div className="comparison-chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={rows}
+                margin={{
+                  top: 18,
+                  right: 20,
+                  left: 10,
+                  bottom: 8,
+                }}
+                barGap={8}
+                barCategoryGap="28%"
+              >
+                <CartesianGrid
+                  stroke="#edf1f5"
+                  strokeDasharray="3 5"
+                  vertical={false}
+                />
 
-      <section className="comparison-chart-card">
-        <div className="comparison-card-heading"><div><h2>Period Comparison</h2><p>{result.currentLabel} compared with {result.comparisonLabel}.</p></div></div>
-        <div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={result.values}><CartesianGrid strokeDasharray="3 5" vertical={false} stroke="#edf1f5"/><XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize:10}}/><YAxis axisLine={false} tickLine={false} tick={{fontSize:10}}/><Tooltip formatter={(value) => formatCurrency(value)}/><Legend/><Bar dataKey="current" name={result.currentLabel} fill="#2f80ed" radius={[7,7,2,2]}/><Bar dataKey="comparison" name={result.comparisonLabel} fill="#f2994a" radius={[7,7,2,2]}/></BarChart></ResponsiveContainer></div>
-      </section>
+                <XAxis
+                  dataKey="academicYear"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#667085",
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}
+                  dy={8}
+                />
 
-      {mode === "ytm" && progression.length > 0 && <section className="comparison-chart-card"><div className="comparison-card-heading"><div><h2>Monthly Progression</h2><p>Month-by-month movement within the selected year-to-month period.</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><LineChart data={progression}><CartesianGrid strokeDasharray="3 5" vertical={false} stroke="#edf1f5"/><XAxis dataKey="month" axisLine={false} tickLine={false}/><YAxis axisLine={false} tickLine={false} tick={{fontSize:10}}/><Tooltip formatter={(value) => formatCurrency(value)}/><Legend/>{metrics.map((metric, index) => <Line key={metric.key} type="monotone" dataKey={`${metric.key}Current`} name={`${metric.label} · ${selectedYear}`} stroke={index === 0 ? "#2f80ed" : "#f2994a"} strokeWidth={2.2} dot={false}/>)}</LineChart></ResponsiveContainer></div></section>}
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fill: "#98a2b3",
+                    fontSize: 11,
+                    fontWeight: 500,
+                  }}
+                />
+
+                <Tooltip
+                  formatter={(value, name) => [
+                    formatCurrency(value),
+                    name,
+                  ]}
+                />
+
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{
+                    paddingTop: "12px",
+                    color: "#667085",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                  }}
+                />
+
+                {metrics.map((metric, index) => (
+                  <Bar
+                    key={metric.key}
+                    dataKey={metric.key}
+                    name={metric.label}
+                    fill={index === 0 ? "#2f80ed" : "#f2994a"}
+                    radius={[8, 8, 2, 2]}
+                    maxBarSize={58}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      )}
     </section>
   );
 }
