@@ -199,6 +199,8 @@ export default function CateringDashboardPage() {
           formatAxis={formatCompactCurrency}
           formatValue={formatCurrency}
           tooltipContent={currencyTooltip}
+          defaultMetric="Sales"
+          defaultView="Pie"
         />
       </section>
 
