@@ -9,17 +9,19 @@ import PerformanceChart from "../../components/dashboard/PerformanceChart";
 import "../../components/dashboard/dashboardComponents.css";
 
 import {
-  academicYears,
   calculateKPIs,
-  filterRecords,
   formatCompactCurrency,
   formatCurrency,
   formatPercentage,
   getMonthlyTrend,
   getSchoolBreakdown,
   getTermBreakdown,
-  schools,
 } from "../../lib/dashboardData";
+import {
+  fetchLeasingRecords,
+  filterLeasingRecords,
+  getLeasingDimensions,
+} from "../../lib/leasingSupabaseData";
 
 const LEASING_METRICS = [
   { key: "totalRevenue", label: "Revenue", tone: "primary" },
@@ -28,10 +30,50 @@ const LEASING_METRICS = [
 
 export default function LeasingDashboardPage() {
   const { setHeaderControls } = useOutletContext();
-  const latestAcademicYear = academicYears[academicYears.length - 1] || "";
-  const [filters, setFilters] = useState({ academicYear: latestAcademicYear, school: "" });
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [filters, setFilters] = useState({ academicYear: "", school: "" });
 
-  const filteredRecords = useMemo(() => filterRecords(filters), [filters]);
+  useEffect(() => {
+    let active = true;
+
+    async function loadRecords() {
+      try {
+        setLoading(true);
+        setLoadError("");
+        const nextRecords = await fetchLeasingRecords();
+
+        if (!active) return;
+
+        setRecords(nextRecords);
+        const dimensions = getLeasingDimensions(nextRecords);
+        const latestAcademicYear =
+          dimensions.academicYears[dimensions.academicYears.length - 1] || "";
+        setFilters((current) => ({
+          ...current,
+          academicYear: current.academicYear || latestAcademicYear,
+        }));
+      } catch (error) {
+        if (!active) return;
+        console.error("Unable to load Leasing records from Supabase", error);
+        setLoadError("Unable to load Leasing records from Supabase.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadRecords();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const dimensions = useMemo(() => getLeasingDimensions(records), [records]);
+  const filteredRecords = useMemo(
+    () => filterLeasingRecords(records, filters),
+    [records, filters]
+  );
   const summary = useMemo(() => calculateKPIs(filteredRecords), [filteredRecords]);
   const monthlyData = useMemo(() => getMonthlyTrend(filteredRecords), [filteredRecords]);
   const schoolData = useMemo(() => getSchoolBreakdown(filteredRecords), [filteredRecords]);
@@ -53,20 +95,20 @@ export default function LeasingDashboardPage() {
           <span>Academic Year</span>
           <select value={filters.academicYear} onChange={(e) => handleFilterChange("academicYear", e.target.value)}>
             <option value="">All Years</option>
-            {academicYears.map((year) => <option key={year} value={year}>{year}</option>)}
+            {dimensions.academicYears.map((year) => <option key={year} value={year}>{year}</option>)}
           </select>
         </label>
         <label className="header-filter-control wide">
           <span>School</span>
           <select value={filters.school} onChange={(e) => handleFilterChange("school", e.target.value)}>
             <option value="">All Schools</option>
-            {schools.map((school) => <option key={school} value={school}>{school}</option>)}
+            {dimensions.schools.map((school) => <option key={school} value={school}>{school}</option>)}
           </select>
         </label>
       </div>
     );
     return () => setHeaderControls(null);
-  }, [filters, setHeaderControls]);
+  }, [filters, dimensions, setHeaderControls]);
 
   const tooltip = <DashboardCurrencyTooltip formatValue={formatCurrency} />;
   const columns = [
@@ -77,6 +119,14 @@ export default function LeasingDashboardPage() {
     { key: "schoolIncome", label: "School Income", numeric: true, tone: "commission", render: formatCurrency },
     { key: "incomeRate", label: "Income Rate", numeric: true, render: formatPercentage },
   ];
+
+  if (loading) {
+    return <section className="dashboard-page leasing-dashboard-page"><div className="dashboard-empty-state">Loading Leasing data…</div></section>;
+  }
+
+  if (loadError) {
+    return <section className="dashboard-page leasing-dashboard-page"><div className="dashboard-empty-state">{loadError}</div></section>;
+  }
 
   return (
     <section className="dashboard-page leasing-dashboard-page">
