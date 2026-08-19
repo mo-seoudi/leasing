@@ -6,16 +6,27 @@ export default function MetricToggle({
 }) {
   return (
     <div className="dashboard-metric-toggle" aria-label={ariaLabel}>
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={value === option ? "active" : ""}
-          onClick={() => onChange(option)}
-        >
-          {option}
-        </button>
-      ))}
+      {options.map((option) => {
+        const optionValue =
+          typeof option === "string" ? option : option.value;
+        const optionLabel =
+          typeof option === "string" ? option : option.label || option.value;
+        const Icon =
+          typeof option === "string" ? null : option.icon;
+
+        return (
+          <button
+            key={optionValue}
+            type="button"
+            className={value === optionValue ? "active" : ""}
+            onClick={() => onChange(optionValue)}
+            aria-label={optionLabel}
+            title={optionLabel}
+          >
+            {Icon ? <Icon aria-hidden="true" /> : optionLabel}
+          </button>
+        );
+      })}
     </div>
   );
 }
