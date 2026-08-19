@@ -29,38 +29,11 @@ function getGrowthClass(value) {
   if (value === null || !Number.isFinite(value) || value === 0) return "neutral";
   return value > 0 ? "positive" : "negative";
 }
-function getAcademicYearStartYear(academicYear) {
-  const match = String(academicYear || "").match(/(20\d{2})/);
-  return match ? Number(match[1]) : 0;
-}
 function getMonthNumberFromRecord(record) {
   const raw = String(record.month || "").trim();
   const dateMatch = raw.match(/^20\d{2}-(\d{1,2})/);
   if (dateMatch) return Number(dateMatch[1]);
   return MONTH_LOOKUP[raw.toLowerCase()] || 0;
-}
-function getRecordMonthKey(record, startMonth) {
-  const raw = String(record.month || "").trim();
-  const dateMatch = raw.match(/^(20\d{2})-(\d{1,2})/);
-  if (dateMatch) return `${dateMatch[1]}-${String(Number(dateMatch[2])).padStart(2,"0")}`;
-
-  const monthNumber = MONTH_LOOKUP[raw.toLowerCase()] || 0;
-  const startYear = getAcademicYearStartYear(record.academicYear);
-  if (!monthNumber || !startYear) return "";
-  const calendarYear = monthNumber >= startMonth ? startYear : startYear + 1;
-  return `${calendarYear}-${String(monthNumber).padStart(2,"0")}`;
-}
-function getMonthKeyForAcademicYear(academicYear, monthNumber, startMonth) {
-  const startYear = getAcademicYearStartYear(academicYear);
-  if (!startYear || !monthNumber) return "";
-  const calendarYear = monthNumber >= startMonth ? startYear : startYear + 1;
-  return `${calendarYear}-${String(monthNumber).padStart(2,"0")}`;
-}
-function getPreviousMonthKey(monthKey) {
-  if (!monthKey) return "";
-  const [year, month] = monthKey.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 2, 1));
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2,"0")}`;
 }
 function getOrderedMonths(startMonth) {
   return Array.from({ length: 12 }, (_, index) => ((startMonth - 1 + index) % 12) + 1);
@@ -102,11 +75,12 @@ export default function PerformanceComparison({
     }
 
     if (mode === "mom") {
-      const selectedMonthKey = getMonthKeyForAcademicYear(academicYear, selectedMonth, startMonth);
-      const previousMonthKey = getPreviousMonthKey(selectedMonthKey);
-
-      currentRecords = records.filter((record) => getRecordMonthKey(record, startMonth) === selectedMonthKey);
-      baselineRecords = records.filter((record) => getRecordMonthKey(record, startMonth) === previousMonthKey);
+      currentRecords = yearRecords.filter(
+        (record) => getMonthNumberFromRecord(record) === selectedMonth
+      );
+      baselineRecords = previousYearRecords.filter(
+        (record) => getMonthNumberFromRecord(record) === selectedMonth
+      );
     }
 
     const values = {};
@@ -118,18 +92,14 @@ export default function PerformanceComparison({
     });
 
     return { academicYear, ...values };
-  }), [records, years, mode, selectedTerm, monthOrder, selectedMonth, metrics, metricKey, startMonth]);
+  }), [records, years, mode, selectedTerm, monthOrder, selectedMonth, metrics, metricKey]);
 
   const modeDescription = useMemo(() => {
     if (mode === "tot") return `${selectedTerm} performance across all available academic years.`;
     if (mode === "ytm") return `${MONTH_NAMES[startMonth - 1]}–${MONTH_NAMES[selectedMonth - 1]} performance across all available academic years.`;
-    if (mode === "mom") {
-      const selectedIndex = monthOrder.indexOf(selectedMonth);
-      const previousMonth = monthOrder[selectedIndex > 0 ? selectedIndex - 1 : monthOrder.length - 1];
-      return `${MONTH_NAMES[selectedMonth - 1]} performance with growth versus ${MONTH_NAMES[previousMonth - 1]} in each academic year.`;
-    }
+    if (mode === "mom") return `${MONTH_NAMES[selectedMonth - 1]} performance across all available academic years, with growth versus the same month in the previous academic year.`;
     return "Performance across all available academic years.";
-  }, [mode, selectedTerm, monthOrder, selectedMonth, startMonth]);
+  }, [mode, selectedTerm, selectedMonth, startMonth]);
 
   return <section className="performance-comparison">
     <div className="comparison-mode-bar">
@@ -157,7 +127,7 @@ export default function PerformanceComparison({
       })}</tbody></table></div>}
     </section>
 
-    {rows.length > 0 && <section className="comparison-chart-card"><div className="comparison-card-heading"><div><h2>{mode === "yoy" ? "Academic-Year Comparison" : mode === "tot" ? `${selectedTerm} Comparison` : mode === "mom" ? "Month Comparison" : "Year-to-Month Comparison"}</h2><p>{modeDescription}</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{top:18,right:20,left:10,bottom:8}} barGap={8} barCategoryGap="28%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false} tick={{fill:"#667085",fontSize:12,fontWeight:500}} dy={8}/><YAxis axisLine={false} tickLine={false} tick={{fill:"#98a2b3",fontSize:11,fontWeight:500}}/><Tooltip formatter={(value,name) => [formatCurrency(value),name]}/><Legend iconType="circle" iconSize={8} wrapperStyle={{paddingTop:"12px",color:"#667085",fontSize:"11px",fontWeight:600}}/>
+    {rows.length > 0 && <section className="comparison-chart-card"><div className="comparison-card-heading"><div><h2>{mode === "yoy" ? "Academic-Year Comparison" : mode === "tot" ? `${selectedTerm} Comparison` : mode === "mom" ? `${MONTH_NAMES[selectedMonth - 1]} Comparison` : "Year-to-Month Comparison"}</h2><p>{modeDescription}</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{top:18,right:20,left:10,bottom:8}} barGap={8} barCategoryGap="28%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false} tick={{fill:"#667085",fontSize:12,fontWeight:500}} dy={8}/><YAxis axisLine={false} tickLine={false} tick={{fill:"#98a2b3",fontSize:11,fontWeight:500}}/><Tooltip formatter={(value,name) => [formatCurrency(value),name]}/><Legend iconType="circle" iconSize={8} wrapperStyle={{paddingTop:"12px",color:"#667085",fontSize:"11px",fontWeight:600}}/>
       {metrics.map((metric,index) => <Bar key={metric.key} dataKey={metric.key} name={metric.label} fill={index === 0 ? "#2f80ed" : "#f2994a"} radius={[8,8,2,2]} maxBarSize={58}/>)}</BarChart></ResponsiveContainer></div></section>}
   </section>;
 }
