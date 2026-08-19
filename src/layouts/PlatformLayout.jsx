@@ -39,7 +39,7 @@ function getPageDetails(pathname){
   if(pathname==="/catering/comparison") return {section:"Catering",title:"Year-on-Year Comparison"};
   if(pathname==="/uniform") return {section:"Uniform",title:"Uniform Dashboard"};
   if(pathname==="/uniform/comparison") return {section:"Uniform",title:"Year-on-Year Comparison"};
-  if(pathname==="/financial-records"||pathname==="/data-entry") return {section:"Administration",title:"Financial Records"};
+  if(pathname==="/financial-records"||pathname==="/data-entry") return {section:"Administration",title:"Records"};
   if(pathname==="/settings") return {section:"Administration",title:"Settings"};
   return {section:"Commercial Operations",title:"Platform"};
 }
@@ -73,7 +73,7 @@ export default function PlatformLayout(){
      <button type="button" className={`navigation-link navigation-parent ${isUniformRoute?"module-active":""}`} onClick={handleUniformToggle} aria-expanded={!sidebarCollapsed&&uniformOpen} title={sidebarCollapsed?"Uniform":undefined}><span className="navigation-link-content"><span className="navigation-icon"><FaShirt className="stream-react-icon"/></span><span className="navigation-text">Uniform</span></span><ChevronIcon open={uniformOpen}/></button>{!sidebarCollapsed&&uniformOpen&&subMenu(uniformLinks)}
      <div className="future-module" title={sidebarCollapsed?"Transport — Soon":undefined}><span className="future-module-content"><span className="navigation-icon"><FaBusSimple className="stream-react-icon"/></span><span className="future-module-name">Transport</span></span><span className="status-badge">Soon</span></div>
     </div>
-    <div className="navigation-group navigation-group-bottom"><span className="navigation-label">Administration</span><NavLink to="/financial-records" title={sidebarCollapsed?"Financial Records":undefined} className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><DataEntryIcon/></span><span className="navigation-text">Financial Records</span></NavLink><NavLink to="/settings" title={sidebarCollapsed?"Settings":undefined} className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><SettingsIcon/></span><span className="navigation-text">Settings</span></NavLink></div>
+    <div className="navigation-group navigation-group-bottom"><span className="navigation-label">Administration</span><NavLink to="/financial-records" title={sidebarCollapsed?"Records":undefined} className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><DataEntryIcon/></span><span className="navigation-text">Records</span></NavLink><NavLink to="/settings" title={sidebarCollapsed?"Settings":undefined} className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><SettingsIcon/></span><span className="navigation-text">Settings</span></NavLink></div>
    </nav>
    <div className="sidebar-footer" title={sidebarCollapsed?userName:undefined}><div className="user-avatar">{userInitials}</div><div className="user-details"><strong>{userName}</strong><span>{userRole}</span></div></div>
   </aside>
