@@ -1,12 +1,16 @@
 import { useState } from "react";
+import { FaChartBar, FaChartPie } from "react-icons/fa";
 
 import ChartCard from "./ChartCard";
 import DashboardBarChart from "./DashboardBarChart";
 import DashboardPieChart from "./DashboardPieChart";
 import MetricToggle from "./MetricToggle";
 
-const METRIC_OPTIONS = ["Both", "Sales", "Commission"];
-const VIEW_OPTIONS = ["Bar", "Pie"];
+const METRIC_OPTIONS = ["Overview", "Sales", "Commission"];
+const VIEW_OPTIONS = [
+  { value: "Bar", label: "Bar chart", icon: FaChartBar },
+  { value: "Pie", label: "Pie chart", icon: FaChartPie },
+];
 
 export default function PerformanceChart({
   title,
@@ -17,20 +21,30 @@ export default function PerformanceChart({
   formatValue,
   tooltipContent,
   height = 290,
+  defaultMetric = "Overview",
+  defaultView = "Bar",
 }) {
-  const [metric, setMetric] = useState("Both");
-  const [view, setView] = useState("Bar");
+  const [metric, setMetric] = useState(defaultMetric);
+  const [view, setView] = useState(defaultView);
+
+  function handleMetricChange(nextMetric) {
+    if (view === "Pie" && nextMetric === "Overview") {
+      setView("Bar");
+    }
+
+    setMetric(nextMetric);
+  }
 
   function handleViewChange(nextView) {
     setView(nextView);
 
-    if (nextView === "Pie" && metric === "Both") {
+    if (nextView === "Pie" && metric === "Overview") {
       setMetric("Sales");
     }
   }
 
   const barSeries =
-    metric === "Both"
+    metric === "Overview"
       ? [
           { key: "sales", label: "Sales", tone: "primary" },
           { key: "commission", label: "Commission", tone: "secondary" },
@@ -51,7 +65,7 @@ export default function PerformanceChart({
           <MetricToggle
             options={METRIC_OPTIONS}
             value={metric}
-            onChange={setMetric}
+            onChange={handleMetricChange}
             ariaLabel={`${title} metric`}
           />
           <MetricToggle
