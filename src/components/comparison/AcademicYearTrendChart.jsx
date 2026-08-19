@@ -10,6 +10,7 @@ const MONTH_LOOKUP = {
   may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8, sep: 9,
   sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11, dec: 12, december: 12,
 };
+const YEAR_COLORS = ["#1679a7", "#d85f1b", "#7c3aed", "#667085", "#16a085", "#b54708"];
 
 function getMonthNumber(record) {
   const raw = String(record.month || "").trim();
@@ -23,14 +24,8 @@ function getOrderedMonths(startMonth) {
 }
 
 export default function AcademicYearTrendChart({
-  records = [],
-  academicYears = [],
-  metrics = [],
-  metricKey = "metric",
-  startMonth = 9,
-  formatAxis,
-  formatCurrency,
-  height = 300,
+  records = [], academicYears = [], metrics = [], metricKey = "metric", startMonth = 9,
+  formatAxis, formatCurrency, height = 300,
 }) {
   const [metricLabel, setMetricLabel] = useState(metrics[0]?.label || "");
   const selectedMetric = metrics.find((item) => item.label === metricLabel) || metrics[0];
@@ -41,11 +36,7 @@ export default function AcademicYearTrendChart({
     const row = { label: MONTH_NAMES[monthNumber - 1] };
     years.forEach((academicYear, index) => {
       row[`year${index}`] = records.reduce((total, record) => {
-        if (
-          record.academicYear === academicYear &&
-          getMonthNumber(record) === monthNumber &&
-          record[metricKey] === selectedMetric?.source
-        ) {
+        if (record.academicYear === academicYear && getMonthNumber(record) === monthNumber && record[metricKey] === selectedMetric?.source) {
           return total + Number(record.amount || 0);
         }
         return total;
@@ -57,52 +48,27 @@ export default function AcademicYearTrendChart({
   const series = years.map((academicYear, index) => ({
     key: `year${index}`,
     label: academicYear,
-    tone: index === years.length - 1 ? "primary" : undefined,
+    color: YEAR_COLORS[index % YEAR_COLORS.length],
     strokeWidth: index === years.length - 1 ? 3 : 2,
+    dot: { r: index === years.length - 1 ? 3 : 2.5 },
   }));
 
   const tooltipContent = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
-    return (
-      <div className="dashboard-chart-tooltip">
-        <strong>{label}</strong>
-        {payload.map((item) => (
-          <div key={item.dataKey}>
-            <span>{item.name}</span>
-            <b>{formatCurrency ? formatCurrency(item.value) : item.value}</b>
-          </div>
-        ))}
-      </div>
-    );
+    return <div className="dashboard-chart-tooltip"><strong>{label}</strong>{payload.map((item) => <div key={item.dataKey}><span>{item.name}</span><b>{formatCurrency ? formatCurrency(item.value) : item.value}</b></div>)}</div>;
   };
 
   if (!selectedMetric || !years.length) return null;
 
-  return (
-    <ChartCard
-      title="Monthly Trend by Academic Year"
-      description={`${selectedMetric.label} by month across all available academic years.`}
-      className="comparison-year-trend-card"
-      action={
-        <MetricToggle
-          options={metrics.map((item) => item.label)}
-          value={selectedMetric.label}
-          onChange={setMetricLabel}
-          ariaLabel="Academic year trend metric"
-        />
-      }
-    >
-      <DashboardLineChart
-        data={data}
-        xKey="label"
-        series={series}
-        formatAxis={formatAxis}
-        tooltipContent={tooltipContent}
-        height={height}
-      />
-      <div className="comparison-year-trend-legend">
-        {years.map((year, index) => <span key={year}><i className={`trend-line trend-line-${index}`} />{year}</span>)}
-      </div>
-    </ChartCard>
-  );
+  return <ChartCard
+    title="Monthly Trend by Academic Year"
+    description={`${selectedMetric.label} by month across all available academic years.`}
+    className="comparison-year-trend-card"
+    action={<MetricToggle options={metrics.map((item) => item.label)} value={selectedMetric.label} onChange={setMetricLabel} ariaLabel="Academic year trend metric" />}
+  >
+    <DashboardLineChart data={data} xKey="label" series={series} formatAxis={formatAxis} tooltipContent={tooltipContent} height={height} />
+    <div className="comparison-year-trend-legend">
+      {years.map((year, index) => <span key={year}><i style={{ backgroundColor: YEAR_COLORS[index % YEAR_COLORS.length] }} />{year}</span>)}
+    </div>
+  </ChartCard>;
 }
