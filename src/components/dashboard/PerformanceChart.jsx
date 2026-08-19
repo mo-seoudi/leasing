@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaChartBar, FaChartPie } from "react-icons/fa";
 
 import ChartCard from "./ChartCard";
 import DashboardBarChart from "./DashboardBarChart";
 import DashboardPieChart from "./DashboardPieChart";
 import MetricToggle from "./MetricToggle";
+import {
+  BarChartViewIcon,
+  PieChartViewIcon,
+} from "./DashboardViewIcons";
 
 const VIEW_OPTIONS = [
-  { value: "Bar", label: "Bar chart", icon: FaChartBar },
-  { value: "Pie", label: "Pie chart", icon: FaChartPie },
+  { value: "Bar", label: "Bar chart", icon: BarChartViewIcon },
+  { value: "Pie", label: "Pie chart", icon: PieChartViewIcon },
 ];
 
 const DEFAULT_METRICS = [
