@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaChartBar, FaChartPie } from "react-icons/fa";
 
 import ChartCard from "./ChartCard";
@@ -26,6 +26,24 @@ export default function PerformanceChart({
 }) {
   const [metric, setMetric] = useState(defaultMetric);
   const [view, setView] = useState(defaultView);
+  const [initialPieReady, setInitialPieReady] = useState(
+    defaultView !== "Pie"
+  );
+
+  useEffect(() => {
+    if (defaultView !== "Pie") {
+      setInitialPieReady(true);
+      return undefined;
+    }
+
+    setInitialPieReady(false);
+
+    const timer = window.setTimeout(() => {
+      setInitialPieReady(true);
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [defaultView]);
 
   function handleMetricChange(nextMetric) {
     if (view === "Pie" && nextMetric === "Overview") {
@@ -36,6 +54,7 @@ export default function PerformanceChart({
   }
 
   function handleViewChange(nextView) {
+    setInitialPieReady(true);
     setView(nextView);
 
     if (nextView === "Pie" && metric === "Overview") {
@@ -78,14 +97,22 @@ export default function PerformanceChart({
       }
     >
       {view === "Pie" ? (
-        <DashboardPieChart
-          data={data}
-          categoryKey={categoryKey}
-          valueKey={pieValueKey}
-          metricLabel={pieMetric}
-          formatValue={formatValue}
-          height={height}
-        />
+        initialPieReady ? (
+          <DashboardPieChart
+            data={data}
+            categoryKey={categoryKey}
+            valueKey={pieValueKey}
+            metricLabel={pieMetric}
+            formatValue={formatValue}
+            height={height}
+          />
+        ) : (
+          <div
+            className="dashboard-chart-canvas"
+            style={{ height }}
+            aria-hidden="true"
+          />
+        )
       ) : (
         <DashboardBarChart
           data={data}
