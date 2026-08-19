@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import AcademicYearTrendChart from "./AcademicYearTrendChart";
 import "./performanceComparison.css";
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -67,20 +68,14 @@ export default function PerformanceComparison({
       currentRecords = yearRecords.filter((record) => record.term === selectedTerm);
       baselineRecords = previousYearRecords.filter((record) => record.term === selectedTerm);
     }
-
     if (mode === "ytm") {
       const allowedMonths = monthOrder.slice(0, monthOrder.indexOf(selectedMonth) + 1);
       currentRecords = yearRecords.filter((record) => allowedMonths.includes(getMonthNumberFromRecord(record)));
       baselineRecords = previousYearRecords.filter((record) => allowedMonths.includes(getMonthNumberFromRecord(record)));
     }
-
     if (mode === "mom") {
-      currentRecords = yearRecords.filter(
-        (record) => getMonthNumberFromRecord(record) === selectedMonth
-      );
-      baselineRecords = previousYearRecords.filter(
-        (record) => getMonthNumberFromRecord(record) === selectedMonth
-      );
+      currentRecords = yearRecords.filter((record) => getMonthNumberFromRecord(record) === selectedMonth);
+      baselineRecords = previousYearRecords.filter((record) => getMonthNumberFromRecord(record) === selectedMonth);
     }
 
     const values = {};
@@ -90,7 +85,6 @@ export default function PerformanceComparison({
       values[metric.key] = currentValue;
       values[`${metric.key}Growth`] = calculateGrowth(currentValue, baselineValue);
     });
-
     return { academicYear, ...values };
   }), [records, years, mode, selectedTerm, monthOrder, selectedMonth, metrics, metricKey]);
 
@@ -100,6 +94,13 @@ export default function PerformanceComparison({
     if (mode === "mom") return `${MONTH_NAMES[selectedMonth - 1]} performance across all available academic years, with growth versus the same month in the previous academic year.`;
     return "Performance across all available academic years.";
   }, [mode, selectedTerm, selectedMonth, startMonth]);
+
+  const formatAxis = (value) => {
+    const numeric = Number(value || 0);
+    if (numeric >= 1000000) return `AED ${(numeric / 1000000).toFixed(numeric >= 10000000 ? 0 : 1)}M`;
+    if (numeric >= 1000) return `AED ${(numeric / 1000).toFixed(0)}K`;
+    return `AED ${numeric.toFixed(0)}`;
+  };
 
   return <section className="performance-comparison">
     <div className="comparison-mode-bar">
@@ -129,5 +130,15 @@ export default function PerformanceComparison({
 
     {rows.length > 0 && <section className="comparison-chart-card"><div className="comparison-card-heading"><div><h2>{mode === "yoy" ? "Academic-Year Comparison" : mode === "tot" ? `${selectedTerm} Comparison` : mode === "mom" ? `${MONTH_NAMES[selectedMonth - 1]} Comparison` : "Year-to-Month Comparison"}</h2><p>{modeDescription}</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{top:18,right:20,left:10,bottom:8}} barGap={8} barCategoryGap="28%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false} tick={{fill:"#667085",fontSize:12,fontWeight:500}} dy={8}/><YAxis axisLine={false} tickLine={false} tick={{fill:"#98a2b3",fontSize:11,fontWeight:500}}/><Tooltip formatter={(value,name) => [formatCurrency(value),name]}/><Legend iconType="circle" iconSize={8} wrapperStyle={{paddingTop:"12px",color:"#667085",fontSize:"11px",fontWeight:600}}/>
       {metrics.map((metric,index) => <Bar key={metric.key} dataKey={metric.key} name={metric.label} fill={index === 0 ? "#2f80ed" : "#f2994a"} radius={[8,8,2,2]} maxBarSize={58}/>)}</BarChart></ResponsiveContainer></div></section>}
+
+    <AcademicYearTrendChart
+      records={records}
+      academicYears={years}
+      metrics={metrics}
+      metricKey={metricKey}
+      startMonth={startMonth}
+      formatAxis={formatAxis}
+      formatCurrency={formatCurrency}
+    />
   </section>;
 }
