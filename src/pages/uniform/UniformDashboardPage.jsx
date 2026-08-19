@@ -1,20 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+
+import DashboardCurrencyTooltip from "../../components/dashboard/DashboardCurrencyTooltip";
+import KpiCard from "../../components/dashboard/KpiCard";
+import MonthlyResultsTable from "../../components/dashboard/MonthlyResultsTable";
+import MonthlyTrendChart from "../../components/dashboard/MonthlyTrendChart";
+import PerformanceChart from "../../components/dashboard/PerformanceChart";
+import "../../components/dashboard/dashboardComponents.css";
 
 import {
-  uniformSchools,
   uniformTerms,
   fetchUniformRecords,
   filterUniformRecords,
@@ -31,32 +25,6 @@ import {
 
 import "./UniformDashboardPage.css";
 
-function KpiCard({ label, value, detail, tone = "default" }) {
-  return (
-    <article className="uniform-kpi-card">
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <p>{detail}</p>
-    </article>
-  );
-}
-
-function CurrencyTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-
-  return (
-    <div className="uniform-chart-tooltip">
-      <strong>{label}</strong>
-      {payload.map((item) => (
-        <div key={item.dataKey}>
-          <span>{item.name}</span>
-          <b>{formatCurrency(item.value)}</b>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function UniformDashboardPage() {
   const { setHeaderControls } = useOutletContext();
 
@@ -69,8 +37,7 @@ export default function UniformDashboardPage() {
     school: "",
     term: "",
   });
-  const [trendMetric, setTrendMetric] = useState("Sales");
-  const [resultsPage, setResultsPage] = useState(0);
+
   const hasInitialisedAcademicYear = useRef(false);
 
   useEffect(() => {
@@ -80,10 +47,15 @@ export default function UniformDashboardPage() {
       try {
         setLoading(true);
         setError("");
+
         const data = await fetchUniformRecords();
-        if (active) setRecords(data);
+
+        if (active) {
+          setRecords(data);
+        }
       } catch (loadError) {
         console.error("Unable to load Uniform records", loadError);
+
         if (active) {
           setError(
             loadError?.message ||
@@ -91,7 +63,9 @@ export default function UniformDashboardPage() {
           );
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
@@ -165,43 +139,6 @@ export default function UniformDashboardPage() {
     [filteredRecords, yearBasis]
   );
 
-  const monthlyResultPages = useMemo(() => {
-    const grouped = new Map();
-
-    monthlyData.forEach((item) => {
-      const key = item.academicYear || "Other";
-      if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key).push(item);
-    });
-
-    return [...grouped.entries()]
-      .sort(([yearA], [yearB]) => yearB.localeCompare(yearA))
-      .map(([academicYear, rows]) => ({
-        academicYear,
-        rows,
-      }));
-  }, [monthlyData]);
-
-  const safeResultsPage = Math.min(
-    resultsPage,
-    Math.max(monthlyResultPages.length - 1, 0)
-  );
-
-  const visibleMonthlyData =
-    monthlyResultPages[safeResultsPage]?.rows || [];
-
-  const visibleResultsYear =
-    monthlyResultPages[safeResultsPage]?.academicYear || "";
-
-  useEffect(() => {
-    setResultsPage(0);
-  }, [
-    filters.academicYear,
-    filters.school,
-    filters.term,
-    yearBasis,
-  ]);
-
   const schoolData = useMemo(
     () => getSchoolUniformData(filteredRecords),
     [filteredRecords]
@@ -212,23 +149,18 @@ export default function UniformDashboardPage() {
     [filteredRecords]
   );
 
+  const tableResetKey = `${filters.academicYear}|${filters.school}|${filters.term}|${yearBasis}`;
+
   function handleFilterChange(name, value) {
-    setFilters((current) => ({ ...current, [name]: value }));
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }
 
   function handleYearBasisChange(nextBasis) {
     setYearBasis(nextBasis);
   }
-
-  function clearFilters() {
-    setFilters({
-      academicYear: latestAcademicYear,
-      school: "",
-      term: "",
-    });
-  }
-
-  const trendDataKey = trendMetric === "Sales" ? "sales" : "commission";
 
   useEffect(() => {
     setHeaderControls(
@@ -238,12 +170,17 @@ export default function UniformDashboardPage() {
           <select
             value={filters.academicYear}
             onChange={(event) =>
-              handleFilterChange("academicYear", event.target.value)
+              handleFilterChange(
+                "academicYear",
+                event.target.value
+              )
             }
           >
             <option value="">All Years</option>
             {uniformAcademicYears.map((year) => (
-              <option key={year} value={year}>{year}</option>
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
         </label>
@@ -253,7 +190,10 @@ export default function UniformDashboardPage() {
           <select
             value={filters.school}
             onChange={(event) =>
-              handleFilterChange("school", event.target.value)
+              handleFilterChange(
+                "school",
+                event.target.value
+              )
             }
           >
             <option value="">All Schools</option>
@@ -270,12 +210,17 @@ export default function UniformDashboardPage() {
           <select
             value={filters.term}
             onChange={(event) =>
-              handleFilterChange("term", event.target.value)
+              handleFilterChange(
+                "term",
+                event.target.value
+              )
             }
           >
             <option value="">All Terms</option>
             {uniformTerms.map((term) => (
-              <option key={term} value={term}>{term}</option>
+              <option key={term} value={term}>
+                {term}
+              </option>
             ))}
           </select>
         </label>
@@ -289,8 +234,12 @@ export default function UniformDashboardPage() {
           >
             <button
               type="button"
-              className={yearBasis === "finance" ? "active" : ""}
-              onClick={() => handleYearBasisChange("finance")}
+              className={
+                yearBasis === "finance" ? "active" : ""
+              }
+              onClick={() =>
+                handleYearBasisChange("finance")
+              }
               title="Finance reporting: September to August"
             >
               Sep–Aug
@@ -298,15 +247,20 @@ export default function UniformDashboardPage() {
 
             <button
               type="button"
-              className={yearBasis === "backToSchool" ? "active" : ""}
-              onClick={() => handleYearBasisChange("backToSchool")}
+              className={
+                yearBasis === "backToSchool"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                handleYearBasisChange("backToSchool")
+              }
               title="Back-to-school view: August to July"
             >
               Aug–Jul
             </button>
           </div>
         </div>
-
       </div>
     );
 
@@ -315,48 +269,100 @@ export default function UniformDashboardPage() {
     filters,
     yearBasis,
     uniformAcademicYears,
+    uniformSchools,
     setHeaderControls,
   ]);
 
   if (loading) {
     return (
-      <section className="uniform-dashboard-page">
-        <div className="uniform-empty-state">Loading Uniform data…</div>
+      <section className="dashboard-page uniform-dashboard-page">
+        <div className="dashboard-loading-state">
+          Loading Uniform data…
+        </div>
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="uniform-dashboard-page">
-        <div className="uniform-empty-state">
+      <section className="dashboard-page uniform-dashboard-page">
+        <div className="dashboard-error-state">
           Unable to load Uniform data: {error}
         </div>
       </section>
     );
   }
 
+  const currencyTooltip = (
+    <DashboardCurrencyTooltip formatValue={formatCurrency} />
+  );
+
+  const monthlyColumns = [
+    {
+      key: "academicYear",
+      label: "Academic Year",
+    },
+    {
+      key: "label",
+      label: "Month",
+    },
+    {
+      key: "term",
+      label: "Term",
+    },
+    {
+      key: "sales",
+      label: "Sales",
+      numeric: true,
+      tone: "sales",
+      render: (value) => formatCurrency(value),
+    },
+    {
+      key: "commission",
+      label: "Commission",
+      numeric: true,
+      tone: "commission",
+      render: (value) => formatCurrency(value),
+    },
+    {
+      key: "commissionRate",
+      label: "Commission Rate",
+      numeric: true,
+      render: (value) => formatPercentage(value),
+    },
+  ];
+
+  const termDescription =
+    yearBasis === "finance"
+      ? "Finance basis: September to August, with July and August in Term 3."
+      : "Back-to-school basis: August to July, with August included in Term 1.";
+
+  const monthlyResultsDescription =
+    yearBasis === "finance"
+      ? "Finance basis (Sep–Aug)."
+      : "Back-to-school basis (Aug–Jul).";
+
   return (
-    <section className="uniform-dashboard-page">
-      <section className="uniform-kpi-grid">
+    <section className="dashboard-page uniform-dashboard-page">
+      <section className="dashboard-kpi-grid">
         <KpiCard
           label="Total Sales"
           value={formatCurrency(summary.sales)}
           detail={`${summary.months} reporting months`}
-          tone="sales"
         />
+
         <KpiCard
           label="Total Commission"
           value={formatCurrency(summary.commission)}
           detail={`${summary.schools} schools included`}
-          tone="commission"
         />
+
         <KpiCard
           label="Effective Commission Rate"
           value={formatPercentage(summary.commissionRate)}
           detail="Commission divided by uniform sales"
-          tone="rate"
         />
+
         <KpiCard
           label="Average Monthly Sales"
           value={formatCurrency(summary.averageMonthlySales)}
@@ -364,241 +370,56 @@ export default function UniformDashboardPage() {
         />
       </section>
 
-      <section className="uniform-two-column-grid">
-        <section className="uniform-chart-card">
-          <div className="uniform-card-heading">
-            <div>
-              <h2>School Performance</h2>
-              <p>Sales and commission by school.</p>
-            </div>
-          </div>
+      <section className="dashboard-two-column-grid">
+        <PerformanceChart
+          title="School Performance"
+          description="Sales and commission by school."
+          data={schoolData}
+          categoryKey="school"
+          formatAxis={formatCompactCurrency}
+          formatValue={formatCurrency}
+          tooltipContent={currencyTooltip}
+          defaultMetric="Overview"
+          defaultView="Bar"
+        />
 
-          <div className="uniform-bar-chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                  data={schoolData}
-                  margin={{
-                    top: 10,
-                    right: 10,
-                    left: 24,
-                    bottom: 5,
-                  }}
-                  barCategoryGap="22%"
-                  barGap={6}
-                >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="school" tickLine={false} axisLine={false} />
-                <YAxis
-                  tickFormatter={formatCompactCurrency}
-                  tickLine={false}
-                  axisLine={false}
-                  width={84}
-                />
-                <Tooltip content={<CurrencyTooltip />} />
-                <Legend />
-                <Bar dataKey="sales" name="Sales" fill="#1679a7" radius={[5, 5, 0, 0]} />
-                <Bar dataKey="commission" name="Commission" fill="#d85f1b" radius={[5, 5, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        <section className="uniform-chart-card">
-          <div className="uniform-card-heading">
-            <div>
-              <h2>Term Performance</h2>
-              <p>
-                {yearBasis === "finance"
-                  ? "Finance basis: September to August, with July and August in Term 3."
-                  : "Back-to-school basis: August to July, with August included in Term 1."}
-              </p>
-            </div>
-          </div>
-
-          <div className="uniform-bar-chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                  data={termData}
-                  margin={{
-                    top: 10,
-                    right: 10,
-                    left: 24,
-                    bottom: 5,
-                  }}
-                  barCategoryGap="22%"
-                  barGap={6}
-                >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="term" tickLine={false} axisLine={false} />
-                <YAxis
-                  tickFormatter={formatCompactCurrency}
-                  tickLine={false}
-                  axisLine={false}
-                  width={84}
-                />
-                <Tooltip content={<CurrencyTooltip />} />
-                <Legend />
-                <Bar dataKey="sales" name="Sales" fill="#1679a7" radius={[5, 5, 0, 0]} />
-                <Bar dataKey="commission" name="Commission" fill="#d85f1b" radius={[5, 5, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
+        <PerformanceChart
+          title="Term Performance"
+          description={termDescription}
+          data={termData}
+          categoryKey="term"
+          formatAxis={formatCompactCurrency}
+          formatValue={formatCurrency}
+          tooltipContent={currencyTooltip}
+          defaultMetric="Sales"
+          defaultView="Pie"
+        />
       </section>
 
+      <MonthlyTrendChart
+        data={monthlyData}
+        formatAxis={formatCompactCurrency}
+        tooltipContent={currencyTooltip}
+        className="dashboard-wide-card"
+      />
 
-      <section className="uniform-chart-card uniform-wide-card">
-        <div className="uniform-card-heading uniform-chart-heading">
-          <div>
-            <h2>Monthly Trend</h2>
-            <p>{trendMetric} by month for the selected reporting scope.</p>
-          </div>
+      <MonthlyResultsTable
+        data={monthlyData}
+        columns={monthlyColumns}
+        totals={{
+          sales: formatCurrency(summary.sales),
+          commission: formatCurrency(summary.commission),
+          commissionRate: formatPercentage(
+            summary.commissionRate
+          ),
+        }}
+        emptyMessage="No uniform records match the selected filters."
+        resetKey={tableResetKey}
+      />
 
-          <div className="uniform-metric-toggle" aria-label="Trend metric">
-            {["Sales", "Commission"].map((metric) => (
-              <button
-                key={metric}
-                type="button"
-                className={trendMetric === metric ? "active" : ""}
-                onClick={() => setTrendMetric(metric)}
-              >
-                {metric}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="uniform-line-chart">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={monthlyData} margin={{ top: 15, right: 20, left: 10, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} />
-              <YAxis tickFormatter={formatCompactCurrency} tickLine={false} axisLine={false} width={80} />
-              <Tooltip content={<CurrencyTooltip />} />
-              <Line
-                type="monotone"
-                dataKey={trendDataKey}
-                name={trendMetric}
-                stroke="currentColor"
-                strokeWidth={3}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-                className={trendMetric === "Sales" ? "uniform-sales-line" : "uniform-commission-line"}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      <section className="uniform-table-card">
-        <div className="uniform-card-heading">
-          <div>
-            <h2>Monthly Results</h2>
-            <p>
-              Detailed sales, commission and effective rate for each month —{" "}
-              {yearBasis === "finance"
-                ? "Finance basis (Sep–Aug)."
-                : "Back-to-school basis (Aug–Jul)."}
-            </p>
-          </div>
-          <span className="uniform-record-count">
-            {visibleResultsYear ? `${visibleResultsYear} · ` : ""}
-            {visibleMonthlyData.length} months
-          </span>
-        </div>
-
-        {monthlyData.length === 0 ? (
-          <div className="uniform-empty-state">No uniform records match the selected filters.</div>
-        ) : (
-          <div className="uniform-table-scroll">
-            <table className="uniform-results-table">
-              <thead>
-                <tr>
-                  <th>Academic Year</th>
-                  <th>Month</th>
-                  <th>Term</th>
-                  <th>Sales</th>
-                  <th>Commission</th>
-                  <th>Commission Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleMonthlyData.map((item) => (
-                  <tr key={item.key}>
-                    <td>{item.academicYear}</td>
-                    <td>{item.label}</td>
-                    <td>{item.term}</td>
-                    <td className="uniform-sales-value">{formatCurrency(item.sales)}</td>
-                    <td className="uniform-commission-value">{formatCurrency(item.commission)}</td>
-                    <td>{formatPercentage(item.commissionRate)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th colSpan="3">Selected Total</th>
-                  <th>{formatCurrency(summary.sales)}</th>
-                  <th>{formatCurrency(summary.commission)}</th>
-                  <th>{formatPercentage(summary.commissionRate)}</th>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
-
-        {monthlyResultPages.length > 1 && (
-          <div className="uniform-results-pagination">
-            <button
-              type="button"
-              className="uniform-pagination-arrow"
-              onClick={() =>
-                setResultsPage((page) => Math.max(0, page - 1))
-              }
-              disabled={safeResultsPage === 0}
-              aria-label="Previous academic year"
-            >
-              ‹
-            </button>
-
-            <div className="uniform-pagination-pages">
-              {monthlyResultPages.map((page, index) => (
-                <button
-                  key={page.academicYear}
-                  type="button"
-                  className={
-                    safeResultsPage === index
-                      ? "uniform-pagination-page active"
-                      : "uniform-pagination-page"
-                  }
-                  onClick={() => setResultsPage(index)}
-                  title={page.academicYear}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              className="uniform-pagination-arrow"
-              onClick={() =>
-                setResultsPage((page) =>
-                  Math.min(monthlyResultPages.length - 1, page + 1)
-                )
-              }
-              disabled={safeResultsPage === monthlyResultPages.length - 1}
-              aria-label="Next academic year"
-            >
-              ›
-            </button>
-
-            <span className="uniform-pagination-label">
-              {visibleResultsYear}
-            </span>
-          </div>
-        )}
-      </section>
+      <p className="uniform-results-basis-note" hidden>
+        {monthlyResultsDescription}
+      </p>
     </section>
   );
 }
-
