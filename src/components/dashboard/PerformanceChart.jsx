@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaChartBar, FaChartPie } from "react-icons/fa";
 
 import ChartCard from "./ChartCard";
@@ -6,10 +6,14 @@ import DashboardBarChart from "./DashboardBarChart";
 import DashboardPieChart from "./DashboardPieChart";
 import MetricToggle from "./MetricToggle";
 
-const METRIC_OPTIONS = ["Overview", "Sales", "Commission"];
 const VIEW_OPTIONS = [
   { value: "Bar", label: "Bar chart", icon: FaChartBar },
   { value: "Pie", label: "Pie chart", icon: FaChartPie },
+];
+
+const DEFAULT_METRICS = [
+  { key: "sales", label: "Sales", tone: "primary" },
+  { key: "commission", label: "Commission", tone: "secondary" },
 ];
 
 export default function PerformanceChart({
@@ -17,6 +21,8 @@ export default function PerformanceChart({
   description,
   data = [],
   categoryKey,
+  metrics = DEFAULT_METRICS,
+  overviewLabel = "Overview",
   formatAxis,
   formatValue,
   tooltipContent,
@@ -24,6 +30,12 @@ export default function PerformanceChart({
   defaultMetric = "Overview",
   defaultView = "Bar",
 }) {
+  const metricOptions = useMemo(
+    () => [overviewLabel, ...metrics.map((item) => item.label)],
+    [metrics, overviewLabel]
+  );
+
+  const fallbackMetric = metrics[0]?.label || overviewLabel;
   const [metric, setMetric] = useState(defaultMetric);
   const [view, setView] = useState(defaultView);
   const [initialPieReady, setInitialPieReady] = useState(
@@ -46,7 +58,7 @@ export default function PerformanceChart({
   }, [defaultView]);
 
   function handleMetricChange(nextMetric) {
-    if (view === "Pie" && nextMetric === "Overview") {
+    if (view === "Pie" && nextMetric === overviewLabel) {
       setView("Bar");
     }
 
@@ -57,23 +69,22 @@ export default function PerformanceChart({
     setInitialPieReady(true);
     setView(nextView);
 
-    if (nextView === "Pie" && metric === "Overview") {
-      setMetric("Sales");
+    if (nextView === "Pie" && metric === overviewLabel) {
+      setMetric(fallbackMetric);
     }
   }
 
-  const barSeries =
-    metric === "Overview"
-      ? [
-          { key: "sales", label: "Sales", tone: "primary" },
-          { key: "commission", label: "Commission", tone: "secondary" },
-        ]
-      : metric === "Sales"
-        ? [{ key: "sales", label: "Sales", tone: "primary" }]
-        : [{ key: "commission", label: "Commission", tone: "secondary" }];
+  const selectedMetric =
+    metrics.find((item) => item.label === metric) || metrics[0];
 
-  const pieMetric = metric === "Commission" ? "Commission" : "Sales";
-  const pieValueKey = pieMetric === "Sales" ? "sales" : "commission";
+  const barSeries =
+    metric === overviewLabel
+      ? metrics
+      : selectedMetric
+        ? [selectedMetric]
+        : [];
+
+  const pieMetric = selectedMetric || metrics[0];
 
   return (
     <ChartCard
@@ -82,7 +93,7 @@ export default function PerformanceChart({
       action={
         <div className="dashboard-chart-controls">
           <MetricToggle
-            options={METRIC_OPTIONS}
+            options={metricOptions}
             value={metric}
             onChange={handleMetricChange}
             ariaLabel={`${title} metric`}
@@ -97,12 +108,12 @@ export default function PerformanceChart({
       }
     >
       {view === "Pie" ? (
-        initialPieReady ? (
+        initialPieReady && pieMetric ? (
           <DashboardPieChart
             data={data}
             categoryKey={categoryKey}
-            valueKey={pieValueKey}
-            metricLabel={pieMetric}
+            valueKey={pieMetric.key}
+            metricLabel={pieMetric.label}
             formatValue={formatValue}
             height={height}
           />
