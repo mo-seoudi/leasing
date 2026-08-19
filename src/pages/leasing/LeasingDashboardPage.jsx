@@ -15,7 +15,6 @@ import {
   formatCompactCurrency,
   formatCurrency,
   formatPercentage,
-  getAvailableTerms,
   getMonthlyTrend,
   getSchoolBreakdown,
   getTermBreakdown,
@@ -30,12 +29,7 @@ const LEASING_METRICS = [
 export default function LeasingDashboardPage() {
   const { setHeaderControls } = useOutletContext();
   const latestAcademicYear = academicYears[academicYears.length - 1] || "";
-  const [filters, setFilters] = useState({ academicYear: latestAcademicYear, school: "", term: "" });
-
-  const availableTerms = useMemo(
-    () => getAvailableTerms(filters.academicYear),
-    [filters.academicYear]
-  );
+  const [filters, setFilters] = useState({ academicYear: latestAcademicYear, school: "" });
 
   const filteredRecords = useMemo(() => filterRecords(filters), [filters]);
   const summary = useMemo(() => calculateKPIs(filteredRecords), [filteredRecords]);
@@ -46,14 +40,10 @@ export default function LeasingDashboardPage() {
   const months = new Set(monthlyData.map((item) => item.monthKey)).size;
   const includedSchools = new Set(filteredRecords.map((item) => item.school).filter(Boolean)).size;
   const incomeRate = summary.totalRevenue ? (summary.schoolIncome / summary.totalRevenue) * 100 : 0;
-  const tableResetKey = `${filters.academicYear}|${filters.school}|${filters.term}`;
+  const tableResetKey = `${filters.academicYear}|${filters.school}`;
 
   function handleFilterChange(name, value) {
-    setFilters((current) => ({
-      ...current,
-      [name]: value,
-      ...(name === "academicYear" ? { term: "" } : {}),
-    }));
+    setFilters((current) => ({ ...current, [name]: value }));
   }
 
   useEffect(() => {
@@ -73,17 +63,10 @@ export default function LeasingDashboardPage() {
             {schools.map((school) => <option key={school} value={school}>{school}</option>)}
           </select>
         </label>
-        <label className="header-filter-control">
-          <span>Term</span>
-          <select value={filters.term} onChange={(e) => handleFilterChange("term", e.target.value)}>
-            <option value="">All Terms</option>
-            {availableTerms.map((term) => <option key={term} value={term}>{term}</option>)}
-          </select>
-        </label>
       </div>
     );
     return () => setHeaderControls(null);
-  }, [availableTerms, filters, setHeaderControls]);
+  }, [filters, setHeaderControls]);
 
   const tooltip = <DashboardCurrencyTooltip formatValue={formatCurrency} />;
   const columns = [
@@ -103,52 +86,12 @@ export default function LeasingDashboardPage() {
         <KpiCard label="Effective School Income Rate" value={formatPercentage(incomeRate)} detail="School income divided by revenue" />
         <KpiCard label="Rental Income" value={formatCurrency(summary.rentalFees)} detail="Income from rental arrangements" />
       </section>
-
       <section className="dashboard-two-column-grid">
-        <PerformanceChart
-          title="School Performance"
-          description="Revenue and school income by school."
-          data={schoolData}
-          categoryKey="school"
-          metrics={LEASING_METRICS}
-          formatAxis={formatCompactCurrency}
-          formatValue={formatCurrency}
-          tooltipContent={tooltip}
-        />
-        <PerformanceChart
-          title="Term Performance"
-          description="Performance across finance terms."
-          data={termData}
-          categoryKey="term"
-          metrics={LEASING_METRICS}
-          formatAxis={formatCompactCurrency}
-          formatValue={formatCurrency}
-          tooltipContent={tooltip}
-          defaultMetric="Revenue"
-          defaultView="Pie"
-        />
+        <PerformanceChart title="School Performance" description="Revenue and school income by school." data={schoolData} categoryKey="school" metrics={LEASING_METRICS} formatAxis={formatCompactCurrency} formatValue={formatCurrency} tooltipContent={tooltip} />
+        <PerformanceChart title="Term Performance" description="Performance across finance terms." data={termData} categoryKey="term" metrics={LEASING_METRICS} formatAxis={formatCompactCurrency} formatValue={formatCurrency} tooltipContent={tooltip} defaultMetric="Revenue" defaultView="Pie" />
       </section>
-
-      <MonthlyTrendChart
-        data={monthlyData}
-        metrics={LEASING_METRICS}
-        defaultMetric="Revenue"
-        formatAxis={formatCompactCurrency}
-        tooltipContent={tooltip}
-        className="dashboard-wide-card"
-      />
-
-      <MonthlyResultsTable
-        data={monthlyData}
-        columns={columns}
-        totals={{
-          totalRevenue: formatCurrency(summary.totalRevenue),
-          schoolIncome: formatCurrency(summary.schoolIncome),
-          incomeRate: formatPercentage(incomeRate),
-        }}
-        emptyMessage="No leasing records match the selected filters."
-        resetKey={tableResetKey}
-      />
+      <MonthlyTrendChart data={monthlyData} metrics={LEASING_METRICS} defaultMetric="Revenue" formatAxis={formatCompactCurrency} tooltipContent={tooltip} className="dashboard-wide-card" />
+      <MonthlyResultsTable data={monthlyData} columns={columns} totals={{ totalRevenue: formatCurrency(summary.totalRevenue), schoolIncome: formatCurrency(summary.schoolIncome), incomeRate: formatPercentage(incomeRate) }} emptyMessage="No leasing records match the selected filters." resetKey={tableResetKey} />
     </section>
   );
 }
