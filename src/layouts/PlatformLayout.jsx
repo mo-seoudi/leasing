@@ -9,6 +9,7 @@ const LAPTOP_BREAKPOINT = 1450;
 const SIDEBAR_STORAGE_KEY = "commercial-operations-sidebar-collapsed";
 
 const leasingLinks = [
+  { label: "Leasing Dashboard", path: "/leasing" },
   { label: "Programme Directory", path: "/leasing/programmes" },
   { label: "Year-on-Year Comparison", path: "/leasing/year-comparison" },
 ];
@@ -31,6 +32,7 @@ function ChevronIcon({open}){return <svg viewBox="0 0 24 24" aria-hidden="true" 
 
 function getPageDetails(pathname){
   if(pathname==="/dashboard") return {section:"",title:"Commercial Operations Dashboard"};
+  if(pathname==="/leasing") return {section:"Leasing",title:"Leasing Dashboard"};
   if(pathname==="/leasing/programmes") return {section:"Leasing",title:"Programme Directory"};
   if(pathname==="/leasing/year-comparison") return {section:"Leasing",title:"Year-on-Year Comparison"};
   if(pathname==="/catering") return {section:"Catering",title:"Catering Dashboard"};
@@ -49,7 +51,7 @@ export default function PlatformLayout(){
  const {user,profile,role}=useAuth();
  const [headerControls,setHeaderControls]=useState(null); const location=useLocation();
  const userName=profile?.full_name||user?.user_metadata?.full_name||user?.email?.split("@")[0]||"User"; const userInitials=getInitials(userName); const userRole=formatRole(role);
- const isLeasingRoute=location.pathname.startsWith("/leasing"); const isCateringRoute=location.pathname.startsWith("/catering"); const isUniformRoute=location.pathname.startsWith("/uniform");
+ const isLeasingRoute=location.pathname==="/leasing"||location.pathname.startsWith("/leasing/"); const isCateringRoute=location.pathname.startsWith("/catering"); const isUniformRoute=location.pathname.startsWith("/uniform");
  const [leasingOpen,setLeasingOpen]=useState(isLeasingRoute); const [cateringOpen,setCateringOpen]=useState(isCateringRoute); const [uniformOpen,setUniformOpen]=useState(isUniformRoute); const [mobileOpen,setMobileOpen]=useState(false); const [sidebarCollapsed,setSidebarCollapsed]=useState(getInitialCollapsedState);
  const pageDetails=getPageDetails(location.pathname);
  useEffect(()=>{if(isLeasingRoute)setLeasingOpen(true);if(isCateringRoute)setCateringOpen(true);if(isUniformRoute)setUniformOpen(true);setMobileOpen(false)},[isCateringRoute,isLeasingRoute,isUniformRoute,location.pathname]);
@@ -58,7 +60,7 @@ export default function PlatformLayout(){
  const handleLeasingToggle=()=>{if(sidebarCollapsed){setSidebarCollapsed(false);setLeasingOpen(true);return}setLeasingOpen(current=>!current)};
  const handleCateringToggle=()=>{if(sidebarCollapsed){setSidebarCollapsed(false);setCateringOpen(true);return}setCateringOpen(current=>!current)};
  const handleUniformToggle=()=>{if(sidebarCollapsed){setSidebarCollapsed(false);setUniformOpen(true);return}setUniformOpen(current=>!current)};
- const subMenu=(links)=> <div className="navigation-submenu">{links.map(link=><NavLink key={link.path} to={link.path} end={link.path==="/catering"||link.path==="/uniform"} className={({isActive})=>`submenu-link ${isActive?"active":""}`}><span className="submenu-dot"/><span>{link.label}</span></NavLink>)}</div>;
+ const subMenu=(links)=> <div className="navigation-submenu">{links.map(link=><NavLink key={link.path} to={link.path} end={link.path==="/leasing"||link.path==="/catering"||link.path==="/uniform"} className={({isActive})=>`submenu-link ${isActive?"active":""}`}><span className="submenu-dot"/><span>{link.label}</span></NavLink>)}</div>;
  return <div className={`platform-layout ${sidebarCollapsed?"sidebar-collapsed":""}`}>
   {mobileOpen&&<button type="button" className="sidebar-overlay" aria-label="Close navigation" onClick={()=>setMobileOpen(false)}/>} 
   <aside className={`platform-sidebar ${mobileOpen?"mobile-open":""}`}>
