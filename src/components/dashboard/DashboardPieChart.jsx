@@ -73,11 +73,19 @@ export default function DashboardPieChart({
     );
   }
 
+  const animationKey = `${valueKey}-${chartData
+    .map((item) => `${item.__name}:${item.__value}`)
+    .join("|")}`;
+
   return (
-    <div className="dashboard-chart-canvas dashboard-pie-canvas" style={{ height }}>
+    <div
+      className="dashboard-chart-canvas dashboard-pie-canvas"
+      style={{ height }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
+            key={animationKey}
             data={chartData}
             dataKey="__value"
             nameKey="__name"
@@ -88,6 +96,10 @@ export default function DashboardPieChart({
             paddingAngle={2}
             stroke="#ffffff"
             strokeWidth={2}
+            isAnimationActive
+            animationBegin={80}
+            animationDuration={650}
+            animationEasing="ease-out"
           >
             {chartData.map((item, index) => (
               <Cell
