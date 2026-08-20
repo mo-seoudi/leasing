@@ -1,10 +1,6 @@
-import dashboardData from "../data/leasing-data.json";
-
-export const records = Array.isArray(dashboardData.records)
-  ? dashboardData.records
-  : [];
-export const metadata = dashboardData.metadata ?? {};
-export const programCatalog = dashboardData.programCatalog ?? [];
+export const records = [];
+export const metadata = {};
+export const programCatalog = [];
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) =>
@@ -51,21 +47,24 @@ function finishMeasures(measures) {
   };
 }
 
-export const schools = unique(
-  records.map((record) => record.school)
-);
-export const academicYears = unique(
-  records.map((record) => record.academicYear)
-);
-export const programmeGroups = unique(
-  records.map((record) => record.programGroup)
-);
-export const programmes = unique(
-  records.map((record) => record.program)
-);
-export const incomeTypes = unique(
-  records.map((record) => record.incomeType)
-);
+export const schools = [];
+export const academicYears = [];
+export const programmeGroups = [];
+export const programmes = [];
+export const incomeTypes = [];
+
+function replaceArray(target, values) {
+  target.splice(0, target.length, ...values);
+}
+
+export function hydrateDashboardData(nextRecords = []) {
+  replaceArray(records, Array.isArray(nextRecords) ? nextRecords : []);
+  replaceArray(schools, unique(records.map((record) => record.school)));
+  replaceArray(academicYears, unique(records.map((record) => record.academicYear)));
+  replaceArray(programmeGroups, unique(records.map((record) => record.programGroup)));
+  replaceArray(programmes, unique(records.map((record) => record.program)));
+  replaceArray(incomeTypes, unique(records.map((record) => record.incomeType)));
+}
 
 export function filterRecords(filters = {}) {
   return records.filter((record) => {
@@ -217,10 +216,6 @@ function resolveMonthInfo(record) {
     };
   }
 
-  /*
-   * Legacy fallback only. Monthly reporting should be driven by record.month.
-   * termStart is used only if an older record has no usable month value.
-   */
   if (record.termStart) {
     const date = new Date(record.termStart);
 
