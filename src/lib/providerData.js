@@ -7,8 +7,27 @@ const SCHOOL_DISPLAY = {
   RAB: "Repton Al Barsha",
 };
 
+const LEGACY_PROVIDER_ALIASES = {
+  "Gulf Star / Evolve": "Evolve Academy (Budo Juku Sports Consultancy LLC)",
+  "Chinese Language Institute": "Chinese Language Institute Middle East (CLIME)",
+  "Alliance Francaise": "Alliance Française Abu Dhabi",
+  "Badminton Academy": "Day Light Sports Academy L.L.C - O.P.",
+  "Basketball Academy": "RnB Sports Managemen",
+  "Peak Sports": "Peak Sports Academy – LLC",
+  "Gulf Multi Sport": "Gulf Multi Sports",
+  "Proactive Soccer School": "Proactive Soccer School LTD",
+  "Champs Gymnastics": "Champs Gymnastics Academy",
+  "Prototype Fitness": "Prototype Fitness Sports Academy",
+  "Neptune Swimming Club": "Neptune Swimming Academy",
+  "Global Sports RS": "Global Sports Recreation Services LLC",
+};
+
 function normaliseProviderName(value) {
   return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
 }
@@ -169,10 +188,12 @@ export function getProviderByName(providerName, providers = providerCache) {
 
   if (!cleanName) return null;
 
-  const normalisedName = normaliseProviderName(cleanName);
+  const aliasTarget = LEGACY_PROVIDER_ALIASES[cleanName] || cleanName;
+  const normalisedRequestedName = normaliseProviderName(aliasTarget);
 
   const provider = (providers || []).find(
-    (item) => normaliseProviderName(item.name) === normalisedName
+    (item) =>
+      normaliseProviderName(item.name) === normalisedRequestedName
   );
 
   if (provider) return provider;
@@ -189,10 +210,6 @@ export function clearProviderCache() {
   providerLoadPromise = null;
 }
 
-// Transitional preload: the current Programme Directory page still performs
-// a synchronous provider lookup. Start loading the Supabase provider cache as
-// soon as this module is imported so the modal can resolve real provider data
-// while the page migration is completed on this branch.
 fetchProviders().catch((error) => {
   console.error("Unable to preload providers from Supabase:", error);
 });
