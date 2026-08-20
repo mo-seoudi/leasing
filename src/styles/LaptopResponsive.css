@@ -125,6 +125,12 @@
     gap: 8px;
   }
 
+  /* Keep the first header filter (Academic Year) wide enough for values like AY2025-26. */
+  .header-page-filters > .header-filter-control:first-child {
+    min-width: 112px;
+    flex-basis: 122px;
+  }
+
   .filter label,
   .programme-filter label,
   .comparison-filter label,
