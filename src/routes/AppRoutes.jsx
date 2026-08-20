@@ -6,7 +6,7 @@ import PlatformLayout from "../layouts/PlatformLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import LeasingDashboardPage from "../pages/leasing/LeasingDashboardPage";
-import ProgrammeDirectoryPage from "../pages/leasing/ProgrammeDirectoryPage";
+import ProgrammeDirectoryGate from "../pages/leasing/ProgrammeDirectoryGate";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
 import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
@@ -27,7 +27,7 @@ export default function AppRoutes() {
         <Route path="uniform" element={<UniformDashboardPage />} />
         <Route path="uniform/comparison" element={<UniformComparisonPage />} />
         <Route path="leasing" element={<LeasingDashboardPage />} />
-        <Route path="leasing/programmes" element={<ProgrammeDirectoryPage />} />
+        <Route path="leasing/programmes" element={<ProgrammeDirectoryGate />} />
         <Route path="leasing/year-comparison" element={<YearComparisonPage />} />
         <Route path="leasing/summary" element={<Navigate to="/leasing" replace />} />
         <Route path="leasing/program-comparison" element={<Navigate to="/leasing/programmes" replace />} />
