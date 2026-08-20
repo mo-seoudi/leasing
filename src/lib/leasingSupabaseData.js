@@ -17,18 +17,12 @@ function getTermOrder(term) {
 function mapLeasingRow(row) {
   return {
     id: row.id,
-    school:
-      SCHOOL_DISPLAY[row.school?.code] ||
-      row.school?.code ||
-      "",
+    school: SCHOOL_DISPLAY[row.school?.code] || row.school?.code || "",
     schoolCode: row.school?.code || "",
     schoolName: row.school?.name || row.school?.code || "",
     program: row.programme?.name || "",
     programGroup: row.programme?.category || "",
-    provider:
-      row.programme?.provider_name ||
-      row.provider?.name ||
-      "",
+    provider: row.programme?.provider_name || row.provider?.name || "",
     incomeType: row.metric?.name || row.metric?.code || "",
     incomeTypeCode: row.metric?.code || "",
     month: row.month,
@@ -38,6 +32,43 @@ function mapLeasingRow(row) {
     amount: Number(row.amount || 0),
     scenario: row.scenario || "Actual",
   };
+}
+
+function mapDashboardSummaryRow(row) {
+  const base = {
+    school: SCHOOL_DISPLAY[row.school_code] || row.school_code || "",
+    schoolCode: row.school_code || "",
+    schoolName: row.school_name || row.school_code || "",
+    month: row.month,
+    academicYear: row.academic_year,
+    term: row.term || "",
+    termOrder: getTermOrder(row.term),
+    scenario: "Actual",
+  };
+
+  return [
+    {
+      ...base,
+      id: `${row.academic_year}-${row.month}-${row.school_code}-sales`,
+      incomeType: "Sales",
+      incomeTypeCode: "sales",
+      amount: Number(row.sales || 0),
+    },
+    {
+      ...base,
+      id: `${row.academic_year}-${row.month}-${row.school_code}-commission`,
+      incomeType: "Commission",
+      incomeTypeCode: "commission",
+      amount: Number(row.commission || 0),
+    },
+    {
+      ...base,
+      id: `${row.academic_year}-${row.month}-${row.school_code}-rental-fees`,
+      incomeType: "Rental Fees",
+      incomeTypeCode: "rental_fees",
+      amount: Number(row.rental_fees || 0),
+    },
+  ];
 }
 
 async function getLeasingStreamId() {
@@ -57,12 +88,10 @@ async function fetchPagedRecords(buildQuery) {
 
   while (true) {
     const { data, error } = await buildQuery(from, from + PAGE_SIZE - 1);
-
     if (error) throw error;
 
     const batch = data || [];
     rows.push(...batch);
-
     if (batch.length < PAGE_SIZE) break;
     from += PAGE_SIZE;
   }
@@ -70,41 +99,46 @@ async function fetchPagedRecords(buildQuery) {
   return rows;
 }
 
+export async function fetchLeasingDashboardSummary() {
+  const { data, error } = await supabase
+    .from("leasing_dashboard_summary")
+    .select(`
+      academic_year,
+      month,
+      term,
+      school_id,
+      school_code,
+      school_name,
+      sales,
+      commission,
+      rental_fees,
+      total_revenue,
+      school_income
+    `)
+    .order("academic_year", { ascending: true })
+    .order("month", { ascending: true })
+    .order("school_code", { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).flatMap(mapDashboardSummaryRow);
+}
+
 export async function fetchLeasingDashboardDimensions() {
-  const streamId = await getLeasingStreamId();
-
-  const [{ data: years, error: yearsError }, { data: schools, error: schoolsError }] =
-    await Promise.all([
-      supabase
-        .from("financial_records")
-        .select("academic_year")
-        .eq("revenue_stream_id", streamId)
-        .eq("is_deleted", false)
-        .order("academic_year", { ascending: true }),
-      supabase
-        .from("financial_records")
-        .select("school:schools(code, name)")
-        .eq("revenue_stream_id", streamId)
-        .eq("is_deleted", false),
-    ]);
-
-  if (yearsError) throw yearsError;
-  if (schoolsError) throw schoolsError;
-
-  const academicYears = [
-    ...new Set((years || []).map((row) => row.academic_year).filter(Boolean)),
-  ].sort((a, b) => String(a).localeCompare(String(b)));
+  const records = await fetchLeasingDashboardSummary();
+  const dimensions = getLeasingDimensions(records);
 
   const schoolMap = new Map();
-  (schools || []).forEach((row) => {
-    const code = row.school?.code;
-    if (!code) return;
-    const display = SCHOOL_DISPLAY[code] || code;
-    schoolMap.set(display, { display, code });
+  records.forEach((record) => {
+    if (!record.schoolCode) return;
+    schoolMap.set(record.school, {
+      display: record.school,
+      code: record.schoolCode,
+    });
   });
 
   return {
-    academicYears,
+    academicYears: dimensions.academicYears,
     schools: [...schoolMap.values()].sort((a, b) =>
       a.display.localeCompare(b.display)
     ),
@@ -115,40 +149,13 @@ export async function fetchLeasingDashboardRecords({
   academicYear = "",
   schoolCode = "",
 } = {}) {
-  const streamId = await getLeasingStreamId();
+  const records = await fetchLeasingDashboardSummary();
 
-  const rows = await fetchPagedRecords((from, to) => {
-    let query = supabase
-      .from("financial_records")
-      .select(`
-        id,
-        academic_year,
-        month,
-        term,
-        scenario,
-        amount,
-        school:schools!inner(code, name),
-        metric:revenue_metrics(code, name),
-        programme:programmes(id, name, category, provider_name),
-        provider:providers(id, name)
-      `)
-      .eq("revenue_stream_id", streamId)
-      .eq("is_deleted", false);
-
-    if (academicYear) {
-      query = query.eq("academic_year", academicYear);
-    }
-
-    if (schoolCode) {
-      query = query.eq("schools.code", schoolCode);
-    }
-
-    return query
-      .order("id", { ascending: true })
-      .range(from, to);
+  return records.filter((record) => {
+    if (academicYear && record.academicYear !== academicYear) return false;
+    if (schoolCode && record.schoolCode !== schoolCode) return false;
+    return true;
   });
-
-  return rows.map(mapLeasingRow);
 }
 
 export async function fetchLeasingRecords() {
@@ -196,28 +203,15 @@ export function getLeasingDimensions(records = []) {
 export function filterLeasingRecords(records = [], filters = {}) {
   return records.filter((record) => {
     if (filters.school && record.school !== filters.school) return false;
-    if (
-      filters.academicYear &&
-      record.academicYear !== filters.academicYear
-    ) {
-      return false;
-    }
-    if (
-      filters.programGroup &&
-      record.programGroup !== filters.programGroup
-    ) {
-      return false;
-    }
+    if (filters.academicYear && record.academicYear !== filters.academicYear) return false;
+    if (filters.programGroup && record.programGroup !== filters.programGroup) return false;
     if (filters.program && record.program !== filters.program) return false;
     if (filters.term && record.term !== filters.term) return false;
     return true;
   });
 }
 
-export function getAvailableLeasingProgrammes(
-  records = [],
-  selectedGroup = ""
-) {
+export function getAvailableLeasingProgrammes(records = [], selectedGroup = "") {
   const matching = selectedGroup
     ? records.filter((record) => record.programGroup === selectedGroup)
     : records;
