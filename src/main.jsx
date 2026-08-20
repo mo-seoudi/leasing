@@ -9,6 +9,7 @@ import App from "./App";
 
 import "./index.css";
 import "./styles/LaptopResponsive.css";
+import "./styles/ProgrammeDirectoryViewFix.css";
 
 ReactDOM.createRoot(
   document.getElementById("root"),
