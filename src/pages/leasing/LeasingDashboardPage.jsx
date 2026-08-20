@@ -16,7 +16,7 @@ import {
   getMonthlyTrend,
   getSchoolBreakdown,
   getTermBreakdown,
-} from "../../lib/dashboardData";
+} from "../../lib/leasingReporting";
 import {
   fetchLeasingDashboardSummary,
   filterLeasingRecords,
