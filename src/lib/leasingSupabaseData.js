@@ -219,3 +219,62 @@ export function getAvailableLeasingProgrammes(records = [], selectedGroup = "") 
   return [...new Set(matching.map((record) => record.program).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b));
 }
+
+function createEmptyMeasures() {
+  return {
+    sales: 0,
+    commission: 0,
+    rentalFees: 0,
+    totalRevenue: 0,
+    schoolIncome: 0,
+  };
+}
+
+function addRecordToMeasures(measures, record) {
+  const amount = Number(record.amount || 0);
+
+  if (record.incomeType === "Sales") measures.sales += amount;
+  if (record.incomeType === "Commission") measures.commission += amount;
+  if (record.incomeType === "Rental Fees") measures.rentalFees += amount;
+}
+
+function finishMeasures(measures) {
+  return {
+    ...measures,
+    totalRevenue: measures.sales + measures.rentalFees,
+    schoolIncome: measures.commission + measures.rentalFees,
+  };
+}
+
+export function getLeasingProgrammeBreakdown(records = []) {
+  const grouped = new Map();
+
+  records.forEach((record) => {
+    const programme = record.program || "Unspecified Programme";
+
+    if (!grouped.has(programme)) {
+      grouped.set(programme, {
+        programme,
+        programGroup: record.programGroup || "Unspecified Group",
+        provider: record.provider || "",
+        ...createEmptyMeasures(),
+      });
+    }
+
+    addRecordToMeasures(grouped.get(programme), record);
+  });
+
+  return [...grouped.values()]
+    .map((item) => finishMeasures(item))
+    .sort((a, b) => b.schoolIncome - a.schoolIncome);
+}
+
+export function formatLeasingCurrency(value) {
+  const number = Number(value);
+
+  return new Intl.NumberFormat("en-AE", {
+    style: "currency",
+    currency: "AED",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(number) ? number : 0);
+}
