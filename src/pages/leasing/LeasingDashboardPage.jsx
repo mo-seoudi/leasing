@@ -19,6 +19,7 @@ import {
 } from "../../lib/leasingReporting";
 import {
   fetchLeasingDashboardSummary,
+  fetchLeasingRecords,
   filterLeasingRecords,
   getLeasingDimensions,
 } from "../../lib/leasingSupabaseData";
@@ -65,6 +66,14 @@ export default function LeasingDashboardPage() {
     }
 
     loadSummary();
+
+    // Warm the shared detailed-record cache in the background. Programme
+    // Directory and Performance Comparison both need this larger dataset,
+    // so navigating to them after the Leasing Dashboard should be immediate.
+    fetchLeasingRecords().catch((error) => {
+      console.warn("Unable to prefetch detailed Leasing records", error);
+    });
+
     return () => {
       active = false;
     };
