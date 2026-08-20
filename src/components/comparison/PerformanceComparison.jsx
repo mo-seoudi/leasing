@@ -54,7 +54,10 @@ export default function PerformanceComparison({
   const years = useMemo(() => [...academicYears].sort((a,b) => a.localeCompare(b)), [academicYears]);
   const monthOrder = useMemo(() => getOrderedMonths(startMonth), [startMonth]);
   const [mode, setMode] = useState("yoy");
-  const [selectedMonth, setSelectedMonth] = useState(3);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const currentMonth = new Date().getMonth() + 1;
+    return currentMonth === 1 ? 12 : currentMonth - 1;
+  });
   const [selectedTerm, setSelectedTerm] = useState("Term 1");
 
   const rows = useMemo(() => years.map((academicYear, yearIndex) => {
