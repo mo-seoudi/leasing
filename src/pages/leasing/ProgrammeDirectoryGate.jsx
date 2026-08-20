@@ -16,7 +16,7 @@ export default function ProgrammeDirectoryGate() {
       try {
         const [records] = await Promise.all([
           fetchLeasingRecords(),
-          fetchProviders({ force: true }),
+          fetchProviders(),
         ]);
 
         hydrateDashboardData(records);
