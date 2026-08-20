@@ -7,6 +7,12 @@ const SCHOOL_DISPLAY = {
   ROSE: "Rose",
 };
 
+let leasingStreamIdPromise = null;
+let leasingSummaryCache = null;
+let leasingSummaryPromise = null;
+let leasingRecordsCache = null;
+let leasingRecordsPromise = null;
+
 function getTermOrder(term) {
   if (term === "Term 1") return 1;
   if (term === "Term 2") return 2;
@@ -72,14 +78,22 @@ function mapDashboardSummaryRow(row) {
 }
 
 async function getLeasingStreamId() {
-  const { data: stream, error } = await supabase
-    .from("revenue_streams")
-    .select("id")
-    .eq("code", "leasing")
-    .single();
+  if (!leasingStreamIdPromise) {
+    leasingStreamIdPromise = supabase
+      .from("revenue_streams")
+      .select("id")
+      .eq("code", "leasing")
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          leasingStreamIdPromise = null;
+          throw error;
+        }
+        return data.id;
+      });
+  }
 
-  if (error) throw error;
-  return stream.id;
+  return leasingStreamIdPromise;
 }
 
 async function fetchPagedRecords(buildQuery) {
@@ -99,29 +113,41 @@ async function fetchPagedRecords(buildQuery) {
   return rows;
 }
 
-export async function fetchLeasingDashboardSummary() {
-  const { data, error } = await supabase
-    .from("leasing_dashboard_summary")
-    .select(`
-      academic_year,
-      month,
-      term,
-      school_id,
-      school_code,
-      school_name,
-      sales,
-      commission,
-      rental_fees,
-      total_revenue,
-      school_income
-    `)
-    .order("academic_year", { ascending: true })
-    .order("month", { ascending: true })
-    .order("school_code", { ascending: true });
+export async function fetchLeasingDashboardSummary({ force = false } = {}) {
+  if (!force && leasingSummaryCache) return leasingSummaryCache;
+  if (!force && leasingSummaryPromise) return leasingSummaryPromise;
 
-  if (error) throw error;
+  leasingSummaryPromise = (async () => {
+    const { data, error } = await supabase
+      .from("leasing_dashboard_summary")
+      .select(`
+        academic_year,
+        month,
+        term,
+        school_id,
+        school_code,
+        school_name,
+        sales,
+        commission,
+        rental_fees,
+        total_revenue,
+        school_income
+      `)
+      .order("academic_year", { ascending: true })
+      .order("month", { ascending: true })
+      .order("school_code", { ascending: true });
 
-  return (data || []).flatMap(mapDashboardSummaryRow);
+    if (error) throw error;
+
+    leasingSummaryCache = (data || []).flatMap(mapDashboardSummaryRow);
+    return leasingSummaryCache;
+  })();
+
+  try {
+    return await leasingSummaryPromise;
+  } finally {
+    leasingSummaryPromise = null;
+  }
 }
 
 export async function fetchLeasingDashboardDimensions() {
@@ -158,31 +184,50 @@ export async function fetchLeasingDashboardRecords({
   });
 }
 
-export async function fetchLeasingRecords() {
-  const streamId = await getLeasingStreamId();
+export async function fetchLeasingRecords({ force = false } = {}) {
+  if (!force && leasingRecordsCache) return leasingRecordsCache;
+  if (!force && leasingRecordsPromise) return leasingRecordsPromise;
 
-  const rows = await fetchPagedRecords((from, to) =>
-    supabase
-      .from("financial_records")
-      .select(`
-        id,
-        academic_year,
-        month,
-        term,
-        scenario,
-        amount,
-        school:schools(code, name),
-        metric:revenue_metrics(code, name),
-        programme:programmes(id, name, category, provider_name),
-        provider:providers(id, name)
-      `)
-      .eq("revenue_stream_id", streamId)
-      .eq("is_deleted", false)
-      .order("id", { ascending: true })
-      .range(from, to)
-  );
+  leasingRecordsPromise = (async () => {
+    const streamId = await getLeasingStreamId();
 
-  return rows.map(mapLeasingRow);
+    const rows = await fetchPagedRecords((from, to) =>
+      supabase
+        .from("financial_records")
+        .select(`
+          id,
+          academic_year,
+          month,
+          term,
+          scenario,
+          amount,
+          school:schools(code, name),
+          metric:revenue_metrics(code, name),
+          programme:programmes(id, name, category, provider_name),
+          provider:providers(id, name)
+        `)
+        .eq("revenue_stream_id", streamId)
+        .eq("is_deleted", false)
+        .order("id", { ascending: true })
+        .range(from, to)
+    );
+
+    leasingRecordsCache = rows.map(mapLeasingRow);
+    return leasingRecordsCache;
+  })();
+
+  try {
+    return await leasingRecordsPromise;
+  } finally {
+    leasingRecordsPromise = null;
+  }
+}
+
+export function clearLeasingDataCache() {
+  leasingSummaryCache = null;
+  leasingSummaryPromise = null;
+  leasingRecordsCache = null;
+  leasingRecordsPromise = null;
 }
 
 export function getLeasingDimensions(records = []) {
