@@ -76,6 +76,49 @@ function mapUniformSummaryRow(row) {
   ];
 }
 
+async function fetchUniformDetailedRecords() {
+  const { data: stream, error: streamError } = await supabase
+    .from("revenue_streams")
+    .select("id")
+    .eq("code", "uniform")
+    .single();
+
+  if (streamError) throw streamError;
+
+  const { data, error } = await supabase
+    .from("financial_records")
+    .select(`
+      id,
+      academic_year,
+      month,
+      term,
+      scenario,
+      amount,
+      school:schools(code, name),
+      metric:revenue_metrics(code, name)
+    `)
+    .eq("revenue_stream_id", stream.id)
+    .eq("is_deleted", false)
+    .order("month", { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    school: row.school?.code || "",
+    schoolName: row.school?.name || row.school?.code || "",
+    revenueStream: "Uniform",
+    metric: row.metric?.name || row.metric?.code || "",
+    metricCode: row.metric?.code || "",
+    scenario: row.scenario || "Actual",
+    month: row.month,
+    academicYear: row.academic_year,
+    term: row.term || "",
+    termOrder: getTermOrder(row.term),
+    amount: Number(row.amount || 0),
+  }));
+}
+
 export const uniformTerms = ["Term 1", "Term 2", "Term 3"];
 
 export async function fetchUniformRecords() {
@@ -96,8 +139,17 @@ export async function fetchUniformRecords() {
     .order("month", { ascending: true })
     .order("school_code", { ascending: true });
 
-  if (error) throw error;
-  return (data || []).flatMap(mapUniformSummaryRow);
+  if (!error) {
+    return (data || []).flatMap(mapUniformSummaryRow);
+  }
+
+  // Keep the page functional until the summary view has been created/deployed.
+  if (error.code === "PGRST205" || String(error.message || "").includes("uniform_dashboard_summary")) {
+    console.warn("Uniform summary view is unavailable; falling back to detailed financial records.");
+    return fetchUniformDetailedRecords();
+  }
+
+  throw error;
 }
 
 export function getUniformAcademicYears(records = [], yearBasis = "finance") {
