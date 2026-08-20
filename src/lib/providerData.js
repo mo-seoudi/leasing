@@ -1,7 +1,11 @@
-import providerSource from "../data/provider-data.json";
+import { supabase } from "./supabase";
 
-const providers =
-  providerSource?.providers || {};
+const SCHOOL_DISPLAY = {
+  FRY: "Fry",
+  ROSE: "Rose",
+  RDXB: "Repton Dubai",
+  RAB: "Repton Al Barsha",
+};
 
 function normaliseProviderName(value) {
   return String(value || "")
@@ -9,47 +13,11 @@ function normaliseProviderName(value) {
     .toLowerCase();
 }
 
-/*
- * Main lookup uses the provider key stored in
- * leasing-data.json.
- */
-export function getProviderByName(providerName) {
-  const cleanName = String(
-    providerName || ""
-  ).trim();
+function createFallbackProvider(providerName) {
+  const cleanName = String(providerName || "").trim();
 
-  if (!cleanName) {
-    return null;
-  }
-
-  if (providers[cleanName]) {
-    return providers[cleanName];
-  }
-
-  /*
-   * Fallback lookup in case of minor differences in
-   * spaces or capitalisation.
-   */
-  const normalisedName =
-    normaliseProviderName(cleanName);
-
-  const matchingKey = Object.keys(
-    providers
-  ).find(
-    (key) =>
-      normaliseProviderName(key) ===
-      normalisedName
-  );
-
-  if (matchingKey) {
-    return providers[matchingKey];
-  }
-
-  /*
-   * Return a usable fallback record so clicking a provider
-   * never crashes the page.
-   */
   return {
+    id: null,
     name: cleanName,
     contactPerson: "",
     email: "",
@@ -71,8 +39,140 @@ export function getProviderByName(providerName) {
   };
 }
 
-export function getAllProviders() {
-  return Object.values(providers);
+function mapContract(contract) {
+  if (!contract) return null;
+
+  const rentalFees =
+    contract.rental_fees_description ||
+    (contract.rental_fees_amount === null ||
+    contract.rental_fees_amount === undefined
+      ? null
+      : Number(contract.rental_fees_amount));
+
+  return {
+    id: contract.id,
+    status: contract.status || "Not Recorded",
+    startDate: contract.start_date || "",
+    expiryDate: contract.expiry_date || "",
+    noticePeriod: contract.notice_period || "",
+    commissionRate:
+      contract.commission_rate === null ||
+      contract.commission_rate === undefined
+        ? null
+        : Number(contract.commission_rate),
+    rentalFees,
+    revenueCollection: contract.revenue_collection || "",
+    invoiceFrequency: contract.invoice_frequency || "",
+    schools: (contract.provider_contract_schools || [])
+      .map((item) => item.school?.code)
+      .filter(Boolean)
+      .map((code) => SCHOOL_DISPLAY[code] || code),
+  };
 }
 
-export default providers;
+function chooseCurrentContract(contracts = []) {
+  if (!Array.isArray(contracts) || contracts.length === 0) {
+    return null;
+  }
+
+  return [...contracts].sort((a, b) => {
+    if (Boolean(a.is_active) !== Boolean(b.is_active)) {
+      return a.is_active ? -1 : 1;
+    }
+
+    const aDate = a.expiry_date || a.start_date || "";
+    const bDate = b.expiry_date || b.start_date || "";
+    return String(bDate).localeCompare(String(aDate));
+  })[0];
+}
+
+function mapProvider(row) {
+  const contract = chooseCurrentContract(row.provider_contracts || []);
+
+  return {
+    id: row.id,
+    name: row.name || "",
+    contactPerson: row.contact_person || "",
+    email: row.email || "",
+    phone: row.phone || "",
+    companyNumber: row.company_number || "",
+    address: row.address || "",
+    programmes: (row.programmes || [])
+      .map((programme) => programme.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b)),
+    contract:
+      mapContract(contract) ||
+      createFallbackProvider(row.name).contract,
+  };
+}
+
+let providerCache = [];
+
+export async function fetchProviders({ force = false } = {}) {
+  if (!force && providerCache.length > 0) {
+    return providerCache;
+  }
+
+  const { data, error } = await supabase
+    .from("providers")
+    .select(`
+      id,
+      name,
+      contact_person,
+      email,
+      phone,
+      company_number,
+      address,
+      programmes(id, name),
+      provider_contracts(
+        id,
+        status,
+        start_date,
+        expiry_date,
+        notice_period,
+        commission_rate,
+        rental_fees_amount,
+        rental_fees_description,
+        revenue_collection,
+        invoice_frequency,
+        is_active,
+        provider_contract_schools(
+          school:schools(id, code, name)
+        )
+      )
+    `)
+    .eq("is_active", true)
+    .order("name", { ascending: true });
+
+  if (error) throw error;
+
+  providerCache = (data || []).map(mapProvider);
+  return providerCache;
+}
+
+export function getProviderByName(providerName, providers = providerCache) {
+  const cleanName = String(providerName || "").trim();
+
+  if (!cleanName) return null;
+
+  const normalisedName = normaliseProviderName(cleanName);
+
+  const provider = (providers || []).find(
+    (item) => normaliseProviderName(item.name) === normalisedName
+  );
+
+  if (provider) return provider;
+
+  return createFallbackProvider(cleanName);
+}
+
+export function getAllProviders() {
+  return providerCache;
+}
+
+export function clearProviderCache() {
+  providerCache = [];
+}
+
+export default providerCache;
