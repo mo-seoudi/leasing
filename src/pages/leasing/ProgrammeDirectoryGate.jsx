@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { hydrateDashboardData } from "../../lib/dashboardData";
-import { fetchLeasingRecords } from "../../lib/leasingSupabaseData";
+import { fetchLeasingProgrammeSummary } from "../../lib/leasingSupabaseData";
 import { fetchProviders } from "../../lib/providerData";
 import ProgrammeDirectoryPage from "./ProgrammeDirectoryPage";
 
@@ -15,18 +15,14 @@ export default function ProgrammeDirectoryGate() {
     async function loadDirectoryData() {
       try {
         const [records] = await Promise.all([
-          fetchLeasingRecords(),
+          fetchLeasingProgrammeSummary(),
           fetchProviders(),
         ]);
 
         hydrateDashboardData(records);
-
-        if (!cancelled) {
-          setStatus("ready");
-        }
+        if (!cancelled) setStatus("ready");
       } catch (error) {
         console.error("Unable to load Programme Directory from Supabase:", error);
-
         if (!cancelled) {
           setErrorMessage(error?.message || "Unable to load Programme Directory data.");
           setStatus("error");
@@ -35,17 +31,14 @@ export default function ProgrammeDirectoryGate() {
     }
 
     loadDirectoryData();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   if (status === "loading") {
     return (
       <section className="card">
         <h2>Programme Directory</h2>
-        <p>Loading programme, financial, provider and contract data…</p>
+        <p>Loading programme and provider data…</p>
       </section>
     );
   }
