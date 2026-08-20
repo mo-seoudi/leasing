@@ -536,6 +536,11 @@ function DirectoryPieCard({
     (item) => toNumber(item[dataKey]) > 0
   );
 
+  const chartTotal = chartData.reduce(
+    (total, item) => total + toNumber(item[dataKey]),
+    0
+  );
+
   return (
     <section className="directory-pie-card">
       <div className="directory-pie-heading">
@@ -575,9 +580,19 @@ function DirectoryPieCard({
               </Pie>
 
               <Tooltip
-                formatter={(value) =>
-                  formatCurrency(value)
-                }
+                formatter={(value) => {
+                  const percentage = chartTotal > 0
+                    ? (toNumber(value) / chartTotal) * 100
+                    : 0;
+
+                  return (
+                    <span>
+                      {formatCurrency(value)}
+                      <br />
+                      <strong>{formatPercentage(percentage)}</strong>
+                    </span>
+                  );
+                }}
               />
 
               <Legend
@@ -676,20 +691,11 @@ export default function ProgrammeDirectoryPage() {
     [filters.programGroup]
   );
 
-  /*
-   * Full dataset used by the working ProgrammeDetailView.
-   * Its own School and Academic Year dropdowns therefore remain
-   * independent from the directory page filters.
-   */
   const allRecords = useMemo(
     () => filterRecords({}),
     []
   );
 
-  /*
-   * Page-filtered records used by the directory table,
-   * bar chart, pie charts and KPI values.
-   */
   const filteredRecords = useMemo(
     () =>
       filterRecords({
@@ -803,14 +809,6 @@ export default function ProgrammeDirectoryPage() {
             )
           : allRecords;
 
-        /*
-         * ProgrammeDetailView filters records using:
-         * record.program === programme
-         *
-         * For group summaries, copy the records and temporarily
-         * assign one common programme name. The original component
-         * itself remains unchanged.
-         */
         const detailRecords = sourceRecords.map(
           (record) => ({
             ...record,
