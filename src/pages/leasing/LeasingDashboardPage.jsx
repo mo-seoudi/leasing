@@ -18,8 +18,9 @@ import {
   getTermBreakdown,
 } from "../../lib/dashboardData";
 import {
-  fetchLeasingDashboardDimensions,
-  fetchLeasingDashboardRecords,
+  fetchLeasingDashboardSummary,
+  filterLeasingRecords,
+  getLeasingDimensions,
 } from "../../lib/leasingSupabaseData";
 
 const LEASING_METRICS = [
@@ -30,88 +31,57 @@ const LEASING_METRICS = [
 export default function LeasingDashboardPage() {
   const { setHeaderControls } = useOutletContext();
   const [records, setRecords] = useState([]);
-  const [dimensions, setDimensions] = useState({ academicYears: [], schools: [] });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [filters, setFilters] = useState({ academicYear: "", school: "" });
-  const [dimensionsReady, setDimensionsReady] = useState(false);
 
   useEffect(() => {
     let active = true;
 
-    async function loadDimensions() {
+    async function loadSummary() {
       try {
         setLoading(true);
         setLoadError("");
-        const nextDimensions = await fetchLeasingDashboardDimensions();
+        const nextRecords = await fetchLeasingDashboardSummary();
 
         if (!active) return;
 
-        setDimensions(nextDimensions);
+        setRecords(nextRecords);
+        const nextDimensions = getLeasingDimensions(nextRecords);
         const latestAcademicYear =
           nextDimensions.academicYears[nextDimensions.academicYears.length - 1] || "";
+
         setFilters((current) => ({
           ...current,
           academicYear: current.academicYear || latestAcademicYear,
         }));
-        setDimensionsReady(true);
       } catch (error) {
         if (!active) return;
-        console.error("Unable to load Leasing dimensions from Supabase", error);
+        console.error("Unable to load Leasing dashboard summary from Supabase", error);
         setLoadError("Unable to load Leasing data from Supabase.");
-        setLoading(false);
-      }
-    }
-
-    loadDimensions();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!dimensionsReady) return undefined;
-
-    let active = true;
-
-    async function loadRecords() {
-      try {
-        setLoading(true);
-        setLoadError("");
-
-        const selectedSchool = dimensions.schools.find(
-          (school) => school.display === filters.school
-        );
-
-        const nextRecords = await fetchLeasingDashboardRecords({
-          academicYear: filters.academicYear,
-          schoolCode: selectedSchool?.code || "",
-        });
-
-        if (!active) return;
-        setRecords(nextRecords);
-      } catch (error) {
-        if (!active) return;
-        console.error("Unable to load Leasing records from Supabase", error);
-        setLoadError("Unable to load Leasing records from Supabase.");
       } finally {
         if (active) setLoading(false);
       }
     }
 
-    loadRecords();
+    loadSummary();
     return () => {
       active = false;
     };
-  }, [dimensionsReady, filters.academicYear, filters.school, dimensions.schools]);
+  }, []);
 
-  const summary = useMemo(() => calculateKPIs(records), [records]);
-  const monthlyData = useMemo(() => getMonthlyTrend(records), [records]);
-  const schoolData = useMemo(() => getSchoolBreakdown(records), [records]);
-  const termData = useMemo(() => getTermBreakdown(records), [records]);
+  const dimensions = useMemo(() => getLeasingDimensions(records), [records]);
+  const filteredRecords = useMemo(
+    () => filterLeasingRecords(records, filters),
+    [records, filters]
+  );
+  const summary = useMemo(() => calculateKPIs(filteredRecords), [filteredRecords]);
+  const monthlyData = useMemo(() => getMonthlyTrend(filteredRecords), [filteredRecords]);
+  const schoolData = useMemo(() => getSchoolBreakdown(filteredRecords), [filteredRecords]);
+  const termData = useMemo(() => getTermBreakdown(filteredRecords), [filteredRecords]);
 
   const months = new Set(monthlyData.map((item) => item.monthKey)).size;
-  const includedSchools = new Set(records.map((item) => item.school).filter(Boolean)).size;
+  const includedSchools = new Set(filteredRecords.map((item) => item.school).filter(Boolean)).size;
   const incomeRate = summary.totalRevenue ? (summary.schoolIncome / summary.totalRevenue) * 100 : 0;
   const tableResetKey = `${filters.academicYear}|${filters.school}`;
 
@@ -133,7 +103,7 @@ export default function LeasingDashboardPage() {
           <span>School</span>
           <select value={filters.school} onChange={(e) => handleFilterChange("school", e.target.value)}>
             <option value="">All Schools</option>
-            {dimensions.schools.map((school) => <option key={school.code} value={school.display}>{school.display}</option>)}
+            {dimensions.schools.map((school) => <option key={school} value={school}>{school}</option>)}
           </select>
         </label>
       </div>
