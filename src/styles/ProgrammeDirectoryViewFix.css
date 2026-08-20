@@ -1,0 +1,15 @@
+/* Programme Directory: Sports Academies / Other Programs / All Leasing are table-only summaries. */
+.programme-directory-page
+  .directory-table-card:has(.directory-view-toggle button[title="Chart view"].active)
+  .directory-aggregate-tabs,
+.programme-directory-page
+  .directory-table-card:has(.directory-view-toggle button[title="Pie view"].active)
+  .directory-aggregate-tabs,
+.programme-directory-page
+  .directory-table-card:has(.directory-view-toggle button[title="Chart view"].active)
+  .directory-aggregate-detail,
+.programme-directory-page
+  .directory-table-card:has(.directory-view-toggle button[title="Pie view"].active)
+  .directory-aggregate-detail {
+  display: none;
+}
