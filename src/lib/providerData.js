@@ -108,47 +108,60 @@ function mapProvider(row) {
 }
 
 let providerCache = [];
+let providerLoadPromise = null;
 
 export async function fetchProviders({ force = false } = {}) {
   if (!force && providerCache.length > 0) {
     return providerCache;
   }
 
-  const { data, error } = await supabase
-    .from("providers")
-    .select(`
-      id,
-      name,
-      contact_person,
-      email,
-      phone,
-      company_number,
-      address,
-      programmes(id, name),
-      provider_contracts(
+  if (!force && providerLoadPromise) {
+    return providerLoadPromise;
+  }
+
+  providerLoadPromise = (async () => {
+    const { data, error } = await supabase
+      .from("providers")
+      .select(`
         id,
-        status,
-        start_date,
-        expiry_date,
-        notice_period,
-        commission_rate,
-        rental_fees_amount,
-        rental_fees_description,
-        revenue_collection,
-        invoice_frequency,
-        is_active,
-        provider_contract_schools(
-          school:schools(id, code, name)
+        name,
+        contact_person,
+        email,
+        phone,
+        company_number,
+        address,
+        programmes(id, name),
+        provider_contracts(
+          id,
+          status,
+          start_date,
+          expiry_date,
+          notice_period,
+          commission_rate,
+          rental_fees_amount,
+          rental_fees_description,
+          revenue_collection,
+          invoice_frequency,
+          is_active,
+          provider_contract_schools(
+            school:schools(id, code, name)
+          )
         )
-      )
-    `)
-    .eq("is_active", true)
-    .order("name", { ascending: true });
+      `)
+      .eq("is_active", true)
+      .order("name", { ascending: true });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  providerCache = (data || []).map(mapProvider);
-  return providerCache;
+    providerCache = (data || []).map(mapProvider);
+    return providerCache;
+  })();
+
+  try {
+    return await providerLoadPromise;
+  } finally {
+    providerLoadPromise = null;
+  }
 }
 
 export function getProviderByName(providerName, providers = providerCache) {
@@ -173,6 +186,15 @@ export function getAllProviders() {
 
 export function clearProviderCache() {
   providerCache = [];
+  providerLoadPromise = null;
 }
+
+// Transitional preload: the current Programme Directory page still performs
+// a synchronous provider lookup. Start loading the Supabase provider cache as
+// soon as this module is imported so the modal can resolve real provider data
+// while the page migration is completed on this branch.
+fetchProviders().catch((error) => {
+  console.error("Unable to preload providers from Supabase:", error);
+});
 
 export default providerCache;
