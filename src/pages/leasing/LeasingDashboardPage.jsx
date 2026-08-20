@@ -101,7 +101,7 @@ export default function LeasingDashboardPage() {
   useEffect(() => {
     setHeaderControls(
       <div className="header-page-filters">
-        <label className="header-filter-control">
+        <label className="header-filter-control wide">
           <span>Academic Year</span>
           <select value={filters.academicYear} onChange={(e) => handleFilterChange("academicYear", e.target.value)}>
             <option value="">All Years</option>
