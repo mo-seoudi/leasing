@@ -134,11 +134,8 @@ export async function fetchLeasingDashboardSummary({ force = false } = {}) {
     return leasingSummaryCache;
   })();
 
-  try {
-    return await leasingSummaryPromise;
-  } finally {
-    leasingSummaryPromise = null;
-  }
+  try { return await leasingSummaryPromise; }
+  finally { leasingSummaryPromise = null; }
 }
 
 export async function fetchLeasingProgrammeSummary({ force = false } = {}) {
@@ -157,11 +154,8 @@ export async function fetchLeasingProgrammeSummary({ force = false } = {}) {
     return leasingProgrammeSummaryCache;
   })();
 
-  try {
-    return await leasingProgrammeSummaryPromise;
-  } finally {
-    leasingProgrammeSummaryPromise = null;
-  }
+  try { return await leasingProgrammeSummaryPromise; }
+  finally { leasingProgrammeSummaryPromise = null; }
 }
 
 export async function fetchLeasingDashboardDimensions() {
@@ -204,11 +198,26 @@ export async function fetchLeasingRecords({ force = false } = {}) {
     return leasingRecordsCache;
   })();
 
-  try {
-    return await leasingRecordsPromise;
-  } finally {
-    leasingRecordsPromise = null;
-  }
+  try { return await leasingRecordsPromise; }
+  finally { leasingRecordsPromise = null; }
+}
+
+export async function fetchLeasingDetailRecords({ programme = "", programGroup = "" } = {}) {
+  const streamId = await getLeasingStreamId();
+
+  let query = supabase
+    .from("financial_records")
+    .select("id, academic_year, month, term, scenario, amount, school:schools(code), metric:revenue_metrics(code), programme:programmes!inner(name, category, provider_name)")
+    .eq("revenue_stream_id", streamId)
+    .eq("is_deleted", false)
+    .order("id", { ascending: true });
+
+  if (programme) query = query.eq("programme.name", programme);
+  if (programGroup) query = query.eq("programme.category", programGroup);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map(mapLeasingRow);
 }
 
 export function clearLeasingDataCache() {
