@@ -14,55 +14,8 @@ function getTermOrder(term) {
   return 0;
 }
 
-export async function fetchLeasingRecords() {
-  const { data: stream, error: streamError } = await supabase
-    .from("revenue_streams")
-    .select("id")
-    .eq("code", "leasing")
-    .single();
-
-  if (streamError) {
-    throw streamError;
-  }
-
-  const rows = [];
-  let from = 0;
-
-  while (true) {
-    const { data, error } = await supabase
-      .from("financial_records")
-      .select(`
-        id,
-        academic_year,
-        month,
-        term,
-        scenario,
-        amount,
-        school:schools(code, name),
-        metric:revenue_metrics(code, name),
-        programme:programmes(id, name, category, provider_name),
-        provider:providers(id, name)
-      `)
-      .eq("revenue_stream_id", stream.id)
-      .eq("is_deleted", false)
-      .order("id", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error) {
-      throw error;
-    }
-
-    const batch = data || [];
-    rows.push(...batch);
-
-    if (batch.length < PAGE_SIZE) {
-      break;
-    }
-
-    from += PAGE_SIZE;
-  }
-
-  return rows.map((row) => ({
+function mapLeasingRow(row) {
+  return {
     id: row.id,
     school:
       SCHOOL_DISPLAY[row.school?.code] ||
@@ -84,7 +37,145 @@ export async function fetchLeasingRecords() {
     termOrder: getTermOrder(row.term),
     amount: Number(row.amount || 0),
     scenario: row.scenario || "Actual",
-  }));
+  };
+}
+
+async function getLeasingStreamId() {
+  const { data: stream, error } = await supabase
+    .from("revenue_streams")
+    .select("id")
+    .eq("code", "leasing")
+    .single();
+
+  if (error) throw error;
+  return stream.id;
+}
+
+async function fetchPagedRecords(buildQuery) {
+  const rows = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await buildQuery(from, from + PAGE_SIZE - 1);
+
+    if (error) throw error;
+
+    const batch = data || [];
+    rows.push(...batch);
+
+    if (batch.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return rows;
+}
+
+export async function fetchLeasingDashboardDimensions() {
+  const streamId = await getLeasingStreamId();
+
+  const [{ data: years, error: yearsError }, { data: schools, error: schoolsError }] =
+    await Promise.all([
+      supabase
+        .from("financial_records")
+        .select("academic_year")
+        .eq("revenue_stream_id", streamId)
+        .eq("is_deleted", false)
+        .order("academic_year", { ascending: true }),
+      supabase
+        .from("financial_records")
+        .select("school:schools(code, name)")
+        .eq("revenue_stream_id", streamId)
+        .eq("is_deleted", false),
+    ]);
+
+  if (yearsError) throw yearsError;
+  if (schoolsError) throw schoolsError;
+
+  const academicYears = [
+    ...new Set((years || []).map((row) => row.academic_year).filter(Boolean)),
+  ].sort((a, b) => String(a).localeCompare(String(b)));
+
+  const schoolMap = new Map();
+  (schools || []).forEach((row) => {
+    const code = row.school?.code;
+    if (!code) return;
+    const display = SCHOOL_DISPLAY[code] || code;
+    schoolMap.set(display, { display, code });
+  });
+
+  return {
+    academicYears,
+    schools: [...schoolMap.values()].sort((a, b) =>
+      a.display.localeCompare(b.display)
+    ),
+  };
+}
+
+export async function fetchLeasingDashboardRecords({
+  academicYear = "",
+  schoolCode = "",
+} = {}) {
+  const streamId = await getLeasingStreamId();
+
+  const rows = await fetchPagedRecords((from, to) => {
+    let query = supabase
+      .from("financial_records")
+      .select(`
+        id,
+        academic_year,
+        month,
+        term,
+        scenario,
+        amount,
+        school:schools!inner(code, name),
+        metric:revenue_metrics(code, name),
+        programme:programmes(id, name, category, provider_name),
+        provider:providers(id, name)
+      `)
+      .eq("revenue_stream_id", streamId)
+      .eq("is_deleted", false);
+
+    if (academicYear) {
+      query = query.eq("academic_year", academicYear);
+    }
+
+    if (schoolCode) {
+      query = query.eq("schools.code", schoolCode);
+    }
+
+    return query
+      .order("id", { ascending: true })
+      .range(from, to);
+  });
+
+  return rows.map(mapLeasingRow);
+}
+
+export async function fetchLeasingRecords() {
+  const streamId = await getLeasingStreamId();
+
+  const rows = await fetchPagedRecords((from, to) =>
+    supabase
+      .from("financial_records")
+      .select(`
+        id,
+        academic_year,
+        month,
+        term,
+        scenario,
+        amount,
+        school:schools(code, name),
+        metric:revenue_metrics(code, name),
+        programme:programmes(id, name, category, provider_name),
+        provider:providers(id, name)
+      `)
+      .eq("revenue_stream_id", streamId)
+      .eq("is_deleted", false)
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
+
+  return rows.map(mapLeasingRow);
 }
 
 export function getLeasingDimensions(records = []) {
