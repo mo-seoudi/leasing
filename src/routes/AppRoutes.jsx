@@ -5,6 +5,7 @@ import PlatformLayout from "../layouts/PlatformLayout";
 
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
+import SupplierDirectoryPage from "../pages/suppliers/SupplierDirectoryPage";
 import LeasingDashboardPage from "../pages/leasing/LeasingDashboardPage";
 import ProgrammeDirectoryGate from "../pages/leasing/ProgrammeDirectoryGate";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
@@ -24,6 +25,7 @@ export default function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><PlatformLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="suppliers" element={<SupplierDirectoryPage />} />
         <Route path="catering" element={<CateringDashboardPage />} />
         <Route path="catering/comparison" element={<CateringComparisonPage />} />
         <Route path="uniform" element={<UniformDashboardPage />} />
