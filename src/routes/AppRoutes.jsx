@@ -16,6 +16,7 @@ import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
 import PhotographyDashboardPage from "../pages/photography/PhotographyDashboardPage";
 import PhotographyComparisonPage from "../pages/photography/PhotographyComparisonPage";
 import DataEntryPage from "../pages/admin/DataEntryPage";
+import SupplierRecordsPage from "../pages/admin/SupplierRecordsPage";
 import SettingsPage from "../pages/settings/SettingsPage";
 
 export default function AppRoutes() {
@@ -38,6 +39,7 @@ export default function AppRoutes() {
         <Route path="leasing/summary" element={<Navigate to="/leasing" replace />} />
         <Route path="leasing/program-comparison" element={<Navigate to="/leasing/programmes" replace />} />
         <Route path="financial-records" element={<DataEntryPage />} />
+        <Route path="supplier-records" element={<SupplierRecordsPage />} />
         <Route path="data-entry" element={<Navigate to="/financial-records" replace />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
