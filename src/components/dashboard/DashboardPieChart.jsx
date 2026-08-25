@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Cell,
   Legend,
@@ -49,6 +50,8 @@ export default function DashboardPieChart({
   formatValue,
   height = 290,
 }) {
+  const [isHoveringSlice, setIsHoveringSlice] = useState(false);
+
   const total = data.reduce(
     (sum, item) => sum + Number(item[valueKey] || 0),
     0
@@ -100,6 +103,8 @@ export default function DashboardPieChart({
             animationBegin={80}
             animationDuration={650}
             animationEasing="ease-out"
+            onMouseEnter={() => setIsHoveringSlice(true)}
+            onMouseLeave={() => setIsHoveringSlice(false)}
           >
             {chartData.map((item, index) => (
               <Cell
@@ -129,10 +134,12 @@ export default function DashboardPieChart({
         </PieChart>
       </ResponsiveContainer>
 
-      <div className="dashboard-pie-centre" aria-hidden="true">
-        <span>{metricLabel}</span>
-        <strong>{formatValue ? formatValue(total) : total}</strong>
-      </div>
+      {!isHoveringSlice && (
+        <div className="dashboard-pie-centre" aria-hidden="true">
+          <span>{metricLabel}</span>
+          <strong>{formatValue ? formatValue(total) : total}</strong>
+        </div>
+      )}
     </div>
   );
 }
