@@ -53,16 +53,47 @@ export async function saveSupplierContact(providerId, payload) {
     is_primary: Boolean(payload.isPrimary),
     is_active: payload.isActive !== false,
   };
-  if (values.is_primary) {
-    const { error: clearError } = await supabase.from("supplier_contacts").update({ is_primary: false }).eq("provider_id", providerId);
-    if (clearError) throw clearError;
-  }
   const query = payload.id
     ? supabase.from("supplier_contacts").update(values).eq("id", payload.id).select().single()
     : supabase.from("supplier_contacts").insert(values).select().single();
   const { data, error } = await query;
   if (error) throw error;
   return data;
+}
+
+export async function saveSupplierProfile(supplierPayload, contacts = []) {
+  const primary = contacts.find(contact => contact.isPrimary && contact.isActive !== false) || contacts.find(contact => contact.isActive !== false) || null;
+  const supplier = await saveSupplier({
+    ...supplierPayload,
+    contactPerson: primary?.contactName || supplierPayload.contactPerson || "",
+    email: supplierPayload.email || primary?.email || "",
+    phone: supplierPayload.phone || primary?.phone || "",
+  });
+
+  const providerId = supplier.id;
+  const existingIds = new Set(contacts.filter(contact => contact.id).map(contact => String(contact.id)));
+
+  const { data: existing, error: existingError } = await supabase
+    .from("supplier_contacts")
+    .select("id")
+    .eq("provider_id", providerId);
+  if (existingError) throw existingError;
+
+  for (const contact of contacts) {
+    if (!contact.contactName?.trim()) continue;
+    await saveSupplierContact(providerId, contact);
+  }
+
+  const removedIds = (existing || []).map(row => row.id).filter(id => !existingIds.has(String(id)));
+  if (removedIds.length) {
+    const { error: removeError } = await supabase
+      .from("supplier_contacts")
+      .update({ is_active: false, is_primary: false })
+      .in("id", removedIds);
+    if (removeError) throw removeError;
+  }
+
+  return supplier;
 }
 
 export async function fetchContractRecords() {
