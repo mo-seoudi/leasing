@@ -12,6 +12,8 @@ import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
 import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
 import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
+import PhotographyDashboardPage from "../pages/photography/PhotographyDashboardPage";
+import PhotographyComparisonPage from "../pages/photography/PhotographyComparisonPage";
 import DataEntryPage from "../pages/admin/DataEntryPage";
 import SettingsPage from "../pages/settings/SettingsPage";
 
@@ -26,6 +28,8 @@ export default function AppRoutes() {
         <Route path="catering/comparison" element={<CateringComparisonPage />} />
         <Route path="uniform" element={<UniformDashboardPage />} />
         <Route path="uniform/comparison" element={<UniformComparisonPage />} />
+        <Route path="photography" element={<PhotographyDashboardPage />} />
+        <Route path="photography/comparison" element={<PhotographyComparisonPage />} />
         <Route path="leasing" element={<LeasingDashboardPage />} />
         <Route path="leasing/programmes" element={<ProgrammeDirectoryGate />} />
         <Route path="leasing/year-comparison" element={<YearComparisonPage />} />
