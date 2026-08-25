@@ -13,6 +13,7 @@ const uniformLinks = [{ label: "Uniform Dashboard", path: "/uniform" }, { label:
 const photographyLinks = [{ label: "Photography Dashboard", path: "/photography" }, { label: "Performance Comparison", path: "/photography/comparison" }];
 
 function DashboardIcon() { return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>; }
+function SupplierIcon(){return <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3M8 12h8M8 16h5"/></svg>}
 function DataEntryIcon() { return <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>; }
 function SettingsIcon() { return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.08V21h-4v-.08A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.08-.4H3v-4h.08A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.08V3h4v.08A1.7 1.7 0 0 0 15.4 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.18.38.4.72.6 1 .28.38.66.6 1.08.6H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>; }
 function MenuIcon() { return <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>; }
@@ -22,6 +23,7 @@ function ChevronIcon({ open }) { return <svg viewBox="0 0 24 24" className={open
 
 function getPageDetails(pathname) {
   if (pathname === "/dashboard") return { section: "", title: "Commercial Overview" };
+  if (pathname === "/suppliers") return { section: "Workspace", title: "Supplier & Contract Register" };
   if (pathname === "/leasing") return { section: "Leasing", title: "Leasing Dashboard" };
   if (pathname === "/leasing/programmes") return { section: "Leasing", title: "Programme Directory" };
   if (pathname === "/leasing/year-comparison") return { section: "Leasing", title: "Performance Comparison" };
@@ -69,47 +71,22 @@ export default function PlatformLayout() {
     if (isPhotographyRoute) setPhotographyOpen(true);
     setMobileOpen(false);
   }, [isCateringRoute, isLeasingRoute, isUniformRoute, isPhotographyRoute, location.pathname]);
-
   useEffect(() => window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed)), [sidebarCollapsed]);
-
   const toggle = () => setSidebarCollapsed((current) => !current);
-  const parentToggle = (setter) => {
-    if (sidebarCollapsed) {
-      setSidebarCollapsed(false);
-      setter(true);
-    } else setter((current) => !current);
-  };
-  const subMenu = (links) => (
-    <div className="navigation-submenu">
-      {links.map((link) => (
-        <NavLink key={link.path} to={link.path} end={["/leasing", "/catering", "/uniform", "/photography"].includes(link.path)} className={({ isActive }) => `submenu-link ${isActive ? "active" : ""}`}>
-          <span className="submenu-dot"/><span>{link.label}</span>
-        </NavLink>
-      ))}
-    </div>
-  );
+  const parentToggle = (setter) => { if (sidebarCollapsed) { setSidebarCollapsed(false); setter(true); } else setter((current) => !current); };
+  const subMenu = (links) => <div className="navigation-submenu">{links.map((link) => <NavLink key={link.path} to={link.path} end={["/leasing", "/catering", "/uniform", "/photography"].includes(link.path)} className={({ isActive }) => `submenu-link ${isActive ? "active" : ""}`}><span className="submenu-dot"/><span>{link.label}</span></NavLink>)}</div>;
 
   return <div className={`platform-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
     {mobileOpen && <button className="sidebar-overlay" onClick={() => setMobileOpen(false)}/>}
     <aside className={`platform-sidebar ${mobileOpen ? "mobile-open" : ""}`}>
       <div className="sidebar-brand"><div className="brand-mark">CO</div><div className="brand-copy"><strong>ComOps</strong><span>Commercial workspace</span></div><button className="sidebar-collapse-button" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><button className="mobile-close-button" onClick={() => setMobileOpen(false)}><CloseIcon/></button></div>
       <nav className="sidebar-navigation">
-        <div className="navigation-group"><span className="navigation-label">Workspace</span><NavLink to="/dashboard" className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}><span className="navigation-icon"><DashboardIcon/></span><span className="navigation-text">Commercial Overview</span></NavLink></div>
-        <div className="navigation-group">
-          <span className="navigation-label">Revenue Streams</span>
-          <button className={`navigation-link navigation-parent ${isLeasingRoute ? "module-active" : ""}`} onClick={() => parentToggle(setLeasingOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdSportsTennis className="stream-react-icon"/></span><span className="navigation-text">Leasing</span></span><ChevronIcon open={leasingOpen}/></button>{!sidebarCollapsed && leasingOpen && subMenu(leasingLinks)}
-          <button className={`navigation-link navigation-parent ${isCateringRoute ? "module-active" : ""}`} onClick={() => parentToggle(setCateringOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdRestaurant className="stream-react-icon"/></span><span className="navigation-text">Catering</span></span><ChevronIcon open={cateringOpen}/></button>{!sidebarCollapsed && cateringOpen && subMenu(cateringLinks)}
-          <button className={`navigation-link navigation-parent ${isUniformRoute ? "module-active" : ""}`} onClick={() => parentToggle(setUniformOpen)}><span className="navigation-link-content"><span className="navigation-icon"><FaShirt className="stream-react-icon"/></span><span className="navigation-text">Uniform</span></span><ChevronIcon open={uniformOpen}/></button>{!sidebarCollapsed && uniformOpen && subMenu(uniformLinks)}
-          <button className={`navigation-link navigation-parent ${isPhotographyRoute ? "module-active" : ""}`} onClick={() => parentToggle(setPhotographyOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdPhotoCamera className="stream-react-icon"/></span><span className="navigation-text">Photography</span></span><ChevronIcon open={photographyOpen}/></button>{!sidebarCollapsed && photographyOpen && subMenu(photographyLinks)}
-          <div className="future-module"><span className="future-module-content"><span className="navigation-icon"><FaBusSimple className="stream-react-icon"/></span><span className="future-module-name">Transport</span></span><span className="status-badge">Soon</span></div>
-        </div>
+        <div className="navigation-group"><span className="navigation-label">Workspace</span><NavLink to="/dashboard" className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}><span className="navigation-icon"><DashboardIcon/></span><span className="navigation-text">Commercial Overview</span></NavLink><NavLink to="/suppliers" className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}><span className="navigation-icon"><SupplierIcon/></span><span className="navigation-text">Supplier Directory</span></NavLink></div>
+        <div className="navigation-group"><span className="navigation-label">Revenue Streams</span><button className={`navigation-link navigation-parent ${isLeasingRoute ? "module-active" : ""}`} onClick={() => parentToggle(setLeasingOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdSportsTennis className="stream-react-icon"/></span><span className="navigation-text">Leasing</span></span><ChevronIcon open={leasingOpen}/></button>{!sidebarCollapsed && leasingOpen && subMenu(leasingLinks)}<button className={`navigation-link navigation-parent ${isCateringRoute ? "module-active" : ""}`} onClick={() => parentToggle(setCateringOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdRestaurant className="stream-react-icon"/></span><span className="navigation-text">Catering</span></span><ChevronIcon open={cateringOpen}/></button>{!sidebarCollapsed && cateringOpen && subMenu(cateringLinks)}<button className={`navigation-link navigation-parent ${isUniformRoute ? "module-active" : ""}`} onClick={() => parentToggle(setUniformOpen)}><span className="navigation-link-content"><span className="navigation-icon"><FaShirt className="stream-react-icon"/></span><span className="navigation-text">Uniform</span></span><ChevronIcon open={uniformOpen}/></button>{!sidebarCollapsed && uniformOpen && subMenu(uniformLinks)}<button className={`navigation-link navigation-parent ${isPhotographyRoute ? "module-active" : ""}`} onClick={() => parentToggle(setPhotographyOpen)}><span className="navigation-link-content"><span className="navigation-icon"><MdPhotoCamera className="stream-react-icon"/></span><span className="navigation-text">Photography</span></span><ChevronIcon open={photographyOpen}/></button>{!sidebarCollapsed && photographyOpen && subMenu(photographyLinks)}<div className="future-module"><span className="future-module-content"><span className="navigation-icon"><FaBusSimple className="stream-react-icon"/></span><span className="future-module-name">Transport</span></span><span className="status-badge">Soon</span></div></div>
         <div className="navigation-group navigation-group-bottom"><span className="navigation-label">Administration</span><NavLink to="/financial-records" className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}><span className="navigation-icon"><DataEntryIcon/></span><span className="navigation-text">Records</span></NavLink><NavLink to="/settings" className={({ isActive }) => `navigation-link ${isActive ? "active" : ""}`}><span className="navigation-icon"><SettingsIcon/></span><span className="navigation-text">Settings</span></NavLink></div>
       </nav>
       <div className="sidebar-footer"><div className="user-avatar">{getInitials(userName)}</div><div className="user-details"><strong>{userName}</strong><span>{formatRole(role)}</span></div></div>
     </aside>
-    <div className="platform-main">
-      <header className="platform-header"><div className="header-left"><button className="mobile-menu-button" onClick={() => setMobileOpen(true)}><MenuIcon/></button><button className="header-sidebar-toggle" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><div>{pageDetails.section && <div className="breadcrumb"><span>Commercial Operations</span><span className="breadcrumb-divider">/</span><span>{pageDetails.section}</span></div>}<h1>{pageDetails.title}</h1></div></div><div className={`header-actions ${headerControls ? "has-page-controls" : ""}`}>{headerControls && <div className="header-page-controls">{headerControls}</div>}</div></header>
-      <main className="platform-content"><Outlet context={{ setHeaderControls }}/></main>
-    </div>
+    <div className="platform-main"><header className="platform-header"><div className="header-left"><button className="mobile-menu-button" onClick={() => setMobileOpen(true)}><MenuIcon/></button><button className="header-sidebar-toggle" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><div>{pageDetails.section && <div className="breadcrumb"><span>Commercial Operations</span><span className="breadcrumb-divider">/</span><span>{pageDetails.section}</span></div>}<h1>{pageDetails.title}</h1></div></div><div className={`header-actions ${headerControls ? "has-page-controls" : ""}`}>{headerControls && <div className="header-page-controls">{headerControls}</div>}</div></header><main className="platform-content"><Outlet context={{ setHeaderControls }}/></main></div>
   </div>;
 }
