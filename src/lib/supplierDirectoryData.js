@@ -5,10 +5,12 @@ function mapContract(row) {
     contractId: row.contract_id,
     providerId: row.provider_id,
     supplierName: row.supplier_name || "",
+    legalName: row.legal_name || "",
     contactPerson: row.contact_person || "",
     email: row.email || "",
     phone: row.phone || "",
     companyNumber: row.company_number || "",
+    vatTrn: row.vat_trn || "",
     address: row.address || "",
     revenueStreamId: row.revenue_stream_id,
     revenueStreamCode: row.revenue_stream_code || "",
@@ -24,6 +26,7 @@ function mapContract(row) {
     invoiceFrequency: row.invoice_frequency || "",
     isActive: Boolean(row.is_active),
     schools: Array.isArray(row.schools) ? row.schools : [],
+    contacts: Array.isArray(row.contacts) ? row.contacts : [],
   };
 }
 
