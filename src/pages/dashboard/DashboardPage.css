@@ -492,6 +492,11 @@
   pointer-events: none !important;
 }
 
+/* Hide the centre total whenever the hover tooltip is visible. */
+.dashboard-donut-wrap:has(.dashboard-donut-tooltip) .dashboard-donut-centre {
+  display: none;
+}
+
 .dashboard-donut-tooltip {
   display: flex;
   min-width: 118px;
