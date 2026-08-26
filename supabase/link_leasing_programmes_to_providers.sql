@@ -20,7 +20,10 @@ where pr.provider_id is null
   and trim(pr.provider_name) <> ''
   and lower(trim(pr.provider_name)) = lower(trim(p.name));
 
--- Refresh the Programme Directory summary so supplier identity comes from providers.
+-- IMPORTANT: preserve every existing leasing_programme_summary column in its
+-- original position. PostgreSQL CREATE OR REPLACE VIEW only allows new columns
+-- to be appended at the end; inserting provider_id before provider_name would
+-- be interpreted as renaming provider_name and causes ERROR 42P16.
 create or replace view public.leasing_programme_summary as
 select
     fr.academic_year,
@@ -30,13 +33,13 @@ select
     fr.programme_id,
     pr.name as programme_name,
     pr.category as programme_category,
-    pr.provider_id,
     coalesce(p.name, pr.provider_name) as provider_name,
     sum(case when rm.code = 'sales' then fr.amount else 0 end) as sales,
     sum(case when rm.code = 'commission' then fr.amount else 0 end) as commission,
     sum(case when rm.code = 'rental_fees' then fr.amount else 0 end) as rental_fees,
     sum(case when rm.code in ('sales', 'rental_fees') then fr.amount else 0 end) as total_revenue,
-    sum(case when rm.code in ('commission', 'rental_fees') then fr.amount else 0 end) as school_income
+    sum(case when rm.code in ('commission', 'rental_fees') then fr.amount else 0 end) as school_income,
+    pr.provider_id as provider_id
 from public.financial_records fr
 join public.revenue_streams rs on rs.id = fr.revenue_stream_id
 join public.schools s on s.id = fr.school_id
@@ -53,9 +56,9 @@ group by
     fr.programme_id,
     pr.name,
     pr.category,
-    pr.provider_id,
+    pr.provider_name,
     p.name,
-    pr.provider_name;
+    pr.provider_id;
 
 grant select on public.leasing_programme_summary to authenticated;
 
