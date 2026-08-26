@@ -100,6 +100,8 @@ export async function fetchContractRecords() {
   const { data, error } = await supabase
     .from("supplier_contract_register")
     .select("*")
+    .order("revenue_stream_name", { ascending: true, nullsFirst: false })
+    .order("supplier_name", { ascending: true })
     .order("expiry_date", { ascending: false, nullsFirst: false });
   if (error) throw error;
   return data || [];
