@@ -7,6 +7,10 @@ function mapProvider(row){const contract=chooseCurrentContract(row.provider_cont
 let providerCache=[],providerLoadPromise=null;
 export async function fetchProviders({force=false}={}){if(!force&&providerCache.length)return providerCache;if(!force&&providerLoadPromise)return providerLoadPromise;providerLoadPromise=(async()=>{const{data,error}=await supabase.from("providers").select(`id,name,contact_person,email,phone,company_number,address,programmes(id,name),supplier_contacts(id,contact_name,role,email,phone,is_primary,is_active),provider_contracts(id,status,start_date,expiry_date,notice_period,commission_rate,rental_fees_amount,rental_fees_description,revenue_collection,invoice_frequency,is_active,revenue_stream:revenue_streams(code),provider_contract_schools(school:schools(id,code,name)))`).eq("is_active",true).order("name",{ascending:true});if(error)throw error;providerCache=(data||[]).map(mapProvider);return providerCache})();try{return await providerLoadPromise}finally{providerLoadPromise=null}}
 export function getProviderById(providerId,providers=providerCache){if(providerId===null||providerId===undefined||providerId==="")return null;return(providers||[]).find(item=>String(item.id)===String(providerId))||null}
+// Temporary compatibility only while ProgrammeDirectoryPage is switched to provider_id.
+// This performs exact matching against the canonical provider name returned by the provider_id join;
+// the old alias/fuzzy-name mapping has been removed.
+export function getProviderByName(providerName,providers=providerCache){const name=String(providerName||"").trim();if(!name)return null;return(providers||[]).find(item=>item.name===name)||null}
 export function getAllProviders(){return providerCache}
 export function clearProviderCache(){providerCache=[];providerLoadPromise=null}
 fetchProviders().catch(error=>console.error("Unable to preload providers from Supabase:",error));
