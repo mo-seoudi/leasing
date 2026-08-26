@@ -108,10 +108,12 @@ export async function fetchContractRecords() {
 }
 
 export async function saveContract(payload) {
+  const normalizedStatus = payload.status || "Not Recorded";
+  const inactiveStatuses = new Set(["Expired", "Inactive", "Terminated", "Cancelled"]);
   const values = {
     provider_id: payload.providerId,
     revenue_stream_id: payload.revenueStreamId,
-    status: payload.status || "Not Recorded",
+    status: normalizedStatus,
     start_date: payload.startDate || null,
     expiry_date: payload.expiryDate || null,
     notice_period: payload.noticePeriod?.trim() || null,
@@ -120,7 +122,7 @@ export async function saveContract(payload) {
     rental_fees_description: payload.rentalFeesDescription?.trim() || null,
     revenue_collection: payload.revenueCollection?.trim() || null,
     invoice_frequency: payload.invoiceFrequency?.trim() || null,
-    is_active: payload.isActive !== false,
+    is_active: !inactiveStatuses.has(normalizedStatus),
   };
   const query = payload.id
     ? supabase.from("provider_contracts").update(values).eq("id", payload.id).select().single()
