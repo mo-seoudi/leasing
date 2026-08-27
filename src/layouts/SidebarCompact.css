@@ -67,6 +67,17 @@
   .header-clear-button { width: 100%; }
   .platform-main,.platform-content { min-width: 0; max-width: 100%; }
   .platform-content { overflow-x: hidden; }
+
+  /* Programme Directory pie charts need enough vertical plot room after Recharts
+     reserves space for the mobile legend. This prevents the donut from clipping
+     against the heading area above it. */
+  .programme-directory-page .directory-pie-container {
+    height: 400px !important;
+  }
+
+  .programme-directory-page .directory-pie-container .recharts-legend-wrapper {
+    max-height: 100px !important;
+  }
 }
 
 /* Keep two compact columns even on narrow phones; the header now scrolls away naturally. */
@@ -75,4 +86,8 @@
   .header-filter-control select,
   .header-filter-control input,
   .header-clear-button { min-height: 42px; height: 42px; }
+
+  .programme-directory-page .directory-pie-container {
+    height: 390px !important;
+  }
 }
