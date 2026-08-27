@@ -133,3 +133,91 @@
     padding-top: 6px;
   }
 }
+
+/* Mobile foundation: page controls become a deliberate, touch-friendly filter strip.
+   Everything here is scoped below 900px so the desktop layout remains unchanged. */
+@media (max-width: 900px) {
+  .platform-header {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px 12px;
+  }
+
+  .header-left {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .header-actions.has-page-controls {
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: stretch;
+  }
+
+  .header-page-controls {
+    display: flex;
+    width: 100%;
+    flex: 1 1 100%;
+    justify-content: stretch;
+    overflow: visible;
+  }
+
+  .header-page-filters {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 8px;
+  }
+
+  .header-filter-control,
+  .header-filter-control.wide,
+  .header-filter-control.search {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+    flex: none;
+  }
+
+  .header-filter-control select,
+  .header-filter-control input,
+  .header-clear-button {
+    min-height: 42px;
+    height: 42px;
+    font-size: 12px;
+  }
+
+  .header-filter-control label,
+  .header-filter-control > span {
+    font-size: 9px;
+    letter-spacing: 0.01em;
+  }
+
+  .header-clear-button {
+    width: 100%;
+  }
+
+  .platform-main,
+  .platform-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .platform-content {
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-page-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .header-filter-control select,
+  .header-filter-control input,
+  .header-clear-button {
+    min-height: 44px;
+    height: 44px;
+  }
+}
