@@ -6,218 +6,73 @@
   scrollbar-color: rgba(115, 115, 115, 0.28) transparent;
 }
 
-.platform-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.platform-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.platform-sidebar::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(115, 115, 115, 0.22);
-}
-
-.platform-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(82, 82, 82, 0.38);
-}
+.platform-sidebar::-webkit-scrollbar { width: 6px; }
+.platform-sidebar::-webkit-scrollbar-track { background: transparent; }
+.platform-sidebar::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(115, 115, 115, 0.22); }
+.platform-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(82, 82, 82, 0.38); }
 
 @media (max-width: 1450px) and (min-width: 901px) and (max-height: 900px) {
-  .platform-sidebar {
-    padding-top: 9px;
-    padding-bottom: 8px;
-  }
-
-  .sidebar-brand {
-    min-height: 46px;
-    padding-top: 0;
-    padding-bottom: 8px;
-  }
-
-  .brand-mark {
-    width: 29px;
-    height: 29px;
-    flex-basis: 29px;
-  }
-
-  .sidebar-navigation {
-    padding-top: 9px;
-  }
-
-  .navigation-group {
-    gap: 1px;
-    margin-bottom: 11px;
-  }
-
-  .navigation-label {
-    padding-bottom: 4px;
-    font-size: 8px;
-  }
-
-  .navigation-link {
-    min-height: 32px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-size: 11px;
-  }
-
-  .navigation-submenu {
-    gap: 0;
-    margin-top: 1px;
-    margin-bottom: 3px;
-  }
-
-  .submenu-link {
-    min-height: 25px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    font-size: 10px;
-  }
-
-  .future-module {
-    min-height: 32px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-  }
-
-  .sidebar-footer {
-    margin-top: 4px;
-    padding-top: 8px;
-  }
-
-  .user-avatar {
-    width: 27px;
-    height: 27px;
-    flex-basis: 27px;
-  }
+  .platform-sidebar { padding-top: 9px; padding-bottom: 8px; }
+  .sidebar-brand { min-height: 46px; padding-top: 0; padding-bottom: 8px; }
+  .brand-mark { width: 29px; height: 29px; flex-basis: 29px; }
+  .sidebar-navigation { padding-top: 9px; }
+  .navigation-group { gap: 1px; margin-bottom: 11px; }
+  .navigation-label { padding-bottom: 4px; font-size: 8px; }
+  .navigation-link { min-height: 32px; padding-top: 5px; padding-bottom: 5px; font-size: 11px; }
+  .navigation-submenu { gap: 0; margin-top: 1px; margin-bottom: 3px; }
+  .submenu-link { min-height: 25px; padding-top: 3px; padding-bottom: 3px; font-size: 10px; }
+  .future-module { min-height: 32px; padding-top: 5px; padding-bottom: 5px; }
+  .sidebar-footer { margin-top: 4px; padding-top: 8px; }
+  .user-avatar { width: 27px; height: 27px; flex-basis: 27px; }
 }
 
-/* Extra squeeze only for shorter laptop viewports. */
 @media (max-width: 1450px) and (min-width: 901px) and (max-height: 760px) {
-  .platform-sidebar {
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
-
-  .sidebar-brand {
-    min-height: 42px;
-    padding-bottom: 6px;
-  }
-
-  .sidebar-navigation {
-    padding-top: 6px;
-  }
-
-  .navigation-group {
-    margin-bottom: 7px;
-  }
-
-  .navigation-link {
-    min-height: 29px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .submenu-link {
-    min-height: 23px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-  }
-
-  .navigation-submenu {
-    margin-bottom: 2px;
-  }
-
-  .sidebar-footer {
-    padding-top: 6px;
-  }
+  .platform-sidebar { padding-top: 6px; padding-bottom: 6px; }
+  .sidebar-brand { min-height: 42px; padding-bottom: 6px; }
+  .sidebar-navigation { padding-top: 6px; }
+  .navigation-group { margin-bottom: 7px; }
+  .navigation-link { min-height: 29px; padding-top: 4px; padding-bottom: 4px; }
+  .submenu-link { min-height: 23px; padding-top: 2px; padding-bottom: 2px; }
+  .navigation-submenu { margin-bottom: 2px; }
+  .sidebar-footer { padding-top: 6px; }
 }
 
-/* Mobile foundation: page controls become a deliberate, touch-friendly filter strip.
-   Everything here is scoped below 900px so the desktop layout remains unchanged. */
+/* Mobile foundation: filters remain available, but the header is part of normal page flow.
+   This prevents a large sticky filter block from consuming the phone viewport. */
 @media (max-width: 900px) {
   .platform-header {
+    position: relative;
+    top: auto;
     flex-wrap: wrap;
     align-items: center;
     gap: 9px 12px;
   }
 
-  .header-left {
-    width: 100%;
-    flex: 1 1 100%;
-  }
-
-  .header-actions.has-page-controls {
-    width: 100%;
-    flex: 1 1 100%;
-    justify-content: stretch;
-  }
-
-  .header-page-controls {
-    display: flex;
-    width: 100%;
-    flex: 1 1 100%;
-    justify-content: stretch;
-    overflow: visible;
-  }
-
-  .header-page-filters {
-    display: grid;
-    width: 100%;
-    min-width: 0;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: end;
-    gap: 8px;
-  }
+  .header-left { width: 100%; flex: 1 1 100%; }
+  .header-actions.has-page-controls { width: 100%; flex: 1 1 100%; justify-content: stretch; }
+  .header-page-controls { display: flex; width: 100%; flex: 1 1 100%; justify-content: stretch; overflow: visible; }
+  .header-page-filters { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 8px; }
 
   .header-filter-control,
   .header-filter-control.wide,
-  .header-filter-control.search {
-    min-width: 0;
-    width: 100%;
-    max-width: none;
-    flex: none;
-  }
+  .header-filter-control.search { min-width: 0; width: 100%; max-width: none; flex: none; }
 
   .header-filter-control select,
   .header-filter-control input,
-  .header-clear-button {
-    min-height: 42px;
-    height: 42px;
-    font-size: 12px;
-  }
+  .header-clear-button { min-height: 42px; height: 42px; font-size: 12px; }
 
   .header-filter-control label,
-  .header-filter-control > span {
-    font-size: 9px;
-    letter-spacing: 0.01em;
-  }
+  .header-filter-control > span { font-size: 9px; letter-spacing: 0.01em; }
 
-  .header-clear-button {
-    width: 100%;
-  }
-
-  .platform-main,
-  .platform-content {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .platform-content {
-    overflow-x: hidden;
-  }
+  .header-clear-button { width: 100%; }
+  .platform-main,.platform-content { min-width: 0; max-width: 100%; }
+  .platform-content { overflow-x: hidden; }
 }
 
+/* Keep two compact columns even on narrow phones; the header now scrolls away naturally. */
 @media (max-width: 480px) {
-  .header-page-filters {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
+  .header-page-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
   .header-filter-control select,
   .header-filter-control input,
-  .header-clear-button {
-    min-height: 44px;
-    height: 44px;
-  }
+  .header-clear-button { min-height: 42px; height: 42px; }
 }
