@@ -37,33 +37,41 @@
   .sidebar-footer { padding-top: 6px; }
 }
 
-/* Mobile foundation: filters remain available, but the header is part of normal page flow.
-   This prevents a large sticky filter block from consuming the phone viewport. */
+/* Mobile foundation: size the application from the device's live viewport rather
+   than from a desktop-derived minimum width. 100dvw follows the usable viewport
+   as mobile browser chrome changes size. */
 @media (max-width: 900px) {
-  /* Never allow a wide chart, table or flex child to establish a desktop-sized page
-     on first load. Safari should open the app at the physical viewport width without
-     requiring the user to pinch the page smaller. */
   html,
-  body,
+  body {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
   #root,
   .platform-layout,
-  .platform-main,
+  .platform-main {
+    width: 100dvw;
+    max-width: 100dvw;
+    min-width: 0;
+    margin-right: 0;
+    overflow-x: clip;
+  }
+
+  .platform-layout {
+    contain: inline-size;
+  }
+
+  .platform-main {
+    margin-left: 0 !important;
+  }
+
   .platform-content {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-  }
-
-  html,
-  body,
-  #root {
     overflow-x: clip;
-  }
-
-  .platform-layout,
-  .platform-main,
-  .platform-content {
-    overflow-x: hidden;
   }
 
   .platform-header {
@@ -95,11 +103,32 @@
 
   .header-clear-button { width: 100%; }
 
+  /* Every direct page/card participates in the available inline size. Wide data
+     surfaces may scroll internally, but they cannot make the document itself wider. */
   .platform-content > *,
   .platform-content section,
-  .platform-content article {
+  .platform-content article,
+  .commercial-dashboard-page,
+  .programme-directory-page,
+  .programme-summary-page,
+  .programme-comparison-page,
+  .year-comparison-page {
+    width: 100%;
     max-width: 100%;
     min-width: 0;
+  }
+
+  .table-wrapper,
+  .table-scroll,
+  .programme-table-scroll,
+  .programme-detail-table-scroll,
+  .directory-table-scroll,
+  .year-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .recharts-responsive-container,
@@ -109,8 +138,7 @@
   }
 
   /* Programme Directory pie charts need enough vertical plot room after Recharts
-     reserves space for the mobile legend. This prevents the donut from clipping
-     against the heading area above it. */
+     reserves space for the mobile legend. */
   .programme-directory-page .directory-pie-container {
     height: 400px !important;
   }
@@ -120,7 +148,6 @@
   }
 }
 
-/* Keep two compact columns even on narrow phones; the header now scrolls away naturally. */
 @media (max-width: 480px) {
   .header-page-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
   .header-filter-control select,
