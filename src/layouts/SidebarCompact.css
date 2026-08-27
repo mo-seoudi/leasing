@@ -40,18 +40,47 @@
 /* Mobile foundation: filters remain available, but the header is part of normal page flow.
    This prevents a large sticky filter block from consuming the phone viewport. */
 @media (max-width: 900px) {
+  /* Never allow a wide chart, table or flex child to establish a desktop-sized page
+     on first load. Safari should open the app at the physical viewport width without
+     requiring the user to pinch the page smaller. */
+  html,
+  body,
+  #root,
+  .platform-layout,
+  .platform-main,
+  .platform-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
+
+  .platform-layout,
+  .platform-main,
+  .platform-content {
+    overflow-x: hidden;
+  }
+
   .platform-header {
     position: relative;
     top: auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     flex-wrap: wrap;
     align-items: center;
     gap: 9px 12px;
   }
 
-  .header-left { width: 100%; flex: 1 1 100%; }
-  .header-actions.has-page-controls { width: 100%; flex: 1 1 100%; justify-content: stretch; }
-  .header-page-controls { display: flex; width: 100%; flex: 1 1 100%; justify-content: stretch; overflow: visible; }
-  .header-page-filters { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 8px; }
+  .header-left { width: 100%; min-width: 0; flex: 1 1 100%; }
+  .header-actions.has-page-controls { width: 100%; min-width: 0; flex: 1 1 100%; justify-content: stretch; }
+  .header-page-controls { display: flex; width: 100%; min-width: 0; max-width: 100%; flex: 1 1 100%; justify-content: stretch; overflow: visible; }
+  .header-page-filters { display: grid; width: 100%; min-width: 0; max-width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 8px; }
 
   .header-filter-control,
   .header-filter-control.wide,
@@ -65,8 +94,19 @@
   .header-filter-control > span { font-size: 9px; letter-spacing: 0.01em; }
 
   .header-clear-button { width: 100%; }
-  .platform-main,.platform-content { min-width: 0; max-width: 100%; }
-  .platform-content { overflow-x: hidden; }
+
+  .platform-content > *,
+  .platform-content section,
+  .platform-content article {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .recharts-responsive-container,
+  .recharts-wrapper,
+  .recharts-surface {
+    max-width: 100% !important;
+  }
 
   /* Programme Directory pie charts need enough vertical plot room after Recharts
      reserves space for the mobile legend. This prevents the donut from clipping
