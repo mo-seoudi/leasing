@@ -9,6 +9,7 @@ import SupplierDirectoryPage from "../pages/suppliers/SupplierDirectoryPage";
 import LeasingDashboardPage from "../pages/leasing/LeasingDashboardPage";
 import ProgrammeDirectoryGate from "../pages/leasing/ProgrammeDirectoryGate";
 import YearComparisonPage from "../pages/leasing/YearComparisonPage";
+import EnrichMePage from "../pages/leasing/EnrichMePage";
 import CateringDashboardPage from "../pages/catering/CateringDashboardPage";
 import CateringComparisonPage from "../pages/catering/CateringComparisonPage";
 import KitchenRentalPage from "../pages/catering/KitchenRentalPage";
@@ -38,6 +39,7 @@ export default function AppRoutes() {
         <Route path="leasing" element={<LeasingDashboardPage />} />
         <Route path="leasing/programmes" element={<ProgrammeDirectoryGate />} />
         <Route path="leasing/year-comparison" element={<YearComparisonPage />} />
+        <Route path="leasing/enrich-me" element={<EnrichMePage />} />
         <Route path="leasing/summary" element={<Navigate to="/leasing" replace />} />
         <Route path="leasing/program-comparison" element={<Navigate to="/leasing/programmes" replace />} />
         <Route path="financial-records" element={<DataEntryPage />} />
