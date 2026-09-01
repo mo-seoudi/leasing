@@ -1,6 +1,23 @@
 import { supabase } from "./supabase";
 
 const STREAM_CODE = "kitchen_rental";
+const MONTH_ORDER = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+const MONTH_ALIASES = {
+  sep: "Sep", september: "Sep", oct: "Oct", october: "Oct", nov: "Nov", november: "Nov", dec: "Dec", december: "Dec",
+  jan: "Jan", january: "Jan", feb: "Feb", february: "Feb", mar: "Mar", march: "Mar", apr: "Apr", april: "Apr", may: "May",
+  jun: "Jun", june: "Jun", jul: "Jul", july: "Jul", aug: "Aug", august: "Aug",
+};
+
+function normalizeMonth(value) {
+  const text = String(value || "").trim().toLowerCase();
+  return MONTH_ALIASES[text] || String(value || "").slice(0, 3);
+}
+
+function termForMonth(month) {
+  if (["Sep", "Oct", "Nov", "Dec"].includes(month)) return "Term 1";
+  if (["Jan", "Feb", "Mar"].includes(month)) return "Term 2";
+  return "Term 3";
+}
 
 export async function fetchKitchenRentalRecords() {
   const { data, error } = await supabase
@@ -32,13 +49,33 @@ export async function fetchKitchenRentalRecords() {
         schoolCode: row.school?.code || "",
         annualRent: 0,
         vatRate: 0,
+        months: [],
       });
     }
+
     const item = years.get(key);
     const metricCode = String(row.metric?.code || "").toLowerCase();
-    if (metricCode === "rental_fees") item.annualRent = Number(row.amount || 0);
-    if (metricCode === "vat_rate") item.vatRate = Number(row.amount || 0);
+    const amount = Number(row.amount || 0);
+
+    if (metricCode === "rental_fees") {
+      const month = normalizeMonth(row.month);
+      item.annualRent += amount;
+      item.months.push({
+        id: row.id,
+        academicYear: row.academic_year || "",
+        month,
+        label: month,
+        term: termForMonth(month),
+        revenue: amount,
+      });
+    }
+    if (metricCode === "vat_rate") item.vatRate = amount;
   });
 
-  return [...years.values()].sort((a, b) => a.academicYear.localeCompare(b.academicYear));
+  return [...years.values()]
+    .map((item) => ({
+      ...item,
+      months: item.months.sort((a, b) => MONTH_ORDER.indexOf(a.month) - MONTH_ORDER.indexOf(b.month)),
+    }))
+    .sort((a, b) => a.academicYear.localeCompare(b.academicYear));
 }
