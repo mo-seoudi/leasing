@@ -7,10 +7,14 @@ const MONTH_ALIASES = {
   jan: "Jan", january: "Jan", feb: "Feb", february: "Feb", mar: "Mar", march: "Mar", apr: "Apr", april: "Apr", may: "May",
   jun: "Jun", june: "Jun", jul: "Jul", july: "Jul", aug: "Aug", august: "Aug",
 };
+const MONTH_NUMBER_TO_LABEL = { 1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun", 7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec" };
 
 function normalizeMonth(value) {
-  const text = String(value || "").trim().toLowerCase();
-  return MONTH_ALIASES[text] || String(value || "").slice(0, 3);
+  const raw = String(value || "").trim();
+  const dateMatch = raw.match(/^20\d{2}-(\d{1,2})/);
+  if (dateMatch) return MONTH_NUMBER_TO_LABEL[Number(dateMatch[1])] || "";
+  const text = raw.toLowerCase();
+  return MONTH_ALIASES[text] || MONTH_ALIASES[text.slice(0, 3)] || raw.slice(0, 3);
 }
 
 function termForMonth(month) {
@@ -77,5 +81,5 @@ export async function fetchKitchenRentalRecords() {
       ...item,
       months: item.months.sort((a, b) => MONTH_ORDER.indexOf(a.month) - MONTH_ORDER.indexOf(b.month)),
     }))
-    .sort((a, b) => a.academicYear.localeCompare(b.academicYear));
+    .sort((a, b) => a.academicYear.localeCompare(b.academicYear) || a.schoolCode.localeCompare(b.schoolCode));
 }
