@@ -23,7 +23,6 @@ function formatCompactCurrency(value) {
 }
 function formatPercentage(value) { return `${Number(value || 0).toFixed(1)}%`; }
 function calculateGrowth(currentValue, previousValue) {
-  if (currentValue === null || previousValue === null || previousValue === undefined) return null;
   const previous = Number(previousValue || 0);
   return previous ? ((Number(currentValue || 0) - previous) / previous) * 100 : null;
 }
@@ -44,14 +43,6 @@ function reportingMonthCount(academicYear) {
   if (academicYear !== currentAcademicYear()) return 12;
   const month = new Date().getMonth();
   return month >= 8 ? month - 7 : month + 5;
-}
-function academicYearRange(startYear = 2022, endAcademicYear = currentAcademicYear()) {
-  const match = String(endAcademicYear || "").match(/^AY(\d{4})-/);
-  const endYear = match ? Number(match[1]) : startYear;
-  return Array.from({ length: Math.max(endYear - startYear + 1, 1) }, (_, index) => {
-    const year = startYear + index;
-    return `AY${year}-${String(year + 1).slice(-2)}`;
-  });
 }
 function combineRecords(items) {
   const monthMap = new Map();
@@ -147,14 +138,10 @@ export default function KitchenRentalPage() {
       academicYear,
       rentalRevenue: combineRecords(scopeRecords.filter((item) => item.academicYear === academicYear)).annualRent,
     }));
-  const comparisonYears = academicYearRange(2022, years[0] || currentAcademicYear());
-  const comparisonRows = comparisonYears.map((academicYear, index) => {
-    const actual = actualHistoryData.find((item) => item.academicYear === academicYear);
-    const previousYear = comparisonYears[index - 1];
-    const previousActual = actualHistoryData.find((item) => item.academicYear === previousYear);
-    const rentalRevenue = actual ? actual.rentalRevenue : null;
-    return { academicYear, rentalRevenue, growth: calculateGrowth(rentalRevenue, previousActual ? previousActual.rentalRevenue : null) };
-  });
+  const comparisonRows = actualHistoryData.map((row, index) => ({
+    ...row,
+    growth: calculateGrowth(row.rentalRevenue, actualHistoryData[index - 1]?.rentalRevenue),
+  }));
   const currencyTooltip = <DashboardCurrencyTooltip formatValue={formatCurrency} />;
   const monthlyColumns = [
     { key: "academicYear", label: "Academic Year" }, { key: "label", label: "Month" }, { key: "term", label: "Term" },
@@ -176,8 +163,8 @@ export default function KitchenRentalPage() {
 
     <section className="kitchen-rental-two-column-grid">
       <section className="comparison-summary-card kitchen-rental-comparison-table">
-        <div className="comparison-card-heading"><div><h2>Year-on-Year Comparison</h2><p>Rental revenue and growth across academic years.</p></div><span className="comparison-year-count">{comparisonRows.length} academic years</span></div>
-        <div className="comparison-table-scroll"><table className="comparison-table"><thead><tr><th>Academic Year</th><th>Rental Revenue</th><th>Revenue Growth</th></tr></thead><tbody>{comparisonRows.map((row) => <tr key={row.academicYear}><th>{row.academicYear}</th><td className="comparison-primary-value">{row.rentalRevenue === null ? "—" : formatCurrency(row.rentalRevenue)}</td><td><span className={`comparison-growth-value ${growthClass(row.growth)}`}>{formatGrowth(row.growth)}</span></td></tr>)}</tbody></table></div>
+        <div className="comparison-card-heading"><div><h2>Year-on-Year Comparison</h2><p>Rental revenue and growth across available academic years.</p></div><span className="comparison-year-count">{comparisonRows.length} academic years</span></div>
+        <div className="comparison-table-scroll"><table className="comparison-table"><thead><tr><th>Academic Year</th><th>Rental Revenue</th><th>Revenue Growth</th></tr></thead><tbody>{comparisonRows.map((row) => <tr key={row.academicYear}><th>{row.academicYear}</th><td className="comparison-primary-value">{formatCurrency(row.rentalRevenue)}</td><td><span className={`comparison-growth-value ${growthClass(row.growth)}`}>{formatGrowth(row.growth)}</span></td></tr>)}</tbody></table></div>
       </section>
 
       <section className="comparison-chart-card kitchen-rental-comparison-chart"><div className="comparison-card-heading"><div><h2>Academic-Year Comparison</h2><p>Rental revenue across all available academic years.</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={actualHistoryData} margin={{ top: 18, right: 20, left: 10, bottom: 8 }} barCategoryGap="28%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false} tick={{ fill: "#667085", fontSize: 12, fontWeight: 500 }} dy={8}/><YAxis axisLine={false} tickLine={false} tick={{ fill: "#98a2b3", fontSize: 11, fontWeight: 500 }} tickFormatter={formatCompactCurrency}/><Tooltip formatter={(value) => [formatCurrency(value), "Rental Revenue"]}/><Bar dataKey="rentalRevenue" name="Rental Revenue" fill="#2f80ed" radius={[8, 8, 2, 2]} maxBarSize={58}/></BarChart></ResponsiveContainer></div></section>
