@@ -1,26 +1,205 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Bar,BarChart,CartesianGrid,ResponsiveContainer,Tooltip,XAxis,YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
+import DashboardCurrencyTooltip from "../../components/dashboard/DashboardCurrencyTooltip";
 import KpiCard from "../../components/dashboard/KpiCard";
 import MonthlyResultsTable from "../../components/dashboard/MonthlyResultsTable";
 import MonthlyTrendChart from "../../components/dashboard/MonthlyTrendChart";
-import DashboardCurrencyTooltip from "../../components/dashboard/DashboardCurrencyTooltip";
-import { fetchEnrichMeRecords } from "../../lib/enrichMeData";
 import "../../components/dashboard/dashboardComponents.css";
 import "../../components/comparison/performanceComparison.css";
+
+import { fetchEnrichMeRecords } from "../../lib/enrichMeData";
 import "../catering/KitchenRentalPage.css";
-const MONTH_ORDER=["Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],MONTH_NUMBER={Sep:9,Oct:10,Nov:11,Dec:12,Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8};
-const money=v=>new Intl.NumberFormat("en-AE",{style:"currency",currency:"AED",maximumFractionDigits:0}).format(Number(v||0));
-const compact=v=>new Intl.NumberFormat("en-AE",{style:"currency",currency:"AED",notation:"compact",maximumFractionDigits:1}).format(Number(v||0));
-const growth=(c,p)=>Number(p)?((Number(c)-Number(p))/Number(p))*100:null;
-const growthText=v=>v===null||!Number.isFinite(v)?"—":`${v>0?"+":""}${v.toFixed(0)}%`;
-const growthClass=v=>v===null||!Number.isFinite(v)||v===0?"neutral":v>0?"positive":"negative";
-function startYear(ay){const m=String(ay).match(/^AY(\d{4})-/);return m?Number(m[1]):0}function rawMonth(ay,m){const y=startYear(ay),n=MONTH_NUMBER[m];return y&&n?`${n>=9?y:y+1}-${String(n).padStart(2,"0")}`:""}function displayMonth(m){return m?new Intl.DateTimeFormat("en-GB",{month:"short",year:"2-digit"}).format(new Date(`${m}-01T00:00:00`)):""}
-function combine(items){const map=new Map();items.forEach(i=>i.months.forEach(r=>{const c=map.get(r.month)||{...r,revenue:0};c.revenue+=Number(r.revenue||0);map.set(r.month,c)}));return{annualRevenue:items.reduce((s,i)=>s+Number(i.annualRevenue||0),0),months:[...map.values()].sort((a,b)=>MONTH_ORDER.indexOf(a.month)-MONTH_ORDER.indexOf(b.month))}}
-export default function EnrichMePage(){const{setHeaderControls}=useOutletContext(),[records,setRecords]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[filters,setFilters]=useState({academicYear:"",school:""});useEffect(()=>{let active=true;(async()=>{try{const data=await fetchEnrichMeRecords();if(!active)return;setRecords(data);const ys=[...new Set(data.map(x=>x.academicYear))].sort((a,b)=>b.localeCompare(a));setFilters(f=>({...f,academicYear:f.academicYear||ys[0]||""}))}catch(e){console.error(e);if(active)setError("Unable to load Enrich ME data from Supabase.")}finally{if(active)setLoading(false)}})();return()=>{active=false}},[]);
-const years=useMemo(()=>[...new Set(records.map(x=>x.academicYear))].sort((a,b)=>b.localeCompare(a)),[records]),schools=useMemo(()=>{const m=new Map();records.forEach(x=>x.schoolCode&&m.set(x.schoolCode,x.school));return[...m].map(([code,name])=>({code,name})).sort((a,b)=>a.name.localeCompare(b.name))},[records]),scope=useMemo(()=>records.filter(x=>!filters.school||x.schoolCode===filters.school),[records,filters.school]);
-useEffect(()=>{setHeaderControls(<div className="header-page-filters"><label className="header-filter-control"><span>Academic Year</span><select value={filters.academicYear} onChange={e=>setFilters(f=>({...f,academicYear:e.target.value}))}><option value="">All Years</option>{years.map(y=><option key={y}>{y}</option>)}</select></label><label className="header-filter-control wide"><span>School</span><select value={filters.school} onChange={e=>setFilters(f=>({...f,school:e.target.value}))}><option value="">All Schools</option>{schools.map(s=><option key={s.code} value={s.code}>{s.name}</option>)}</select></label></div>);return()=>setHeaderControls(null)},[filters,years,schools,setHeaderControls]);
-if(loading)return <section className="kitchen-rental-page"><div className="dashboard-empty-state">Loading Enrich ME data…</div></section>;if(error)return <section className="kitchen-rental-page"><div className="dashboard-empty-state">{error}</div></section>;if(!scope.length)return <section className="kitchen-rental-page"><div className="dashboard-empty-state">No Enrich ME records are available yet. Add Enrich ME financial records to begin reporting.</div></section>;
-const selectedYears=filters.academicYear?[filters.academicYear]:[...years].sort(),latestYear=filters.academicYear||years[0],latest=combine(scope.filter(x=>x.academicYear===latestYear)),history=[...new Set(scope.map(x=>x.academicYear))].sort().map(academicYear=>({academicYear,revenue:combine(scope.filter(x=>x.academicYear===academicYear)).annualRevenue})),rows=history.map((r,i)=>({...r,growth:growth(r.revenue,history[i-1]?.revenue)}));
-const monthlyData=selectedYears.flatMap(ay=>{const year=combine(scope.filter(x=>x.academicYear===ay));let cumulative=0;return MONTH_ORDER.map((m,i)=>{const r=year.months.find(x=>x.month===m),revenue=Number(r?.revenue||0),month=rawMonth(ay,m);cumulative+=revenue;return{key:`${ay}-${month}`,academicYear:ay,label:displayMonth(month),term:r?.term||(i<4?"Term 1":i<7?"Term 2":"Term 3"),revenue,cumulativeRevenue:cumulative}})}),total=monthlyData.reduce((s,x)=>s+x.revenue,0),monthly=latest.annualRevenue/12,tooltip=<DashboardCurrencyTooltip formatValue={money}/>;
-return <section className="kitchen-rental-page"><section className="kitchen-rental-kpi-grid"><KpiCard label="Enrich ME Revenue" value={money(filters.academicYear?latest.annualRevenue:history.reduce((s,x)=>s+x.revenue,0))} detail={filters.academicYear?latestYear:"Across selected academic years"}/><KpiCard label="Annual Contracted Revenue" value={money(latest.annualRevenue)} detail={latestYear}/><KpiCard label="Monthly Revenue" value={money(monthly)} detail="Annual revenue allocated across 12 months"/><KpiCard label="Schools Covered" value={new Set(scope.filter(x=>x.academicYear===latestYear).map(x=>x.schoolCode)).size} detail="Schools with Enrich ME records"/></section><section className="kitchen-rental-two-column-grid"><section className="comparison-summary-card kitchen-rental-comparison-table"><div className="comparison-card-heading"><div><h2>Year-on-Year Comparison</h2><p>Enrich ME revenue and growth across available academic years.</p></div><span className="comparison-year-count">{rows.length} academic years</span></div><div className="comparison-table-scroll"><table className="comparison-table"><thead><tr><th>Academic Year</th><th>Enrich ME Revenue</th><th>Revenue Growth</th></tr></thead><tbody>{rows.map(r=><tr key={r.academicYear}><th>{r.academicYear}</th><td className="comparison-primary-value">{money(r.revenue)}</td><td><span className={`comparison-growth-value ${growthClass(r.growth)}`}>{growthText(r.growth)}</span></td></tr>)}</tbody></table></div></section><section className="comparison-chart-card kitchen-rental-comparison-chart"><div className="comparison-card-heading"><div><h2>Academic-Year Comparison</h2><p>Enrich ME revenue across available academic years.</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={history}><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false}/><YAxis axisLine={false} tickLine={false} tickFormatter={compact}/><Tooltip formatter={v=>[money(v),"Enrich ME Revenue"]}/><Bar dataKey="revenue" fill="#2f80ed" radius={[8,8,2,2]} maxBarSize={58}/></BarChart></ResponsiveContainer></div></section></section><MonthlyTrendChart data={monthlyData} metrics={[{key:"revenue",label:"Monthly Revenue",tone:"secondary"},{key:"cumulativeRevenue",label:"Cumulative Revenue",tone:"primary"}]} defaultMetric="Monthly Revenue" formatAxis={compact} tooltipContent={tooltip} className="kitchen-rental-wide-card"/><MonthlyResultsTable data={monthlyData} columns={[{key:"academicYear",label:"Academic Year"},{key:"label",label:"Month"},{key:"term",label:"Term"},{key:"revenue",label:"Enrich ME Revenue",numeric:true,tone:"sales",render:money},{key:"cumulativeRevenue",label:"Cumulative Revenue",numeric:true,render:money}]} totals={{revenue:money(total),cumulativeRevenue:money(total)}} emptyMessage="No Enrich ME records match the selected filters." resetKey={`${filters.academicYear}|${filters.school}`}/><article className="kitchen-rental-terms-card"><div className="kitchen-rental-terms-heading"><div><span>Operating arrangement</span><h2>Enrich ME Arrangement</h2><p>Reporting scope derived from the selected financial records.</p></div></div><dl className="kitchen-rental-terms"><div><dt>Academic year</dt><dd>{latestYear}</dd></div><div><dt>Operator</dt><dd>Enrich ME</dd></div><div><dt>Schools</dt><dd>{scope.filter(x=>x.academicYear===latestYear).map(x=>x.school).join(", ")||"—"}</dd></div><div><dt>Annual contracted revenue</dt><dd>{money(latest.annualRevenue)}</dd></div><div><dt>Monthly allocation</dt><dd>{money(monthly)}</dd></div><div><dt>Reporting basis</dt><dd>Fixed school revenue; underlying programme turnover not tracked</dd></div></dl></article></section>}
+
+const MONTH_ORDER = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+const MONTH_NUMBER = { Sep: 9, Oct: 10, Nov: 11, Dec: 12, Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8 };
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+function formatCompactCurrency(value) {
+  return new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", notation: "compact", maximumFractionDigits: 1 }).format(Number(value || 0));
+}
+function formatPercentage(value) { return `${Number(value || 0).toFixed(1)}%`; }
+function calculateGrowth(currentValue, previousValue) {
+  const previous = Number(previousValue || 0);
+  return previous ? ((Number(currentValue || 0) - previous) / previous) * 100 : null;
+}
+function formatGrowth(value) {
+  if (value === null || !Number.isFinite(value)) return "—";
+  return `${value > 0 ? "+" : ""}${value.toFixed(0)}%`;
+}
+function growthClass(value) {
+  if (value === null || !Number.isFinite(value) || value === 0) return "neutral";
+  return value > 0 ? "positive" : "negative";
+}
+function currentAcademicYear() {
+  const now = new Date();
+  const start = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+  return `AY${start}-${String(start + 1).slice(-2)}`;
+}
+function reportingMonthCount(academicYear) {
+  if (academicYear !== currentAcademicYear()) return 12;
+  const month = new Date().getMonth();
+  return month >= 8 ? month - 7 : month + 5;
+}
+function academicYearStart(academicYear) {
+  const match = String(academicYear || "").match(/^AY(\d{4})-/);
+  return match ? Number(match[1]) : 0;
+}
+function calendarMonthForAcademicYear(academicYear, monthLabel) {
+  const startYear = academicYearStart(academicYear);
+  const monthNumber = MONTH_NUMBER[monthLabel] || 0;
+  if (!startYear || !monthNumber) return "";
+  const calendarYear = monthNumber >= 9 ? startYear : startYear + 1;
+  return `${calendarYear}-${String(monthNumber).padStart(2, "0")}`;
+}
+function displayMonth(rawMonth) {
+  if (!rawMonth) return "";
+  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(`${rawMonth}-01T00:00:00`));
+}
+function combineRecords(items) {
+  const monthMap = new Map();
+  items.forEach((item) => item.months.forEach((row) => {
+    const current = monthMap.get(row.month) || { ...row, revenue: 0 };
+    current.revenue += Number(row.revenue || 0);
+    monthMap.set(row.month, current);
+  }));
+  return {
+    annualRevenue: items.reduce((sum, item) => sum + Number(item.annualRevenue || 0), 0),
+    months: [...monthMap.values()].sort((a, b) => MONTH_ORDER.indexOf(a.month) - MONTH_ORDER.indexOf(b.month)),
+  };
+}
+
+export default function EnrichMePage() {
+  const { setHeaderControls } = useOutletContext();
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [filters, setFilters] = useState({ academicYear: "", school: "" });
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setLoadError("");
+        const data = await fetchEnrichMeRecords();
+        if (!active) return;
+        setRecords(data);
+        const nextYears = [...new Set(data.map((item) => item.academicYear))].sort((a, b) => b.localeCompare(a));
+        setFilters((current) => ({ ...current, academicYear: current.academicYear || nextYears[0] || "" }));
+      } catch (error) {
+        console.error("Unable to load Enrich ME records from Supabase", error);
+        if (active) setLoadError("Unable to load Enrich ME data from Supabase.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const years = useMemo(() => [...new Set(records.map((item) => item.academicYear))].sort((a, b) => b.localeCompare(a)), [records]);
+  const schools = useMemo(() => {
+    const map = new Map();
+    records.forEach((item) => { if (item.schoolCode) map.set(item.schoolCode, item.school); });
+    return [...map.entries()].map(([code, name]) => ({ code, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [records]);
+  const scopeRecords = useMemo(() => records.filter((item) => !filters.school || item.schoolCode === filters.school), [records, filters.school]);
+  const selectedYearRecords = useMemo(() => scopeRecords.filter((item) => item.academicYear === filters.academicYear), [scopeRecords, filters.academicYear]);
+
+  useEffect(() => {
+    setHeaderControls(<div className="header-page-filters">
+      <label className="header-filter-control"><span>Academic Year</span><select value={filters.academicYear} onChange={(event) => setFilters((current) => ({ ...current, academicYear: event.target.value }))}><option value="">All Years</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
+      <label className="header-filter-control wide"><span>School</span><select value={filters.school} onChange={(event) => setFilters((current) => ({ ...current, school: event.target.value }))}><option value="">All Schools</option>{schools.map((school) => <option key={school.code} value={school.code}>{school.name}</option>)}</select></label>
+    </div>);
+    return () => setHeaderControls(null);
+  }, [filters, years, schools, setHeaderControls]);
+
+  if (loading) return <section className="kitchen-rental-page"><div className="dashboard-empty-state">Loading Enrich ME data…</div></section>;
+  if (loadError) return <section className="kitchen-rental-page"><div className="dashboard-empty-state">{loadError}</div></section>;
+  if (!scopeRecords.length) return <section className="kitchen-rental-page"><div className="dashboard-empty-state">No Enrich ME records are available yet. Add Enrich ME financial records to begin reporting.</div></section>;
+
+  const selectedYears = filters.academicYear ? [filters.academicYear] : [...years].sort((a, b) => a.localeCompare(b));
+  const reportingRecords = filters.academicYear ? selectedYearRecords : scopeRecords;
+  const reportingAnnualRevenue = reportingRecords.reduce((sum, item) => sum + Number(item.annualRevenue || 0), 0);
+  const latestYear = filters.academicYear || years[0] || "";
+  const latestYearItems = scopeRecords.filter((item) => item.academicYear === latestYear);
+  const latest = combineRecords(latestYearItems);
+  const reportMonths = Math.min(reportingMonthCount(latestYear), 12);
+  const recognisedRevenue = filters.academicYear
+    ? latest.months.slice(0, reportMonths).reduce((sum, item) => sum + Number(item.revenue || 0), 0)
+    : reportingAnnualRevenue;
+  const monthlyContractValue = latest.annualRevenue / 12;
+  const recognisedPercentage = latest.annualRevenue ? (recognisedRevenue / latest.annualRevenue) * 100 : 0;
+
+  const monthlyData = selectedYears.flatMap((academicYear) => {
+    const year = combineRecords(scopeRecords.filter((item) => item.academicYear === academicYear));
+    const count = Math.min(reportingMonthCount(academicYear), 12);
+    let cumulative = 0;
+    return MONTH_ORDER.map((monthLabel, index) => {
+      const row = year.months.find((item) => item.month === monthLabel);
+      const revenue = index < count ? Number(row?.revenue || 0) : 0;
+      const rawMonth = calendarMonthForAcademicYear(academicYear, monthLabel);
+      cumulative += revenue;
+      return {
+        key: `${academicYear}-${rawMonth}`,
+        academicYear,
+        month: rawMonth,
+        label: displayMonth(rawMonth),
+        term: row?.term || (index < 4 ? "Term 1" : index < 7 ? "Term 2" : "Term 3"),
+        revenue,
+        cumulativeRevenue: cumulative,
+      };
+    });
+  });
+
+  const actualHistoryData = [...new Set(scopeRecords.map((item) => item.academicYear))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((academicYear) => ({
+      academicYear,
+      enrichMeRevenue: combineRecords(scopeRecords.filter((item) => item.academicYear === academicYear)).annualRevenue,
+    }));
+  const comparisonRows = actualHistoryData.map((row, index) => ({
+    ...row,
+    growth: calculateGrowth(row.enrichMeRevenue, actualHistoryData[index - 1]?.enrichMeRevenue),
+  }));
+  const currencyTooltip = <DashboardCurrencyTooltip formatValue={formatCurrency} />;
+  const monthlyColumns = [
+    { key: "academicYear", label: "Academic Year" }, { key: "label", label: "Month" }, { key: "term", label: "Term" },
+    { key: "revenue", label: "Enrich ME Revenue", numeric: true, tone: "sales", render: formatCurrency },
+    { key: "cumulativeRevenue", label: "Cumulative Revenue", numeric: true, render: formatCurrency },
+  ];
+  const tableTotal = monthlyData.reduce((sum, item) => sum + Number(item.revenue || 0), 0);
+  const arrangementItem = latestYearItems[0];
+
+  return <section className="kitchen-rental-page">
+    <section className="kitchen-rental-kpi-grid">
+      <KpiCard label="Recognised Enrich ME Revenue" value={formatCurrency(recognisedRevenue)} detail={filters.academicYear ? `${reportMonths} of 12 reporting months` : "Across selected academic years"} />
+      <KpiCard label="Contracted Annual Revenue" value={formatCurrency(latest.annualRevenue)} detail={`${latestYear || "Selected year"} · fixed annual amount`} />
+      <KpiCard label="Monthly Enrich ME Revenue" value={formatCurrency(monthlyContractValue)} detail="Annual revenue allocated across 12 months" />
+      <KpiCard label="Revenue Recognised" value={formatPercentage(recognisedPercentage)} detail={`Of ${latestYear || "the selected"} contracted revenue`} />
+    </section>
+
+    <section className="kitchen-rental-two-column-grid">
+      <section className="comparison-summary-card kitchen-rental-comparison-table">
+        <div className="comparison-card-heading"><div><h2>Year-on-Year Comparison</h2><p>Enrich ME revenue and growth across available academic years.</p></div><span className="comparison-year-count">{comparisonRows.length} academic years</span></div>
+        <div className="comparison-table-scroll"><table className="comparison-table"><thead><tr><th>Academic Year</th><th>Enrich ME Revenue</th><th>Revenue Growth</th></tr></thead><tbody>{comparisonRows.map((row) => <tr key={row.academicYear}><th>{row.academicYear}</th><td className="comparison-primary-value">{formatCurrency(row.enrichMeRevenue)}</td><td><span className={`comparison-growth-value ${growthClass(row.growth)}`}>{formatGrowth(row.growth)}</span></td></tr>)}</tbody></table></div>
+      </section>
+
+      <section className="comparison-chart-card kitchen-rental-comparison-chart"><div className="comparison-card-heading"><div><h2>Academic-Year Comparison</h2><p>Enrich ME revenue across all available academic years.</p></div></div><div className="comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={actualHistoryData} margin={{ top: 18, right: 20, left: 10, bottom: 8 }} barCategoryGap="28%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false} tick={{ fill: "#667085", fontSize: 12, fontWeight: 500 }} dy={8}/><YAxis axisLine={false} tickLine={false} tick={{ fill: "#98a2b3", fontSize: 11, fontWeight: 500 }} tickFormatter={formatCompactCurrency}/><Tooltip formatter={(value) => [formatCurrency(value), "Enrich ME Revenue"]}/><Bar dataKey="enrichMeRevenue" name="Enrich ME Revenue" fill="#2f80ed" radius={[8, 8, 2, 2]} maxBarSize={58}/></BarChart></ResponsiveContainer></div></section>
+    </section>
+
+    <MonthlyTrendChart data={monthlyData} metrics={[{ key: "revenue", label: "Monthly Revenue", tone: "secondary" }, { key: "cumulativeRevenue", label: "Cumulative Revenue", tone: "primary" }]} defaultMetric="Monthly Revenue" formatAxis={formatCompactCurrency} tooltipContent={currencyTooltip} className="kitchen-rental-wide-card" />
+
+    <MonthlyResultsTable data={monthlyData} columns={monthlyColumns} totals={{ revenue: formatCurrency(tableTotal), cumulativeRevenue: formatCurrency(tableTotal) }} emptyMessage="No Enrich ME records match the selected filters." resetKey={`${filters.academicYear}|${filters.school}`} />
+
+    {arrangementItem && <article className="kitchen-rental-terms-card">
+      <div className="kitchen-rental-terms-heading"><div><span>Current arrangement</span><h2>Enrich ME Terms</h2><p>Commercial information for the selected school and academic year.</p></div><span className="kitchen-rental-status">{latestYear === years[0] ? "Current" : "Previous"}</span></div>
+      <dl className="kitchen-rental-terms">
+        <div><dt>Academic year</dt><dd>{latestYear}</dd></div><div><dt>Operator</dt><dd>Enrich ME</dd></div><div><dt>School</dt><dd>{filters.school ? arrangementItem.school : latestYearItems.map((item) => item.school).join(", ")}</dd></div><div><dt>Annual contracted revenue</dt><dd>{formatCurrency(latest.annualRevenue)}</dd></div><div><dt>Monthly allocation</dt><dd>{formatCurrency(monthlyContractValue)}</dd></div><div><dt>Revenue recognised</dt><dd>{formatPercentage(recognisedPercentage)}</dd></div><div><dt>Reporting basis</dt><dd>Fixed annual school revenue allocated evenly across 12 months</dd></div><div><dt>Commercial context</dt><dd>Leasing activities operated by Enrich ME</dd></div>
+      </dl>
+    </article>}
+  </section>;
+}
