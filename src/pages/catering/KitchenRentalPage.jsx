@@ -14,6 +14,7 @@ import "./KitchenRentalPage.css";
 
 const SUPPLIER_BY_YEAR = { "AY2025-26": "Ginza", "AY2026-27": "Ben's Farmhouse" };
 const MONTH_ORDER = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
+const MONTH_NUMBER = { Sep: 9, Oct: 10, Nov: 11, Dec: 12, Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8 };
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 }).format(Number(value || 0));
@@ -43,6 +44,21 @@ function reportingMonthCount(academicYear) {
   if (academicYear !== currentAcademicYear()) return 12;
   const month = new Date().getMonth();
   return month >= 8 ? month - 7 : month + 5;
+}
+function academicYearStart(academicYear) {
+  const match = String(academicYear || "").match(/^AY(\d{4})-/);
+  return match ? Number(match[1]) : 0;
+}
+function calendarMonthForAcademicYear(academicYear, monthLabel) {
+  const startYear = academicYearStart(academicYear);
+  const monthNumber = MONTH_NUMBER[monthLabel] || 0;
+  if (!startYear || !monthNumber) return "";
+  const calendarYear = monthNumber >= 9 ? startYear : startYear + 1;
+  return `${calendarYear}-${String(monthNumber).padStart(2, "0")}`;
+}
+function displayMonth(rawMonth) {
+  if (!rawMonth) return "";
+  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "2-digit" }).format(new Date(`${rawMonth}-01T00:00:00`));
 }
 function combineRecords(items) {
   const monthMap = new Map();
@@ -107,7 +123,7 @@ export default function KitchenRentalPage() {
   if (loadError) return <section className="kitchen-rental-page"><div className="dashboard-empty-state">{loadError}</div></section>;
   if (!scopeRecords.length) return <section className="kitchen-rental-page"><div className="dashboard-empty-state">No Kitchen Rental records match the selected filters.</div></section>;
 
-  const selectedYears = filters.academicYear ? [filters.academicYear] : years;
+  const selectedYears = filters.academicYear ? [filters.academicYear] : [...years].sort((a, b) => a.localeCompare(b));
   const reportingRecords = filters.academicYear ? selectedYearRecords : scopeRecords;
   const reportingAnnualRent = reportingRecords.reduce((sum, item) => sum + Number(item.annualRent || 0), 0);
   const latestYear = filters.academicYear || years[0] || "";
@@ -124,11 +140,20 @@ export default function KitchenRentalPage() {
     const year = combineRecords(scopeRecords.filter((item) => item.academicYear === academicYear));
     const count = Math.min(reportingMonthCount(academicYear), 12);
     let cumulative = 0;
-    return MONTH_ORDER.map((month, index) => {
-      const row = year.months.find((item) => item.month === month);
+    return MONTH_ORDER.map((monthLabel, index) => {
+      const row = year.months.find((item) => item.month === monthLabel);
       const revenue = index < count ? Number(row?.revenue || 0) : 0;
+      const rawMonth = calendarMonthForAcademicYear(academicYear, monthLabel);
       cumulative += revenue;
-      return { key: `${academicYear}-${month}`, academicYear, month, label: month, term: row?.term || (index < 4 ? "Term 1" : index < 7 ? "Term 2" : "Term 3"), revenue, cumulativeRevenue: cumulative };
+      return {
+        key: `${academicYear}-${rawMonth}`,
+        academicYear,
+        month: rawMonth,
+        label: displayMonth(rawMonth),
+        term: row?.term || (index < 4 ? "Term 1" : index < 7 ? "Term 2" : "Term 3"),
+        revenue,
+        cumulativeRevenue: cumulative,
+      };
     });
   });
 
