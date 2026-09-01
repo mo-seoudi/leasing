@@ -66,7 +66,8 @@
   background: #c7cdd6;
 }
 
-/* Programme Directory reset button is an outlined icon, not a filled SVG. */
+/* Shared header controls. Pages supply the options; sizing and icon rendering
+   stay consistent here instead of being fixed page by page. */
 .header-reset-icon-button svg {
   width: 17px;
   height: 17px;
@@ -141,39 +142,41 @@
     gap: 8px;
   }
 
-  /* Keep the first header filter (Academic Year) wide enough for values like AY2025-26. */
-  .header-page-filters > .header-filter-control:first-child {
-    min-width: 112px;
-    flex-basis: 122px;
+  /* Header filters use common minimum widths everywhere. This prevents the same
+     Academic Year / School controls from clipping simply because a page has a
+     different number of filters. */
+  .header-page-filters > .header-filter-control {
+    min-width: 116px;
+    flex-basis: 126px;
   }
 
-  /* Programme Directory has four header filters plus reset. Give each enough
-     room for its real option text while still fitting a normal laptop header. */
+  .header-page-filters > .header-filter-control:first-child {
+    min-width: 124px;
+    flex-basis: 132px;
+  }
+
+  .header-page-filters > .header-filter-control.wide {
+    min-width: 132px;
+    flex-basis: 148px;
+  }
+
+  .header-page-filters > .header-filter-control.search {
+    min-width: 150px;
+    flex-basis: 170px;
+  }
+
+  /* Programme Directory has four filters plus reset, so its Programme control
+     gets a little more room while retaining the shared control styling above. */
   .header-page-filters:has(.header-reset-icon-button) {
     gap: 7px;
   }
 
-  .header-page-filters:has(.header-reset-icon-button) > .header-filter-control:nth-child(1) {
-    min-width: 116px;
-    flex: 0 0 116px;
-  }
-
-  .header-page-filters:has(.header-reset-icon-button) > .header-filter-control:nth-child(2) {
-    min-width: 124px;
-    flex: 0 0 124px;
-  }
-
-  .header-page-filters:has(.header-reset-icon-button) > .header-filter-control:nth-child(3) {
-    min-width: 126px;
-    flex: 0 0 126px;
-  }
-
   .header-page-filters:has(.header-reset-icon-button) > .header-filter-control:nth-child(4) {
     min-width: 146px;
-    flex: 0 0 146px;
+    flex-basis: 154px;
   }
 
-  .header-page-filters:has(.header-reset-icon-button) .header-filter-control select {
+  .header-page-filters .header-filter-control select {
     font-size: 10.5px;
   }
 
