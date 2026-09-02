@@ -23,26 +23,55 @@ function termForMonth(month) {
   return "Term 3";
 }
 
+function academicYearDates(academicYear) {
+  const match = String(academicYear || "").match(/^AY(\d{4})-/);
+  if (!match) return null;
+  const startYear = Number(match[1]);
+  return { start: `${startYear}-09-01`, end: `${startYear + 1}-08-31` };
+}
+
+function contractApplies(term, academicYear) {
+  const dates = academicYearDates(academicYear);
+  if (!dates) return false;
+  const startsBeforeYearEnds = !term.start_date || term.start_date <= dates.end;
+  const endsAfterYearStarts = !term.expiry_date || term.expiry_date >= dates.start;
+  return startsBeforeYearEnds && endsAfterYearStarts;
+}
+
+function contractedAmount(terms, schoolCode, academicYear) {
+  return terms
+    .filter((term) => term.school_code === schoolCode && contractApplies(term, academicYear))
+    .reduce((sum, term) => sum + Number(term.fixed_amount || 0), 0);
+}
+
 export async function fetchKitchenRentalRecords() {
-  const { data, error } = await supabase
-    .from("financial_records")
-    .select(`
-      id,
-      academic_year,
-      month,
-      scenario,
-      amount,
-      school:schools(code, name),
-      stream:revenue_streams!inner(code, name),
-      metric:revenue_metrics(code, name)
-    `)
-    .eq("stream.code", STREAM_CODE)
-    .eq("scenario", "Actual")
-    .eq("is_deleted", false)
-    .order("academic_year", { ascending: true });
+  const [{ data, error }, { data: contractTerms, error: contractError }] = await Promise.all([
+    supabase
+      .from("financial_records")
+      .select(`
+        id,
+        academic_year,
+        month,
+        scenario,
+        amount,
+        school:schools(code, name),
+        stream:revenue_streams!inner(code, name),
+        metric:revenue_metrics(code, name)
+      `)
+      .eq("stream.code", STREAM_CODE)
+      .eq("scenario", "Actual")
+      .eq("is_deleted", false)
+      .order("academic_year", { ascending: true }),
+    supabase
+      .from("supplier_contract_school_terms")
+      .select("contract_id, supplier_name, revenue_stream_code, start_date, expiry_date, school_code, school_name, fixed_amount, commercial_model")
+      .eq("revenue_stream_code", STREAM_CODE),
+  ]);
 
   if (error) throw error;
+  if (contractError) throw contractError;
 
+  const terms = contractTerms || [];
   const years = new Map();
   (data || []).forEach((row) => {
     const key = `${row.academic_year}|${row.school?.code || ""}`;
@@ -51,7 +80,7 @@ export async function fetchKitchenRentalRecords() {
         academicYear: row.academic_year || "",
         school: row.school?.name || row.school?.code || "",
         schoolCode: row.school?.code || "",
-        annualRent: 0,
+        annualRent: contractedAmount(terms, row.school?.code || "", row.academic_year),
         vatRate: 0,
         months: [],
       });
@@ -63,7 +92,6 @@ export async function fetchKitchenRentalRecords() {
 
     if (metricCode === "rental_fees") {
       const month = normalizeMonth(row.month);
-      item.annualRent += amount;
       item.months.push({
         id: row.id,
         academicYear: row.academic_year || "",
