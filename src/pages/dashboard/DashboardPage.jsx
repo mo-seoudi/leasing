@@ -7,6 +7,7 @@ import "./DashboardPage.css";
 
 const STREAM_META={
  leasing:{description:"Programmes and facility income",path:"/leasing/programmes",colour:"#6d5dfc"},
+ enrich_me:{description:"Fixed Enrich ME school revenue",path:"/leasing/enrich-me",colour:"#9333ea"},
  catering:{description:"Food-service sales and commission",path:"/catering",colour:"#159f8c"},
  kitchen_rental:{description:"Annual kitchen rental income",path:"/catering/kitchen-rental",colour:"#0f766e"},
  uniform:{description:"Uniform sales and commission",path:"/uniform",colour:"#e97832"},
@@ -21,7 +22,7 @@ function formatCompactCurrency(value){return new Intl.NumberFormat("en-AE",{styl
 function formatPercent(value){return Number.isFinite(value)?`${value.toFixed(1)}%`:"—"}
 function getLatestAcademicYear(years){return [...years].sort((a,b)=>b.localeCompare(a))[0]||""}
 function getStreamMeta(code,index){const known=STREAM_META[code];return known||{description:"Commercial revenue stream",path:"#",colour:FALLBACK_COLOURS[index%FALLBACK_COLOURS.length]}}
-function getMetricRole(record){const code=String(record.metricCode||"").toLowerCase();if(code==="sales"||code==="revenue")return"revenue";if(code==="commission")return"income";if(code==="rental_fees"||code==="rental-fees"||code==="rental fees")return"both";return"other"}
+function getMetricRole(record){const code=String(record.metricCode||"").toLowerCase();if(code==="sales"||code==="revenue"||code==="enrich_me_revenue")return"revenue";if(code==="commission")return"income";if(code==="rental_fees"||code==="rental-fees"||code==="rental fees")return"both";return"other"}
 function buildStreamData(records){const grouped=new Map();records.forEach(record=>{const code=record.streamCode||String(record.streamName||"stream").toLowerCase();if(!grouped.has(code))grouped.set(code,{code,name:record.streamName||code,revenue:0,income:0});const item=grouped.get(code),amount=toNumber(record.amount),role=getMetricRole(record);if(role==="revenue")item.revenue+=amount;if(role==="income")item.income+=amount;if(role==="both"){item.revenue+=amount;item.income+=amount}});const result=[...grouped.values()].filter(item=>item.revenue!==0||item.income!==0).sort((a,b)=>b.revenue-a.revenue).map((item,index)=>({...item,...getStreamMeta(item.code,index)}));const total=result.reduce((sum,item)=>sum+item.revenue,0);return result.map(item=>({...item,contribution:total>0?(item.revenue/total)*100:0}))}
 function buildSchoolData(records){const grouped=new Map();records.forEach(record=>{const school=record.schoolCode||record.schoolName||"Unknown";if(!grouped.has(school))grouped.set(school,{school,revenue:0,income:0});const item=grouped.get(school),amount=toNumber(record.amount),role=getMetricRole(record);if(role==="revenue")item.revenue+=amount;if(role==="income")item.income+=amount;if(role==="both"){item.revenue+=amount;item.income+=amount}});return[...grouped.values()].sort((a,b)=>b.revenue-a.revenue)}
 function getMonthInfo(month){const match=String(month||"").match(/^(\d{4})-(\d{2})/);if(!match)return null;const year=Number(match[1]),monthNumber=Number(match[2]);if(!year||!monthNumber)return null;const date=new Date(Date.UTC(year,monthNumber-1,1));return{key:`${year}-${String(monthNumber).padStart(2,"0")}`,label:new Intl.DateTimeFormat("en-GB",{month:"short",timeZone:"UTC"}).format(date),monthNumber}}
