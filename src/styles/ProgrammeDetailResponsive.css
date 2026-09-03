@@ -1,83 +1,122 @@
 /* Programme Directory detail panel.
+   Desktop/laptop matrices are fluid to their ACTUAL container width.
    Mobile (<=720px) keeps its dedicated card/tab presentation untouched. */
 @media (min-width: 721px) {
   .programme-detail-option2 {
     width: 100% !important;
-    max-width: none !important;
-    min-width: 0;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
   .programme-detail-option2-toolbar,
   .programme-detail-option2-metrics,
   .programme-detail-option2-matrix-wrap {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box;
   }
 
-  .programme-detail-option2-matrix-wrap.termly .programme-detail-option2-matrix {
-    width: 100% !important;
-    min-width: 0 !important;
-    grid-template-columns: minmax(118px, 1.25fr) repeat(3, minmax(110px, 1fr)) minmax(104px, 1fr) !important;
+  /* Do not let the desktop/laptop result matrix manufacture horizontal
+     width. It must always resolve its tracks inside the space left by the
+     sidebar and page padding. */
+  .programme-detail-option2-matrix-wrap {
+    overflow-x: hidden !important;
   }
-}
 
-/* Normal laptop with the platform sidebar open.
-   Fit all 12 months inside the actual content width rather than forcing a
-   1060px matrix which gets clipped by the page column. */
-@media (min-width: 901px) and (max-width: 1449px) {
-  .programme-detail-option2-matrix-wrap.monthly {
-    overflow-x: hidden;
+  .programme-detail-option2-matrix {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .programme-detail-option2-matrix-wrap.termly .programme-detail-option2-matrix {
+    grid-template-columns:
+      minmax(92px, 1.25fr)
+      repeat(3, minmax(0, 1fr))
+      minmax(76px, 0.95fr) !important;
   }
 
   .programme-detail-option2-matrix-wrap.monthly .programme-detail-option2-matrix {
-    width: 100% !important;
-    min-width: 0 !important;
     grid-template-columns:
-      minmax(82px, 1.45fr)
+      minmax(78px, 1.45fr)
       repeat(12, minmax(0, 1fr))
-      minmax(78px, 1.25fr) !important;
+      minmax(72px, 1.2fr) !important;
   }
 
   .programme-detail-option2-matrix-header,
+  .programme-detail-option2-matrix-label,
   .programme-detail-option2-matrix-value {
-    min-width: 0;
-    padding-left: 3px;
-    padding-right: 3px;
+    min-width: 0 !important;
+  }
+}
+
+/* Laptop: compact typography/padding so all twelve months and Total remain
+   visible while the sidebar is expanded. No horizontal scrolling. */
+@media (min-width: 901px) and (max-width: 1449px) {
+  .programme-detail-option2-matrix-header {
+    padding-left: 2px;
+    padding-right: 2px;
+    font-size: 7px;
+  }
+
+  .programme-detail-option2-matrix-value {
+    padding-left: 2px;
+    padding-right: 2px;
+    font-size: 7.5px;
+    letter-spacing: -0.02em;
+  }
+
+  .programme-detail-option2-matrix-label {
+    padding-left: 7px;
+    padding-right: 4px;
     font-size: 8px;
   }
 
-  .programme-detail-option2-matrix-header.label,
-  .programme-detail-option2-matrix-label {
-    padding-left: 7px;
-  }
-
   .programme-detail-option2-matrix-value.total {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
   }
 }
 
-/* Intermediate tablet/small-window desktop can still scroll the matrix;
-   this is separate from the dedicated mobile mode below 720px. */
+/* 721–900px is still the desktop/tablet matrix rather than the dedicated
+   mobile cards, but it remains fluid instead of forcing a scroll width. */
 @media (min-width: 721px) and (max-width: 900px) {
-  .programme-detail-option2-matrix-wrap.monthly .programme-detail-option2-matrix {
-    width: 930px !important;
-    min-width: 930px !important;
+  .programme-detail-option2-matrix-header {
+    padding-left: 1px;
+    padding-right: 1px;
+    font-size: 6.5px;
+  }
+
+  .programme-detail-option2-matrix-value {
+    padding-left: 1px;
+    padding-right: 1px;
+    font-size: 7px;
+  }
+
+  .programme-detail-option2-matrix-label {
+    padding-left: 5px;
+    padding-right: 3px;
+    font-size: 7.5px;
   }
 }
 
-/* Large external screens: use all available width with comfortable month
-   columns and no artificial narrow card. */
+/* Large external screens use the same fluid model, simply with more generous
+   tracks and spacing because more container width is available. */
 @media (min-width: 1450px) {
+  .programme-detail-option2-matrix-wrap.termly .programme-detail-option2-matrix {
+    grid-template-columns:
+      minmax(118px, 1.25fr)
+      repeat(3, minmax(110px, 1fr))
+      minmax(104px, 1fr) !important;
+  }
+
   .programme-detail-option2-matrix-wrap.monthly .programme-detail-option2-matrix {
-    width: 100% !important;
-    min-width: 0 !important;
     grid-template-columns:
       minmax(118px, 1.35fr)
-      repeat(12, minmax(62px, 1fr))
+      repeat(12, minmax(0, 1fr))
       minmax(104px, 1.1fr) !important;
   }
 
@@ -85,5 +124,6 @@
   .programme-detail-option2-matrix-value {
     padding-left: 7px;
     padding-right: 7px;
+    font-size: 8px;
   }
 }
