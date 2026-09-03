@@ -8,7 +8,7 @@ function normalizeMonth(value){const raw=String(value||"").trim();const match=ra
 function termForMonth(month){if(["Sep","Oct","Nov","Dec"].includes(month))return"Term 1";if(["Jan","Feb","Mar"].includes(month))return"Term 2";return"Term 3"}
 function academicYearDates(academicYear){const match=String(academicYear||"").match(/^AY(\d{4})-/);if(!match)return null;const startYear=Number(match[1]);return{start:`${startYear}-09-01`,end:`${startYear+1}-08-31`}}
 function contractApplies(term,academicYear){const dates=academicYearDates(academicYear);if(!dates)return false;return(!term.start_date||term.start_date<=dates.end)&&(!term.expiry_date||term.expiry_date>=dates.start)}
-function contractedAmount(terms,schoolCode,academicYear){return terms.filter(term=>term.school_code===schoolCode&&contractApplies(term,academicYear)).reduce((sum,term)=>sum+Number(term.fixed_amount||0),0)}
+function applicableContracts(terms,schoolCode,academicYear){return terms.filter(term=>term.school_code===schoolCode&&contractApplies(term,academicYear)).map(term=>({contractId:term.contract_id,supplierName:term.supplier_name||"Enrich ME",startDate:term.start_date||"",expiryDate:term.expiry_date||"",annualAmount:Number(term.fixed_amount||0),commercialModel:term.commercial_model||""}))}
 
 export async function fetchEnrichMeRecords(){
  const [{data,error},{data:contractTerms,error:contractError}]=await Promise.all([
@@ -17,6 +17,6 @@ export async function fetchEnrichMeRecords(){
  ]);
  if(error)throw error;if(contractError)throw contractError;
  const terms=contractTerms||[],years=new Map();
- (data||[]).forEach(row=>{const key=`${row.academic_year}|${row.school?.code||""}`;if(!years.has(key))years.set(key,{academicYear:row.academic_year||"",school:row.school?.name||row.school?.code||"",schoolCode:row.school?.code||"",annualRevenue:contractedAmount(terms,row.school?.code||"",row.academic_year),months:[]});const item=years.get(key);const metric=String(row.metric?.code||"").toLowerCase();if(metric!=="revenue"&&metric!=="enrich_me_revenue")return;const amount=Number(row.amount||0),month=normalizeMonth(row.month);item.months.push({id:row.id,academicYear:row.academic_year||"",month,label:month,term:termForMonth(month),revenue:amount})});
+ (data||[]).forEach(row=>{const schoolCode=row.school?.code||"",key=`${row.academic_year}|${schoolCode}`;if(!years.has(key))years.set(key,{academicYear:row.academic_year||"",school:row.school?.name||schoolCode,schoolCode,contracts:applicableContracts(terms,schoolCode,row.academic_year),months:[]});const item=years.get(key);const metric=String(row.metric?.code||"").toLowerCase();if(metric!=="revenue"&&metric!=="enrich_me_revenue")return;const amount=Number(row.amount||0),month=normalizeMonth(row.month);item.months.push({id:row.id,academicYear:row.academic_year||"",month,label:month,term:termForMonth(month),revenue:amount})});
  return [...years.values()].map(item=>({...item,months:item.months.sort((a,b)=>MONTH_ORDER.indexOf(a.month)-MONTH_ORDER.indexOf(b.month))})).sort((a,b)=>a.academicYear.localeCompare(b.academicYear)||a.schoolCode.localeCompare(b.schoolCode));
 }
