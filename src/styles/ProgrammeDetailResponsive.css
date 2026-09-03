@@ -1,0 +1,46 @@
+/* Desktop/laptop Programme Directory detail panel.
+   Keep the dedicated mobile presentation below 720px untouched. */
+@media (min-width: 721px) {
+  .programme-detail-option2 {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .programme-detail-option2-toolbar,
+  .programme-detail-option2-metrics,
+  .programme-detail-option2-matrix-wrap {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Termly should use the available row instead of clustering left. */
+  .programme-detail-option2-matrix-wrap.termly .programme-detail-option2-matrix {
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(118px, 1.25fr) repeat(3, minmax(110px, 1fr)) minmax(104px, 1fr) !important;
+  }
+
+  /* Monthly: use the full desktop width first. On narrower laptops the
+     matrix remains horizontally scrollable rather than crushing months. */
+  .programme-detail-option2-matrix-wrap.monthly .programme-detail-option2-matrix {
+    width: 100% !important;
+    min-width: 1060px !important;
+    grid-template-columns: minmax(118px, 1.35fr) repeat(12, minmax(68px, 1fr)) minmax(104px, 1.1fr) !important;
+  }
+
+  .programme-detail-option2-matrix-header,
+  .programme-detail-option2-matrix-value {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+}
+
+/* Large external screens have enough room to show all months without
+   manufacturing an unnecessarily narrow card. */
+@media (min-width: 1450px) {
+  .programme-detail-option2-matrix-wrap.monthly .programme-detail-option2-matrix {
+    min-width: 100% !important;
+  }
+}
