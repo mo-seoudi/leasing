@@ -1,23 +1,26 @@
 import { supabase } from "./supabase";
 
 export async function fetchDataEntryOptions() {
-  const [schoolsResult, streamsResult, metricsResult, programmesResult] = await Promise.all([
+  const [schoolsResult, streamsResult, metricsResult, programmesResult, providersResult] = await Promise.all([
     supabase.from("schools").select("id, code, name, short_name").eq("is_active", true).order("name"),
     supabase.from("revenue_streams").select("id, code, name").eq("is_active", true).order("name"),
     supabase.from("revenue_metrics").select("id, revenue_stream_id, code, name, display_order").eq("is_active", true).order("display_order"),
     supabase.from("programmes").select("id, name, category, provider_name").order("name"),
+    supabase.from("providers").select("id, name").order("name"),
   ]);
 
   if (schoolsResult.error) throw schoolsResult.error;
   if (streamsResult.error) throw streamsResult.error;
   if (metricsResult.error) throw metricsResult.error;
   if (programmesResult.error) throw programmesResult.error;
+  if (providersResult.error) throw providersResult.error;
 
   return {
     schools: schoolsResult.data || [],
     revenueStreams: streamsResult.data || [],
     metrics: metricsResult.data || [],
     programmes: programmesResult.data || [],
+    providers: providersResult.data || [],
   };
 }
 
@@ -26,6 +29,69 @@ async function getCurrentUserId() {
   if (error) throw error;
   if (!user?.id) throw new Error("You must be signed in to modify financial records.");
   return user.id;
+}
+
+export async function fetchProgrammes() {
+  const { data, error } = await supabase
+    .from("programmes")
+    .select("id, name, category, provider_name")
+    .order("category")
+    .order("name");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createProgramme({ name, category, providerName = "" }) {
+  await getCurrentUserId();
+  const cleanName = String(name || "").trim();
+  const cleanCategory = String(category || "").trim();
+  const cleanProviderName = String(providerName || "").trim();
+
+  if (!cleanName) throw new Error("Enter a programme name.");
+  if (!cleanCategory) throw new Error("Select or enter a programme category.");
+
+  const { data: existing, error: existingError } = await supabase
+    .from("programmes")
+    .select("id")
+    .ilike("name", cleanName)
+    .maybeSingle();
+  if (existingError) throw existingError;
+  if (existing?.id) throw new Error("A programme with this name already exists.");
+
+  const { data, error } = await supabase
+    .from("programmes")
+    .insert({
+      name: cleanName,
+      category: cleanCategory,
+      provider_name: cleanProviderName || null,
+    })
+    .select("id, name, category, provider_name")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateProgramme(programmeId, { name, category, providerName = "" }) {
+  await getCurrentUserId();
+  const cleanName = String(name || "").trim();
+  const cleanCategory = String(category || "").trim();
+  const cleanProviderName = String(providerName || "").trim();
+
+  if (!cleanName) throw new Error("Enter a programme name.");
+  if (!cleanCategory) throw new Error("Select or enter a programme category.");
+
+  const { data, error } = await supabase
+    .from("programmes")
+    .update({
+      name: cleanName,
+      category: cleanCategory,
+      provider_name: cleanProviderName || null,
+    })
+    .eq("id", Number(programmeId))
+    .select("id, name, category, provider_name")
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export function getAcademicYearFromMonth(month) {
