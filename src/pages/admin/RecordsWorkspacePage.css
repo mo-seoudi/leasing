@@ -1,0 +1,131 @@
+.records-workspace-page {
+  display: grid;
+  gap: 18px;
+}
+
+.records-workspace-tabs {
+  display: inline-flex;
+  width: fit-content;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.records-workspace-tabs button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.records-workspace-tabs button.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.records-workspace-loading,
+.records-workspace-error {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #667085;
+  font-size: 13px;
+}
+
+.records-workspace-error {
+  color: #b42318;
+}
+
+.programme-manager-card {
+  margin: 0;
+}
+
+.programme-manager-description {
+  max-width: 720px;
+  margin: 7px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.programme-manager-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.programme-add-button {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.programme-manager-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 0.7fr);
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+
+.programme-manager-table td:first-child strong,
+.programme-manager-table td:first-child span {
+  display: block;
+}
+
+.programme-manager-table td:first-child span {
+  margin-top: 3px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+.programme-category-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.programme-editor-modal {
+  width: min(100%, 560px);
+}
+
+.programme-editor-fields {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .records-workspace-tabs {
+    width: 100%;
+  }
+
+  .records-workspace-tabs button {
+    flex: 1;
+  }
+
+  .programme-manager-header-actions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  .programme-manager-filters {
+    grid-template-columns: 1fr;
+  }
+}
