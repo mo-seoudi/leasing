@@ -347,6 +347,7 @@ export function getProgrammeBreakdown(filteredRecords = []) {
         programme,
         programGroup:
           record.programGroup || "Unspecified Group",
+        providerId: record.providerId ?? null,
         provider: record.provider || "",
         ...createEmptyMeasures(),
       });
