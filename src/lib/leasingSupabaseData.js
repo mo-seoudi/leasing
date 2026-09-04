@@ -205,19 +205,21 @@ export async function fetchLeasingRecords({ force = false } = {}) {
 export async function fetchLeasingDetailRecords({ programme = "", programGroup = "" } = {}) {
   const streamId = await getLeasingStreamId();
 
-  let query = supabase
-    .from("financial_records")
-    .select("id, academic_year, month, term, scenario, amount, school:schools(code), metric:revenue_metrics(code), programme:programmes!inner(name, category, provider_name)")
-    .eq("revenue_stream_id", streamId)
-    .eq("is_deleted", false)
-    .order("id", { ascending: true });
+  const rows = await fetchPagedRecords((from, to) => {
+    let query = supabase
+      .from("financial_records")
+      .select("id, academic_year, month, term, scenario, amount, school:schools(code), metric:revenue_metrics(code), programme:programmes!inner(name, category, provider_name)")
+      .eq("revenue_stream_id", streamId)
+      .eq("is_deleted", false)
+      .order("id", { ascending: true });
 
-  if (programme) query = query.eq("programme.name", programme);
-  if (programGroup) query = query.eq("programme.category", programGroup);
+    if (programme) query = query.eq("programme.name", programme);
+    if (programGroup) query = query.eq("programme.category", programGroup);
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return (data || []).map(mapLeasingRow);
+    return query.range(from, to);
+  });
+
+  return rows.map(mapLeasingRow);
 }
 
 export function clearLeasingDataCache() {
