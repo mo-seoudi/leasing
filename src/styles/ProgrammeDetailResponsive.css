@@ -1,6 +1,9 @@
-/* Programme Directory detail panel.
-   Desktop/laptop matrices are fluid to their ACTUAL container width.
-   Mobile (<=720px) keeps its dedicated card/tab presentation untouched. */
+/* Programme Directory detail responsiveness.
+   The important constraint is the DIRECTORY TABLE itself: the expanded detail
+   row lives inside that table, so a fixed/minimum-width parent makes a 100%
+   detail panel wider than the visible laptop content area.
+   Mobile (<=720px) keeps its dedicated presentation untouched. */
+
 @media (min-width: 721px) {
   .programme-detail-option2 {
     width: 100% !important;
@@ -19,9 +22,6 @@
     box-sizing: border-box;
   }
 
-  /* Do not let the desktop/laptop result matrix manufacture horizontal
-     width. It must always resolve its tracks inside the space left by the
-     sidebar and page padding. */
   .programme-detail-option2-matrix-wrap {
     overflow-x: hidden !important;
   }
@@ -53,9 +53,73 @@
   }
 }
 
-/* Laptop: compact typography/padding so all twelve months and Total remain
-   visible while the sidebar is expanded. No horizontal scrolling. */
-@media (min-width: 901px) and (max-width: 1449px) {
+/* Laptop / normal desktop.
+   Remove the directory table's legacy 1120px minimum width. This is the key
+   fix: the expanded <td> can now equal the REAL width between the open sidebar
+   and the browser's right edge instead of inheriting an off-screen table. */
+@media (min-width: 761px) and (max-width: 1449px) {
+  .programme-directory-page .directory-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .programme-directory-page .directory-comparison-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+  }
+
+  .programme-directory-page .directory-comparison-table th,
+  .programme-directory-page .directory-comparison-table td {
+    min-width: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .programme-directory-page .directory-comparison-table th:nth-child(1) { width: 17%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(2) { width: 27%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(3) { width: 17%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(4) { width: 12%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(5) { width: 12%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(6) { width: 7.5%; }
+  .programme-directory-page .directory-comparison-table th:nth-child(7) { width: 7.5%; }
+
+  .programme-directory-page .directory-programme-button,
+  .programme-directory-page .directory-percentage-cell {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .programme-directory-page .directory-percentage-cell {
+    gap: 4px;
+  }
+
+  .programme-directory-page .directory-percentage-track {
+    width: auto;
+    min-width: 12px;
+    flex: 1 1 auto;
+  }
+
+  /* Expanded row must never introduce its own width beyond the parent table. */
+  .programme-directory-page .directory-expanded-row > td {
+    width: auto !important;
+    max-width: 0;
+    overflow: hidden !important;
+  }
+
+  .programme-directory-page .directory-expanded-row .programme-detail-panel,
+  .programme-directory-page .directory-expanded-row .programme-detail-option2 {
+    width: calc(100% - 20px) !important;
+    max-width: calc(100% - 20px) !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
   .programme-detail-option2-matrix-header {
     padding-left: 2px;
     padding-right: 2px;
@@ -81,30 +145,7 @@
   }
 }
 
-/* 721–900px is still the desktop/tablet matrix rather than the dedicated
-   mobile cards, but it remains fluid instead of forcing a scroll width. */
-@media (min-width: 721px) and (max-width: 900px) {
-  .programme-detail-option2-matrix-header {
-    padding-left: 1px;
-    padding-right: 1px;
-    font-size: 6.5px;
-  }
-
-  .programme-detail-option2-matrix-value {
-    padding-left: 1px;
-    padding-right: 1px;
-    font-size: 7px;
-  }
-
-  .programme-detail-option2-matrix-label {
-    padding-left: 5px;
-    padding-right: 3px;
-    font-size: 7.5px;
-  }
-}
-
-/* Large external screens use the same fluid model, simply with more generous
-   tracks and spacing because more container width is available. */
+/* Large external screens keep the spacious behaviour already working well. */
 @media (min-width: 1450px) {
   .programme-detail-option2-matrix-wrap.termly .programme-detail-option2-matrix {
     grid-template-columns:
