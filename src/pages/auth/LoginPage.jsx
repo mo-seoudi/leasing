@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const destination = location.state?.from || "/dashboard";
+  const sessionExpired = Boolean(location.state?.sessionExpired);
 
   useEffect(() => {
     setErrorMessage("");
@@ -66,6 +67,12 @@ export default function LoginPage() {
             Sign in to access the Commercial Operations Dashboard.
           </p>
         </div>
+
+        {sessionExpired && (
+          <div className="login-session-notice" role="status">
+            Your session has expired. Please sign in again to continue.
+          </div>
+        )}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
