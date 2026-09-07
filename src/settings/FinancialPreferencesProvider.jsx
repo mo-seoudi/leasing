@@ -15,11 +15,22 @@ function loadPreferences() {
 
 export function FinancialPreferencesProvider({ children }) {
   const [preferences, setPreferences] = useState(loadPreferences);
+  const [vatRevision, setVatRevision] = useState(0);
+  const [vatDisplayNotice, setVatDisplayNotice] = useState("");
+
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences)); }, [preferences]);
-  const value = useMemo(() => ({
-    ...preferences,
-    setVatDisplayBasis: (vatDisplayBasis) => setPreferences((current) => ({ ...current, vatDisplayBasis })),
-  }), [preferences]);
+
+  function setVatDisplayBasis(vatDisplayBasis) {
+    const next = vatDisplayBasis === VAT_BASES.INCLUSIVE ? VAT_BASES.INCLUSIVE : VAT_BASES.EXCLUSIVE;
+    if (next === preferences.vatDisplayBasis) return;
+    setPreferences((current) => ({ ...current, vatDisplayBasis: next }));
+    setVatRevision((revision) => revision + 1);
+    const label = next === VAT_BASES.INCLUSIVE ? "VAT Inclusive" : "VAT Exclusive";
+    setVatDisplayNotice(`Dashboard recalculated — all monetary figures are now shown ${label}.`);
+    window.setTimeout(() => setVatDisplayNotice(""), 4200);
+  }
+
+  const value = useMemo(() => ({ ...preferences, vatRevision, vatDisplayNotice, setVatDisplayBasis }), [preferences, vatRevision, vatDisplayNotice]);
   return <FinancialPreferencesContext.Provider value={value}>{children}</FinancialPreferencesContext.Provider>;
 }
 
