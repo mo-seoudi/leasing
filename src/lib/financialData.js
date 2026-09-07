@@ -1,5 +1,7 @@
 import { supabase } from "./supabase";
 
+const FINANCIAL_RECORDS_PAGE_SIZE = 1000;
+
 export async function fetchDataEntryOptions() {
   const [schoolsResult, streamsResult, metricsResult, programmesResult, providersResult] = await Promise.all([
     supabase.from("schools").select("id, code, name, short_name").eq("is_active", true).order("name"),
@@ -188,28 +190,41 @@ export async function saveFinancialRecords({ schoolId, revenueStreamId, programm
 }
 
 export async function fetchFinancialRecords({ schoolId = "", revenueStreamId = "", academicYear = "", month = "", scenario = "", includeDeleted = false } = {}) {
-  let query = supabase
-    .from("financial_records")
-    .select(`
-      id, academic_year, month, term, scenario, amount, programme_id, provider_id,
-      created_at, updated_at, created_by, updated_by, deleted_at, deleted_by, is_deleted,
-      school:schools(id, code, name, short_name),
-      revenue_stream:revenue_streams(id, code, name),
-      metric:revenue_metrics(id, code, name),
-      programme:programmes(id, name, category, provider_name)
-    `)
-    .order("month", { ascending: false });
+  const rows = [];
+  let from = 0;
 
-  if (!includeDeleted) query = query.eq("is_deleted", false);
-  if (schoolId) query = query.eq("school_id", Number(schoolId));
-  if (revenueStreamId) query = query.eq("revenue_stream_id", Number(revenueStreamId));
-  if (academicYear) query = query.eq("academic_year", academicYear);
-  if (month) query = query.eq("month", `${month}-01`);
-  if (scenario) query = query.eq("scenario", scenario);
+  while (true) {
+    let query = supabase
+      .from("financial_records")
+      .select(`
+        id, academic_year, month, term, scenario, amount, programme_id, provider_id,
+        created_at, updated_at, created_by, updated_by, deleted_at, deleted_by, is_deleted,
+        school:schools(id, code, name, short_name),
+        revenue_stream:revenue_streams(id, code, name),
+        metric:revenue_metrics(id, code, name),
+        programme:programmes(id, name, category, provider_name)
+      `)
+      .order("month", { ascending: false })
+      .order("id", { ascending: false });
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data || [];
+    if (!includeDeleted) query = query.eq("is_deleted", false);
+    if (schoolId) query = query.eq("school_id", Number(schoolId));
+    if (revenueStreamId) query = query.eq("revenue_stream_id", Number(revenueStreamId));
+    if (academicYear) query = query.eq("academic_year", academicYear);
+    if (month) query = query.eq("month", `${month}-01`);
+    if (scenario) query = query.eq("scenario", scenario);
+
+    const { data, error } = await query.range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
+    if (error) throw error;
+
+    const batch = data || [];
+    if (batch.length === 0) break;
+
+    rows.push(...batch);
+    from += batch.length;
+  }
+
+  return rows;
 }
 
 export async function updateFinancialRecord(recordId, { amount, scenario, month, programmeId }) {
