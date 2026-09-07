@@ -1,23 +1,28 @@
 import { supabase } from "./supabase";
 
+const FINANCIAL_RECORDS_PAGE_SIZE = 1000;
+
 export async function fetchDataEntryOptions() {
-  const [schoolsResult, streamsResult, metricsResult, programmesResult] = await Promise.all([
+  const [schoolsResult, streamsResult, metricsResult, programmesResult, providersResult] = await Promise.all([
     supabase.from("schools").select("id, code, name, short_name").eq("is_active", true).order("name"),
     supabase.from("revenue_streams").select("id, code, name").eq("is_active", true).order("name"),
     supabase.from("revenue_metrics").select("id, revenue_stream_id, code, name, display_order").eq("is_active", true).order("display_order"),
     supabase.from("programmes").select("id, name, category, provider_name").order("name"),
+    supabase.from("providers").select("id, name").order("name"),
   ]);
 
   if (schoolsResult.error) throw schoolsResult.error;
   if (streamsResult.error) throw streamsResult.error;
   if (metricsResult.error) throw metricsResult.error;
   if (programmesResult.error) throw programmesResult.error;
+  if (providersResult.error) throw providersResult.error;
 
   return {
     schools: schoolsResult.data || [],
     revenueStreams: streamsResult.data || [],
     metrics: metricsResult.data || [],
     programmes: programmesResult.data || [],
+    providers: providersResult.data || [],
   };
 }
 
@@ -26,6 +31,82 @@ async function getCurrentUserId() {
   if (error) throw error;
   if (!user?.id) throw new Error("You must be signed in to modify financial records.");
   return user.id;
+}
+
+export async function fetchFinancialRecordAcademicYears() {
+  const years = new Set();
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("financial_records")
+      .select("academic_year")
+      .order("academic_year", { ascending: false })
+      .range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
+    if (error) throw error;
+
+    const batch = data || [];
+    if (batch.length === 0) break;
+    batch.forEach((row) => { if (row.academic_year) years.add(row.academic_year); });
+    from += batch.length;
+  }
+
+  return [...years].sort((a, b) => String(b).localeCompare(String(a)));
+}
+
+export async function fetchProgrammes() {
+  const { data, error } = await supabase
+    .from("programmes")
+    .select("id, name, category, provider_name")
+    .order("category")
+    .order("name");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createProgramme({ name, category, providerName = "" }) {
+  await getCurrentUserId();
+  const cleanName = String(name || "").trim();
+  const cleanCategory = String(category || "").trim();
+  const cleanProviderName = String(providerName || "").trim();
+
+  if (!cleanName) throw new Error("Enter a programme name.");
+  if (!cleanCategory) throw new Error("Select or enter a programme category.");
+
+  const { data: existing, error: existingError } = await supabase
+    .from("programmes")
+    .select("id")
+    .ilike("name", cleanName)
+    .maybeSingle();
+  if (existingError) throw existingError;
+  if (existing?.id) throw new Error("A programme with this name already exists.");
+
+  const { data, error } = await supabase
+    .from("programmes")
+    .insert({ name: cleanName, category: cleanCategory, provider_name: cleanProviderName || null })
+    .select("id, name, category, provider_name")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateProgramme(programmeId, { name, category, providerName = "" }) {
+  await getCurrentUserId();
+  const cleanName = String(name || "").trim();
+  const cleanCategory = String(category || "").trim();
+  const cleanProviderName = String(providerName || "").trim();
+
+  if (!cleanName) throw new Error("Enter a programme name.");
+  if (!cleanCategory) throw new Error("Select or enter a programme category.");
+
+  const { data, error } = await supabase
+    .from("programmes")
+    .update({ name: cleanName, category: cleanCategory, provider_name: cleanProviderName || null })
+    .eq("id", Number(programmeId))
+    .select("id, name, category, provider_name")
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export function getAcademicYearFromMonth(month) {
@@ -60,59 +141,36 @@ export async function saveFinancialRecords({ schoolId, revenueStreamId, programm
   if (streamError) throw streamError;
 
   const isLeasing = stream?.code === "leasing";
-  if (isLeasing && !programmeId) {
-    throw new Error("Select a programme for Leasing financial records.");
-  }
+  if (isLeasing && !programmeId) throw new Error("Select a programme for Leasing financial records.");
 
   const resolvedProgrammeId = isLeasing ? Number(programmeId) : null;
   const rows = Object.entries(metricValues)
     .filter(([, value]) => value !== "")
     .map(([metricId, value]) => ({
-      school_id: Number(schoolId),
-      revenue_stream_id: Number(revenueStreamId),
-      metric_id: Number(metricId),
-      academic_year: academicYear,
-      month: `${month}-01`,
-      term,
-      scenario,
-      amount: Number(value),
-      programme_id: resolvedProgrammeId,
-      provider_id: null,
+      school_id: Number(schoolId), revenue_stream_id: Number(revenueStreamId), metric_id: Number(metricId),
+      academic_year: academicYear, month: `${month}-01`, term, scenario, amount: Number(value),
+      programme_id: resolvedProgrammeId, provider_id: null,
     }));
 
   if (!rows.length) throw new Error("Enter an amount for at least one metric.");
 
   for (const row of rows) {
-    let lookup = supabase
-      .from("financial_records")
-      .select("id")
-      .eq("school_id", row.school_id)
-      .eq("revenue_stream_id", row.revenue_stream_id)
-      .eq("metric_id", row.metric_id)
-      .eq("academic_year", row.academic_year)
-      .eq("month", row.month)
-      .eq("scenario", row.scenario)
-      .eq("is_deleted", false);
-
+    let lookup = supabase.from("financial_records").select("id")
+      .eq("school_id", row.school_id).eq("revenue_stream_id", row.revenue_stream_id)
+      .eq("metric_id", row.metric_id).eq("academic_year", row.academic_year)
+      .eq("month", row.month).eq("scenario", row.scenario).eq("is_deleted", false);
     lookup = row.programme_id ? lookup.eq("programme_id", row.programme_id) : lookup.is("programme_id", null);
     const { data: existing, error: lookupError } = await lookup.maybeSingle();
     if (lookupError) throw lookupError;
 
     if (existing?.id) {
-      const { error } = await supabase
-        .from("financial_records")
+      const { error } = await supabase.from("financial_records")
         .update({ amount: row.amount, term: row.term, programme_id: row.programme_id, provider_id: null, updated_by: userId })
-        .eq("id", existing.id)
-        .eq("is_deleted", false);
+        .eq("id", existing.id).eq("is_deleted", false);
       if (error) throw error;
     } else {
       const { error } = await supabase.from("financial_records").insert({
-        ...row,
-        is_deleted: false,
-        created_by: userId,
-        updated_by: userId,
-        deleted_by: null,
-        deleted_at: null,
+        ...row, is_deleted: false, created_by: userId, updated_by: userId, deleted_by: null, deleted_at: null,
       });
       if (error) throw error;
     }
@@ -121,7 +179,7 @@ export async function saveFinancialRecords({ schoolId, revenueStreamId, programm
   return { academicYear, term, savedCount: rows.length };
 }
 
-export async function fetchFinancialRecords({ schoolId = "", revenueStreamId = "", academicYear = "", month = "", scenario = "", includeDeleted = false } = {}) {
+function buildFinancialRecordsQuery({ includeDeleted, schoolId, revenueStreamId, academicYear, month, scenario, metricIds, programmeId, programmeIds }) {
   let query = supabase
     .from("financial_records")
     .select(`
@@ -131,8 +189,9 @@ export async function fetchFinancialRecords({ schoolId = "", revenueStreamId = "
       revenue_stream:revenue_streams(id, code, name),
       metric:revenue_metrics(id, code, name),
       programme:programmes(id, name, category, provider_name)
-    `)
-    .order("month", { ascending: false });
+    `, { count: "exact" })
+    .order("month", { ascending: false })
+    .order("id", { ascending: false });
 
   if (!includeDeleted) query = query.eq("is_deleted", false);
   if (schoolId) query = query.eq("school_id", Number(schoolId));
@@ -140,10 +199,40 @@ export async function fetchFinancialRecords({ schoolId = "", revenueStreamId = "
   if (academicYear) query = query.eq("academic_year", academicYear);
   if (month) query = query.eq("month", `${month}-01`);
   if (scenario) query = query.eq("scenario", scenario);
+  if (metricIds?.length) query = query.in("metric_id", metricIds.map(Number));
+  if (programmeId) query = query.eq("programme_id", Number(programmeId));
+  else if (programmeIds?.length) query = query.in("programme_id", programmeIds.map(Number));
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data || [];
+  return query;
+}
+
+export async function fetchFinancialRecords({
+  schoolId = "", revenueStreamId = "", academicYear = "", month = "", scenario = "",
+  metricIds = [], programmeId = "", programmeIds = [], includeDeleted = false,
+  page = 1, pageSize = 25, fetchAll = false,
+} = {}) {
+  const filters = { schoolId, revenueStreamId, academicYear, month, scenario, metricIds, programmeId, programmeIds, includeDeleted };
+
+  if (!fetchAll) {
+    const from = Math.max(0, (page - 1) * pageSize);
+    const { data, error, count } = await buildFinancialRecordsQuery(filters).range(from, from + pageSize - 1);
+    if (error) throw error;
+    return { records: data || [], totalCount: count || 0 };
+  }
+
+  const rows = [];
+  let from = 0;
+  let totalCount = 0;
+  while (true) {
+    const { data, error, count } = await buildFinancialRecordsQuery(filters).range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
+    if (error) throw error;
+    const batch = data || [];
+    if (count !== null && count !== undefined) totalCount = count;
+    if (batch.length === 0) break;
+    rows.push(...batch);
+    from += batch.length;
+  }
+  return { records: rows, totalCount };
 }
 
 export async function updateFinancialRecord(recordId, { amount, scenario, month, programmeId }) {
@@ -161,39 +250,26 @@ export async function updateFinancialRecord(recordId, { amount, scenario, month,
     changes.provider_id = null;
   }
 
-  const { data, error } = await supabase
-    .from("financial_records")
-    .update(changes)
-    .eq("id", recordId)
-    .eq("is_deleted", false)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("financial_records").update(changes)
+    .eq("id", recordId).eq("is_deleted", false).select().single();
   if (error) throw error;
   return data;
 }
 
 export async function archiveFinancialRecord(recordId) {
   const userId = await getCurrentUserId();
-  const { data, error } = await supabase
-    .from("financial_records")
+  const { data, error } = await supabase.from("financial_records")
     .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: userId, updated_by: userId })
-    .eq("id", recordId)
-    .eq("is_deleted", false)
-    .select()
-    .single();
+    .eq("id", recordId).eq("is_deleted", false).select().single();
   if (error) throw error;
   return data;
 }
 
 export async function restoreFinancialRecord(recordId) {
   const userId = await getCurrentUserId();
-  const { data, error } = await supabase
-    .from("financial_records")
+  const { data, error } = await supabase.from("financial_records")
     .update({ is_deleted: false, deleted_at: null, deleted_by: null, updated_by: userId })
-    .eq("id", recordId)
-    .eq("is_deleted", true)
-    .select()
-    .single();
+    .eq("id", recordId).eq("is_deleted", true).select().single();
   if (error) throw error;
   return data;
 }

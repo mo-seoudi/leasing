@@ -1,7 +1,8 @@
 -- Kitchen Rental revenue stream setup
 -- Annual contractual rent is allocated evenly across 12 monthly records so
 -- Commercial Overview can include Kitchen Rental in monthly revenue trends.
--- Safe to rerun: replaces the earlier Kitchen Rental seed records for RDXB.
+-- Kitchen Rental financial reporting uses Rental Fees only.
+-- Safe to rerun: replaces the seeded Kitchen Rental financial records for RDXB.
 
 begin;
 
@@ -24,18 +25,7 @@ where rs.code = 'kitchen_rental'
       and rm.code = 'rental_fees'
   );
 
-insert into public.revenue_metrics (revenue_stream_id, code, name, display_order)
-select rs.id, 'vat_rate', 'VAT Rate', 2
-from public.revenue_streams rs
-where rs.code = 'kitchen_rental'
-  and not exists (
-    select 1
-    from public.revenue_metrics rm
-    where rm.revenue_stream_id = rs.id
-      and rm.code = 'vat_rate'
-  );
-
--- Replace the earlier September-only seeds for these two known years.
+-- Replace seeded Kitchen Rental financial rows for the known current years.
 delete from public.financial_records fr
 using public.schools s, public.revenue_streams rs
 where fr.school_id = s.id
@@ -51,8 +41,7 @@ with refs as (
   select
     s.id as school_id,
     rs.id as stream_id,
-    max(case when rm.code = 'rental_fees' then rm.id end) as rental_metric_id,
-    max(case when rm.code = 'vat_rate' then rm.id end) as vat_metric_id
+    max(case when rm.code = 'rental_fees' then rm.id end) as rental_metric_id
   from public.schools s
   cross join public.revenue_streams rs
   join public.revenue_metrics rm
@@ -64,14 +53,12 @@ with refs as (
   select
     'AY2025-26'::text as academic_year,
     2025::int as start_year,
-    500000::numeric as annual_rent,
-    5::numeric as vat_rate
+    500000::numeric as annual_rent
   union all
   select
     'AY2026-27'::text,
     2026::int,
-    400000::numeric,
-    5::numeric
+    400000::numeric
 ), months as (
   select *
   from (values
@@ -85,8 +72,8 @@ with refs as (
     (8, 4,  'Term 3'),
     (9, 5,  'Term 3'),
     (10, 6, 'Term 3'),
-    (11, 7, 'Term 3'),
-    (12, 8, 'Term 3')
+    (11, 7,  'Term 3'),
+    (12, 8,  'Term 3')
   ) as m(position, month_number, term)
 ), rental_rows as (
   select
@@ -111,23 +98,6 @@ with refs as (
   from refs r
   cross join annual_values a
   cross join months m
-), vat_rows as (
-  -- VAT is informational and stored once per year; it is not revenue.
-  select
-    r.school_id,
-    r.stream_id,
-    r.vat_metric_id as metric_id,
-    a.academic_year,
-    make_date(a.start_year, 9, 1) as record_month,
-    'Term 1'::text as term,
-    'Actual'::text as scenario,
-    a.vat_rate as amount
-  from refs r
-  cross join annual_values a
-), seed_rows as (
-  select * from rental_rows
-  union all
-  select * from vat_rows
 )
 insert into public.financial_records (
   school_id,
@@ -154,7 +124,7 @@ select
   null,
   null,
   false
-from seed_rows
+from rental_rows
 where metric_id is not null;
 
 commit;
