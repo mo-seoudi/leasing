@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { DEFAULT_VAT_RATE, VAT_BASES, normalizeVatBasis } from "./vat";
 
 const FINANCIAL_RECORDS_PAGE_SIZE = 1000;
 
@@ -10,20 +11,12 @@ export async function fetchDataEntryOptions() {
     supabase.from("programmes").select("id, name, category, provider_name").order("name"),
     supabase.from("providers").select("id, name").order("name"),
   ]);
-
   if (schoolsResult.error) throw schoolsResult.error;
   if (streamsResult.error) throw streamsResult.error;
   if (metricsResult.error) throw metricsResult.error;
   if (programmesResult.error) throw programmesResult.error;
   if (providersResult.error) throw providersResult.error;
-
-  return {
-    schools: schoolsResult.data || [],
-    revenueStreams: streamsResult.data || [],
-    metrics: metricsResult.data || [],
-    programmes: programmesResult.data || [],
-    providers: providersResult.data || [],
-  };
+  return { schools: schoolsResult.data || [], revenueStreams: streamsResult.data || [], metrics: metricsResult.data || [], programmes: programmesResult.data || [], providers: providersResult.data || [] };
 }
 
 async function getCurrentUserId() {
@@ -33,243 +26,89 @@ async function getCurrentUserId() {
   return user.id;
 }
 
+function resolveVatFields(vatBasis, vatRate = DEFAULT_VAT_RATE) {
+  const basis = normalizeVatBasis(vatBasis);
+  if (!basis) throw new Error("Select whether the entered amount is VAT exclusive, VAT inclusive, or not subject to VAT.");
+  if (basis === VAT_BASES.NO_VAT) return { vat_basis: basis, vat_rate: 0 };
+  const rate = Number(vatRate);
+  if (!Number.isFinite(rate) || rate < 0 || rate > 100) throw new Error("Enter a valid VAT rate between 0 and 100.");
+  return { vat_basis: basis, vat_rate: rate };
+}
+
 export async function fetchFinancialRecordAcademicYears() {
-  const years = new Set();
-  let from = 0;
-
+  const years = new Set(); let from = 0;
   while (true) {
-    const { data, error } = await supabase
-      .from("financial_records")
-      .select("academic_year")
-      .order("academic_year", { ascending: false })
-      .range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
+    const { data, error } = await supabase.from("financial_records").select("academic_year").order("academic_year", { ascending: false }).range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
     if (error) throw error;
-
-    const batch = data || [];
-    if (batch.length === 0) break;
-    batch.forEach((row) => { if (row.academic_year) years.add(row.academic_year); });
-    from += batch.length;
+    const batch = data || []; if (!batch.length) break;
+    batch.forEach(row => { if (row.academic_year) years.add(row.academic_year); }); from += batch.length;
   }
-
-  return [...years].sort((a, b) => String(b).localeCompare(String(a)));
+  return [...years].sort((a,b)=>String(b).localeCompare(String(a)));
 }
 
 export async function fetchProgrammes() {
-  const { data, error } = await supabase
-    .from("programmes")
-    .select("id, name, category, provider_name")
-    .order("category")
-    .order("name");
-  if (error) throw error;
-  return data || [];
+  const { data, error } = await supabase.from("programmes").select("id, name, category, provider_name").order("category").order("name");
+  if (error) throw error; return data || [];
 }
 
 export async function createProgramme({ name, category, providerName = "" }) {
   await getCurrentUserId();
-  const cleanName = String(name || "").trim();
-  const cleanCategory = String(category || "").trim();
-  const cleanProviderName = String(providerName || "").trim();
-
+  const cleanName=String(name||"").trim(), cleanCategory=String(category||"").trim(), cleanProviderName=String(providerName||"").trim();
   if (!cleanName) throw new Error("Enter a programme name.");
   if (!cleanCategory) throw new Error("Select or enter a programme category.");
-
-  const { data: existing, error: existingError } = await supabase
-    .from("programmes")
-    .select("id")
-    .ilike("name", cleanName)
-    .maybeSingle();
-  if (existingError) throw existingError;
-  if (existing?.id) throw new Error("A programme with this name already exists.");
-
-  const { data, error } = await supabase
-    .from("programmes")
-    .insert({ name: cleanName, category: cleanCategory, provider_name: cleanProviderName || null })
-    .select("id, name, category, provider_name")
-    .single();
-  if (error) throw error;
-  return data;
+  const { data: existing, error: existingError } = await supabase.from("programmes").select("id").ilike("name",cleanName).maybeSingle();
+  if (existingError) throw existingError; if (existing?.id) throw new Error("A programme with this name already exists.");
+  const { data, error } = await supabase.from("programmes").insert({name:cleanName,category:cleanCategory,provider_name:cleanProviderName||null}).select("id, name, category, provider_name").single();
+  if (error) throw error; return data;
 }
 
-export async function updateProgramme(programmeId, { name, category, providerName = "" }) {
+export async function updateProgramme(programmeId,{name,category,providerName=""}) {
   await getCurrentUserId();
-  const cleanName = String(name || "").trim();
-  const cleanCategory = String(category || "").trim();
-  const cleanProviderName = String(providerName || "").trim();
-
-  if (!cleanName) throw new Error("Enter a programme name.");
-  if (!cleanCategory) throw new Error("Select or enter a programme category.");
-
-  const { data, error } = await supabase
-    .from("programmes")
-    .update({ name: cleanName, category: cleanCategory, provider_name: cleanProviderName || null })
-    .eq("id", Number(programmeId))
-    .select("id, name, category, provider_name")
-    .single();
-  if (error) throw error;
-  return data;
+  const cleanName=String(name||"").trim(), cleanCategory=String(category||"").trim(), cleanProviderName=String(providerName||"").trim();
+  if (!cleanName) throw new Error("Enter a programme name."); if (!cleanCategory) throw new Error("Select or enter a programme category.");
+  const {data,error}=await supabase.from("programmes").update({name:cleanName,category:cleanCategory,provider_name:cleanProviderName||null}).eq("id",Number(programmeId)).select("id, name, category, provider_name").single();
+  if(error)throw error; return data;
 }
 
-export function getAcademicYearFromMonth(month) {
-  if (!month) return "";
-  const [yearString, monthString] = month.split("-");
-  const year = Number(yearString);
-  const monthNumber = Number(monthString);
-  if (!year || !monthNumber) return "";
-  const startYear = monthNumber >= 9 ? year : year - 1;
-  return `AY${startYear}-${String(startYear + 1).slice(-2)}`;
-}
+export function getAcademicYearFromMonth(month){if(!month)return"";const [ys,ms]=month.split("-"),year=Number(ys),m=Number(ms);if(!year||!m)return"";const start=m>=9?year:year-1;return `AY${start}-${String(start+1).slice(-2)}`;}
+export function getFinanceTermFromMonth(month){if(!month)return"";const m=Number(month.split("-")[1]);if([9,10,11,12].includes(m))return"Term 1";if([1,2,3].includes(m))return"Term 2";if([4,5,6,7,8].includes(m))return"Term 3";return"";}
 
-export function getFinanceTermFromMonth(month) {
-  if (!month) return "";
-  const monthNumber = Number(month.split("-")[1]);
-  if ([9, 10, 11, 12].includes(monthNumber)) return "Term 1";
-  if ([1, 2, 3].includes(monthNumber)) return "Term 2";
-  if ([4, 5, 6, 7, 8].includes(monthNumber)) return "Term 3";
-  return "";
-}
-
-export async function saveFinancialRecords({ schoolId, revenueStreamId, programmeId = "", month, scenario, metricValues }) {
-  const userId = await getCurrentUserId();
-  const academicYear = getAcademicYearFromMonth(month);
-  const term = getFinanceTermFromMonth(month);
-
-  const { data: stream, error: streamError } = await supabase
-    .from("revenue_streams")
-    .select("code")
-    .eq("id", Number(revenueStreamId))
-    .single();
-  if (streamError) throw streamError;
-
-  const isLeasing = stream?.code === "leasing";
-  if (isLeasing && !programmeId) throw new Error("Select a programme for Leasing financial records.");
-
-  const resolvedProgrammeId = isLeasing ? Number(programmeId) : null;
-  const rows = Object.entries(metricValues)
-    .filter(([, value]) => value !== "")
-    .map(([metricId, value]) => ({
-      school_id: Number(schoolId), revenue_stream_id: Number(revenueStreamId), metric_id: Number(metricId),
-      academic_year: academicYear, month: `${month}-01`, term, scenario, amount: Number(value),
-      programme_id: resolvedProgrammeId, provider_id: null,
-    }));
-
-  if (!rows.length) throw new Error("Enter an amount for at least one metric.");
-
-  for (const row of rows) {
-    let lookup = supabase.from("financial_records").select("id")
-      .eq("school_id", row.school_id).eq("revenue_stream_id", row.revenue_stream_id)
-      .eq("metric_id", row.metric_id).eq("academic_year", row.academic_year)
-      .eq("month", row.month).eq("scenario", row.scenario).eq("is_deleted", false);
-    lookup = row.programme_id ? lookup.eq("programme_id", row.programme_id) : lookup.is("programme_id", null);
-    const { data: existing, error: lookupError } = await lookup.maybeSingle();
-    if (lookupError) throw lookupError;
-
-    if (existing?.id) {
-      const { error } = await supabase.from("financial_records")
-        .update({ amount: row.amount, term: row.term, programme_id: row.programme_id, provider_id: null, updated_by: userId })
-        .eq("id", existing.id).eq("is_deleted", false);
-      if (error) throw error;
-    } else {
-      const { error } = await supabase.from("financial_records").insert({
-        ...row, is_deleted: false, created_by: userId, updated_by: userId, deleted_by: null, deleted_at: null,
-      });
-      if (error) throw error;
-    }
+export async function saveFinancialRecords({schoolId,revenueStreamId,programmeId="",month,scenario,metricValues,vatBasis,vatRate=DEFAULT_VAT_RATE}){
+  const userId=await getCurrentUserId(), academicYear=getAcademicYearFromMonth(month), term=getFinanceTermFromMonth(month), vat=resolveVatFields(vatBasis,vatRate);
+  const {data:stream,error:streamError}=await supabase.from("revenue_streams").select("code").eq("id",Number(revenueStreamId)).single(); if(streamError)throw streamError;
+  const isLeasing=stream?.code==="leasing"; if(isLeasing&&!programmeId)throw new Error("Select a programme for Leasing financial records.");
+  const resolvedProgrammeId=isLeasing?Number(programmeId):null;
+  const rows=Object.entries(metricValues).filter(([,v])=>v!=="").map(([metricId,value])=>({school_id:Number(schoolId),revenue_stream_id:Number(revenueStreamId),metric_id:Number(metricId),academic_year:academicYear,month:`${month}-01`,term,scenario,amount:Number(value),programme_id:resolvedProgrammeId,provider_id:null,...vat}));
+  if(!rows.length)throw new Error("Enter an amount for at least one metric.");
+  for(const row of rows){
+    let lookup=supabase.from("financial_records").select("id").eq("school_id",row.school_id).eq("revenue_stream_id",row.revenue_stream_id).eq("metric_id",row.metric_id).eq("academic_year",row.academic_year).eq("month",row.month).eq("scenario",row.scenario).eq("is_deleted",false);
+    lookup=row.programme_id?lookup.eq("programme_id",row.programme_id):lookup.is("programme_id",null);
+    const {data:existing,error:lookupError}=await lookup.maybeSingle(); if(lookupError)throw lookupError;
+    if(existing?.id){const {error}=await supabase.from("financial_records").update({amount:row.amount,term:row.term,programme_id:row.programme_id,provider_id:null,vat_basis:row.vat_basis,vat_rate:row.vat_rate,updated_by:userId}).eq("id",existing.id).eq("is_deleted",false);if(error)throw error;}
+    else{const {error}=await supabase.from("financial_records").insert({...row,is_deleted:false,created_by:userId,updated_by:userId,deleted_by:null,deleted_at:null});if(error)throw error;}
   }
-
-  return { academicYear, term, savedCount: rows.length };
+  return{academicYear,term,savedCount:rows.length};
 }
 
-function buildFinancialRecordsQuery({ includeDeleted, schoolId, revenueStreamId, academicYear, month, scenario, metricIds, programmeId, programmeIds }) {
-  let query = supabase
-    .from("financial_records")
-    .select(`
-      id, academic_year, month, term, scenario, amount, programme_id, provider_id,
-      created_at, updated_at, created_by, updated_by, deleted_at, deleted_by, is_deleted,
-      school:schools(id, code, name, short_name),
-      revenue_stream:revenue_streams(id, code, name),
-      metric:revenue_metrics(id, code, name),
-      programme:programmes(id, name, category, provider_name)
-    `, { count: "exact" })
-    .order("month", { ascending: false })
-    .order("id", { ascending: false });
-
-  if (!includeDeleted) query = query.eq("is_deleted", false);
-  if (schoolId) query = query.eq("school_id", Number(schoolId));
-  if (revenueStreamId) query = query.eq("revenue_stream_id", Number(revenueStreamId));
-  if (academicYear) query = query.eq("academic_year", academicYear);
-  if (month) query = query.eq("month", `${month}-01`);
-  if (scenario) query = query.eq("scenario", scenario);
-  if (metricIds?.length) query = query.in("metric_id", metricIds.map(Number));
-  if (programmeId) query = query.eq("programme_id", Number(programmeId));
-  else if (programmeIds?.length) query = query.in("programme_id", programmeIds.map(Number));
-
-  return query;
+function buildFinancialRecordsQuery({includeDeleted,schoolId,revenueStreamId,academicYear,month,scenario,metricIds,programmeId,programmeIds}){
+  let query=supabase.from("financial_records").select(`id, academic_year, month, term, scenario, amount, programme_id, provider_id, vat_basis, vat_rate, created_at, updated_at, created_by, updated_by, deleted_at, deleted_by, is_deleted, school:schools(id, code, name, short_name), revenue_stream:revenue_streams(id, code, name), metric:revenue_metrics(id, code, name), programme:programmes(id, name, category, provider_name)`,{count:"exact"}).order("month",{ascending:false}).order("id",{ascending:false});
+  if(!includeDeleted)query=query.eq("is_deleted",false);if(schoolId)query=query.eq("school_id",Number(schoolId));if(revenueStreamId)query=query.eq("revenue_stream_id",Number(revenueStreamId));if(academicYear)query=query.eq("academic_year",academicYear);if(month)query=query.eq("month",`${month}-01`);if(scenario)query=query.eq("scenario",scenario);if(metricIds?.length)query=query.in("metric_id",metricIds.map(Number));if(programmeId)query=query.eq("programme_id",Number(programmeId));else if(programmeIds?.length)query=query.in("programme_id",programmeIds.map(Number));return query;
 }
 
-export async function fetchFinancialRecords({
-  schoolId = "", revenueStreamId = "", academicYear = "", month = "", scenario = "",
-  metricIds = [], programmeId = "", programmeIds = [], includeDeleted = false,
-  page = 1, pageSize = 25, fetchAll = false,
-} = {}) {
-  const filters = { schoolId, revenueStreamId, academicYear, month, scenario, metricIds, programmeId, programmeIds, includeDeleted };
-
-  if (!fetchAll) {
-    const from = Math.max(0, (page - 1) * pageSize);
-    const { data, error, count } = await buildFinancialRecordsQuery(filters).range(from, from + pageSize - 1);
-    if (error) throw error;
-    return { records: data || [], totalCount: count || 0 };
-  }
-
-  const rows = [];
-  let from = 0;
-  let totalCount = 0;
-  while (true) {
-    const { data, error, count } = await buildFinancialRecordsQuery(filters).range(from, from + FINANCIAL_RECORDS_PAGE_SIZE - 1);
-    if (error) throw error;
-    const batch = data || [];
-    if (count !== null && count !== undefined) totalCount = count;
-    if (batch.length === 0) break;
-    rows.push(...batch);
-    from += batch.length;
-  }
-  return { records: rows, totalCount };
+export async function fetchFinancialRecords({schoolId="",revenueStreamId="",academicYear="",month="",scenario="",metricIds=[],programmeId="",programmeIds=[],includeDeleted=false,page=1,pageSize=25,fetchAll=false}={}){
+  const filters={schoolId,revenueStreamId,academicYear,month,scenario,metricIds,programmeId,programmeIds,includeDeleted};
+  if(!fetchAll){const from=Math.max(0,(page-1)*pageSize);const {data,error,count}=await buildFinancialRecordsQuery(filters).range(from,from+pageSize-1);if(error)throw error;return{records:data||[],totalCount:count||0};}
+  const rows=[];let from=0,totalCount=0;while(true){const {data,error,count}=await buildFinancialRecordsQuery(filters).range(from,from+FINANCIAL_RECORDS_PAGE_SIZE-1);if(error)throw error;const batch=data||[];if(count!==null&&count!==undefined)totalCount=count;if(!batch.length)break;rows.push(...batch);from+=batch.length;}return{records:rows,totalCount};
 }
 
-export async function updateFinancialRecord(recordId, { amount, scenario, month, programmeId }) {
-  const userId = await getCurrentUserId();
-  const changes = { updated_by: userId };
-  if (amount !== undefined && amount !== "") changes.amount = Number(amount);
-  if (scenario) changes.scenario = scenario;
-  if (month) {
-    changes.month = `${month}-01`;
-    changes.academic_year = getAcademicYearFromMonth(month);
-    changes.term = getFinanceTermFromMonth(month);
-  }
-  if (programmeId !== undefined) {
-    changes.programme_id = programmeId ? Number(programmeId) : null;
-    changes.provider_id = null;
-  }
-
-  const { data, error } = await supabase.from("financial_records").update(changes)
-    .eq("id", recordId).eq("is_deleted", false).select().single();
-  if (error) throw error;
-  return data;
+export async function updateFinancialRecord(recordId,{amount,scenario,month,programmeId,vatBasis,vatRate}){
+  const userId=await getCurrentUserId(),changes={updated_by:userId};
+  if(amount!==undefined&&amount!=="")changes.amount=Number(amount);if(scenario)changes.scenario=scenario;
+  if(month){changes.month=`${month}-01`;changes.academic_year=getAcademicYearFromMonth(month);changes.term=getFinanceTermFromMonth(month);}
+  if(programmeId!==undefined){changes.programme_id=programmeId?Number(programmeId):null;changes.provider_id=null;}
+  if(vatBasis!==undefined){const vat=resolveVatFields(vatBasis,vatRate);changes.vat_basis=vat.vat_basis;changes.vat_rate=vat.vat_rate;}
+  const {data,error}=await supabase.from("financial_records").update(changes).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw error;return data;
 }
 
-export async function archiveFinancialRecord(recordId) {
-  const userId = await getCurrentUserId();
-  const { data, error } = await supabase.from("financial_records")
-    .update({ is_deleted: true, deleted_at: new Date().toISOString(), deleted_by: userId, updated_by: userId })
-    .eq("id", recordId).eq("is_deleted", false).select().single();
-  if (error) throw error;
-  return data;
-}
-
-export async function restoreFinancialRecord(recordId) {
-  const userId = await getCurrentUserId();
-  const { data, error } = await supabase.from("financial_records")
-    .update({ is_deleted: false, deleted_at: null, deleted_by: null, updated_by: userId })
-    .eq("id", recordId).eq("is_deleted", true).select().single();
-  if (error) throw error;
-  return data;
-}
+export async function archiveFinancialRecord(recordId){const userId=await getCurrentUserId();const {data,error}=await supabase.from("financial_records").update({is_deleted:true,deleted_at:new Date().toISOString(),deleted_by:userId,updated_by:userId}).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw error;return data;}
+export async function restoreFinancialRecord(recordId){const userId=await getCurrentUserId();const {data,error}=await supabase.from("financial_records").update({is_deleted:false,deleted_at:null,deleted_by:null,updated_by:userId}).eq("id",recordId).eq("is_deleted",true).select().single();if(error)throw error;return data;}
