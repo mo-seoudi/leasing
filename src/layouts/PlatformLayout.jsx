@@ -12,7 +12,7 @@ const leasingLinks = [{ label:"Leasing Dashboard", path:"/leasing" },{ label:"Pr
 const cateringLinks = [{ label:"Catering Dashboard", path:"/catering" },{ label:"Performance Comparison", path:"/catering/comparison" },{ label:"Kitchen Rental", path:"/catering/kitchen-rental" }];
 const uniformLinks = [{ label:"Uniform Dashboard", path:"/uniform" },{ label:"Performance Comparison", path:"/uniform/comparison" }];
 const photographyLinks = [{ label:"Photography Dashboard", path:"/photography" },{ label:"Performance Comparison", path:"/photography/comparison" }];
-const transportLinks = [{ label:"Transport Dashboard", path:"/transport" },{ label:"Performance Comparison", path:"/transport/comparison" }];
+const transportLinks = [{ label:"Transport Dashboard", path:"/transport" },{ label:"Performance Comparison", path:"/transport/comparison" },{ label:"Cost Centre", path:"/transport/cost-centre" }];
 const recordLinks = [{ label:"Financial Records", path:"/financial-records" },{ label:"Suppliers & Contracts", path:"/supplier-records" }];
 
 function DashboardIcon(){return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>}
@@ -31,7 +31,7 @@ function getPageDetails(p){
   "/catering":{section:"Catering",title:"Catering Dashboard"},"/catering/comparison":{section:"Catering",title:"Performance Comparison"},"/catering/kitchen-rental":{section:"Catering",title:"Kitchen Rental"},
   "/uniform":{section:"Uniform",title:"Uniform Dashboard"},"/uniform/comparison":{section:"Uniform",title:"Performance Comparison"},
   "/photography":{section:"Photography",title:"Photography Dashboard"},"/photography/comparison":{section:"Photography",title:"Performance Comparison"},
-  "/transport":{section:"Transport",title:"Transport Dashboard"},"/transport/comparison":{section:"Transport",title:"Performance Comparison"},
+  "/transport":{section:"Transport",title:"Transport Dashboard"},"/transport/comparison":{section:"Transport",title:"Performance Comparison"},"/transport/cost-centre":{section:"Transport",title:"Cost Centre"},
   "/financial-records":{section:"Administration",title:"Financial Records"},"/data-entry":{section:"Administration",title:"Financial Records"},"/supplier-records":{section:"Administration",title:"Supplier & Contract Records"},"/settings":{section:"Administration",title:"Settings"}
  };
  return pages[p]||{section:"Commercial Operations",title:"Platform"};
