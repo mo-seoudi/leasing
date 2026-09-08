@@ -17,6 +17,8 @@ import UniformDashboardPage from "../pages/uniform/UniformDashboardPage";
 import UniformComparisonPage from "../pages/uniform/UniformComparisonPage";
 import PhotographyDashboardPage from "../pages/photography/PhotographyDashboardPage";
 import PhotographyComparisonPage from "../pages/photography/PhotographyComparisonPage";
+import TransportDashboardPage from "../pages/transport/TransportDashboardPage";
+import TransportComparisonPage from "../pages/transport/TransportComparisonPage";
 import RecordsWorkspacePage from "../pages/admin/RecordsWorkspacePage";
 import SupplierRecordsPage from "../pages/admin/SupplierRecordsPage";
 import SettingsPage from "../pages/settings/SettingsPage";
@@ -36,6 +38,8 @@ export default function AppRoutes() {
         <Route path="uniform/comparison" element={<UniformComparisonPage />} />
         <Route path="photography" element={<PhotographyDashboardPage />} />
         <Route path="photography/comparison" element={<PhotographyComparisonPage />} />
+        <Route path="transport" element={<TransportDashboardPage />} />
+        <Route path="transport/comparison" element={<TransportComparisonPage />} />
         <Route path="leasing" element={<LeasingDashboardPage />} />
         <Route path="leasing/programmes" element={<ProgrammeDirectoryGate />} />
         <Route path="leasing/year-comparison" element={<YearComparisonPage />} />
