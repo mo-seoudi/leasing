@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import DataEntryPage from "./DataEntryPage";
 import TransportCostRecordsWorkspace from "./TransportCostRecordsWorkspace";
@@ -10,8 +11,29 @@ const AREAS = [
 ];
 
 export default function RecordsWorkspacePage() {
-  const [area, setArea] = useState("monthly-reporting");
-  const [costCentre, setCostCentre] = useState("transport");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedArea = searchParams.get("area");
+  const area = requestedArea === "cost-centres" ? "cost-centres" : "monthly-reporting";
+  const costCentre = searchParams.get("costCentre") || "transport";
+  const stream = searchParams.get("stream") || "";
+  const view = searchParams.get("view") || "";
+
+  function setArea(nextArea) {
+    const next = new URLSearchParams(searchParams);
+    next.set("area", nextArea);
+    next.delete("stream");
+    next.delete("view");
+    if (nextArea === "cost-centres") next.set("costCentre", "transport");
+    else next.delete("costCentre");
+    setSearchParams(next);
+  }
+
+  function setCostCentre(nextCostCentre) {
+    const next = new URLSearchParams(searchParams);
+    next.set("area", "cost-centres");
+    next.set("costCentre", nextCostCentre);
+    setSearchParams(next);
+  }
 
   return (
     <section className="records-workspace-page">
@@ -25,12 +47,7 @@ export default function RecordsWorkspacePage() {
 
       <nav className="records-primary-tabs" aria-label="Records work areas">
         {AREAS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            className={area === item.key ? "active" : ""}
-            onClick={() => setArea(item.key)}
-          >
+          <button key={item.key} type="button" className={area === item.key ? "active" : ""} onClick={() => setArea(item.key)}>
             {item.label}
           </button>
         ))}
@@ -38,21 +55,16 @@ export default function RecordsWorkspacePage() {
 
       <main className="records-workspace-main">
         {area === "monthly-reporting" ? (
-          <DataEntryPage />
+          <DataEntryPage initialStreamCode={stream} initialView={view} />
         ) : (
           <section className="cost-centres-workspace">
             <div className="cost-centre-control">
               <label htmlFor="records-cost-centre">Cost Centre</label>
-              <select
-                id="records-cost-centre"
-                value={costCentre}
-                onChange={(event) => setCostCentre(event.target.value)}
-              >
+              <select id="records-cost-centre" value={costCentre} onChange={(event) => setCostCentre(event.target.value)}>
                 <option value="transport">Transport</option>
               </select>
             </div>
-
-            {costCentre === "transport" && <TransportCostRecordsWorkspace />}
+            {costCentre === "transport" && <TransportCostRecordsWorkspace initialView={view} />}
           </section>
         )}
       </main>
