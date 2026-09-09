@@ -38,40 +38,18 @@ export default function RecordsWorkspacePage() {
 
       <main className="records-workspace-main">
         {area === "monthly-reporting" ? (
-          <section className="records-area-section">
-            <div className="records-area-header">
-              <div>
-                <span>COMMERCIAL RECORDS</span>
-                <h3>Monthly Reporting</h3>
-                <p>Maintain monthly revenue, income, budget and forecast records across your commercial streams.</p>
-              </div>
-            </div>
-            <DataEntryPage />
-          </section>
+          <DataEntryPage />
         ) : (
-          <section className="records-area-section cost-centres-workspace">
-            <div className="records-area-header">
-              <div>
-                <span>OPERATIONAL COSTS</span>
-                <h3>Cost Centres</h3>
-                <p>Maintain operating costs and supporting expenditure records by business area.</p>
-              </div>
-            </div>
-
-            <div className="cost-centre-toolbar">
-              <span>Cost Centre</span>
-              <div className="cost-centre-selector" role="tablist" aria-label="Cost centres">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={costCentre === "transport"}
-                  className={costCentre === "transport" ? "active" : ""}
-                  onClick={() => setCostCentre("transport")}
-                >
-                  Transport
-                </button>
-              </div>
-            </div>
+          <section className="cost-centres-workspace">
+            <nav className="records-secondary-tabs" aria-label="Cost centres">
+              <button
+                type="button"
+                className={costCentre === "transport" ? "active" : ""}
+                onClick={() => setCostCentre("transport")}
+              >
+                Transport
+              </button>
+            </nav>
 
             {costCentre === "transport" && <TransportCostRecordsWorkspace />}
           </section>
