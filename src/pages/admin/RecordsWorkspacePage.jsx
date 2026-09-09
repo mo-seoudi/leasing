@@ -41,15 +41,16 @@ export default function RecordsWorkspacePage() {
           <DataEntryPage />
         ) : (
           <section className="cost-centres-workspace">
-            <nav className="records-secondary-tabs" aria-label="Cost centres">
-              <button
-                type="button"
-                className={costCentre === "transport" ? "active" : ""}
-                onClick={() => setCostCentre("transport")}
+            <div className="cost-centre-control">
+              <label htmlFor="records-cost-centre">Cost Centre</label>
+              <select
+                id="records-cost-centre"
+                value={costCentre}
+                onChange={(event) => setCostCentre(event.target.value)}
               >
-                Transport
-              </button>
-            </nav>
+                <option value="transport">Transport</option>
+              </select>
+            </div>
 
             {costCentre === "transport" && <TransportCostRecordsWorkspace />}
           </section>
