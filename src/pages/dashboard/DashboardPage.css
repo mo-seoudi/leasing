@@ -27,6 +27,10 @@
 .saas-panel-heading h2 { margin:0; color:#171717; font-size:14px; font-weight:650; letter-spacing:-.02em; }
 .saas-panel-heading p { margin:5px 0 0; color:#8a8a8a; font-size:9px; line-height:1.45; }
 .dashboard-count-pill { padding:4px 7px; border:1px solid #e5e5e5; border-radius:999px; background:#fafafa; color:#737373; font-size:8px; font-weight:600; white-space:nowrap; }
+.dashboard-performance-tabs { display:inline-flex; align-items:center; gap:3px; margin-bottom:10px; padding:3px; border:1px solid #e5e7eb; border-radius:8px; background:#f5f6f8; }
+.dashboard-performance-tabs button { min-height:27px; padding:5px 10px; border:0; border-radius:6px; background:transparent; color:#737373; font:inherit; font-size:9px; font-weight:650; cursor:pointer; }
+.dashboard-performance-tabs button:hover { color:#262626; }
+.dashboard-performance-tabs button.active { background:#fff; color:#171717; box-shadow:0 1px 3px rgba(16,24,40,.12); }
 .dashboard-line-container { height:310px; }
 .dashboard-chart-container { height:300px; }
 .dashboard-stream-list { display:grid; }
@@ -104,6 +108,8 @@
  .saas-panel-heading h2 { font-size:14px; }
  .saas-panel-heading p { max-width:280px; font-size:9px; line-height:1.45; }
  .dashboard-count-pill { flex:0 0 auto; }
+ .dashboard-performance-tabs { margin-bottom:9px; }
+ .dashboard-performance-tabs button { min-height:30px; padding:5px 9px; font-size:9px; }
  .dashboard-chart-container,.dashboard-school-chart-container { height:265px; }
  .dashboard-line-container { height:250px; }
  .dashboard-stream-row { grid-template-columns:38px minmax(0,1fr) 24px; gap:10px; min-height:58px; padding:10px 4px; }
