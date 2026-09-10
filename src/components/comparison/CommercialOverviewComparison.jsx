@@ -1,0 +1,36 @@
+import { useMemo, useState } from "react";
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import "./performanceComparison.css";
+import "./commercialOverviewComparison.css";
+
+const MONTH_NAMES=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MODES=[["yoy","Year on Year"],["tot","Term on Term"],["mom","Month on Month"],["ytm","Year to Month"]];
+const TERMS=["Term 1","Term 2","Term 3"];
+function monthNumber(record){const match=String(record.month||"").match(/^20\d{2}-(\d{1,2})/);return match?Number(match[1]):0}
+function growth(current,previous){return Number(previous||0)?((Number(current||0)-Number(previous))/Number(previous))*100:null}
+function formatGrowth(value){return value===null||!Number.isFinite(value)?"—":`${value>0?"+":""}${value.toFixed(0)}%`}
+function growthClass(value){return value===null||!Number.isFinite(value)||value===0?"neutral":value>0?"positive":"negative"}
+function orderedMonths(startMonth){return Array.from({length:12},(_,index)=>((startMonth-1+index)%12)+1)}
+
+export default function CommercialOverviewComparison({records=[],formatCurrency,formatCompactCurrency,startMonth=9,schoolLabel="All Schools"}){
+ const[mode,setMode]=useState("yoy"),[selectedTerm,setSelectedTerm]=useState("Term 1"),[selectedMonth,setSelectedMonth]=useState(()=>new Date().getMonth()+1);
+ const years=useMemo(()=>[...new Set(records.map(row=>row.academicYear).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),[records]);
+ const monthOrder=useMemo(()=>orderedMonths(startMonth),[startMonth]);
+ const rows=useMemo(()=>years.map((academicYear,index)=>{
+  const currentYear=records.filter(row=>row.academicYear===academicYear),previousYear=records.filter(row=>row.academicYear===years[index-1]);
+  let current=currentYear,previous=previousYear;
+  if(mode==="tot"){current=currentYear.filter(row=>row.term===selectedTerm);previous=previousYear.filter(row=>row.term===selectedTerm)}
+  else if(mode==="mom"){current=currentYear.filter(row=>monthNumber(row)===selectedMonth);previous=previousYear.filter(row=>monthNumber(row)===selectedMonth)}
+  else if(mode==="ytm"){const end=monthOrder.indexOf(selectedMonth),allowed=end>=0?monthOrder.slice(0,end+1):monthOrder;current=currentYear.filter(row=>allowed.includes(monthNumber(row)));previous=previousYear.filter(row=>allowed.includes(monthNumber(row)))}
+  const revenue=current.reduce((sum,row)=>sum+Number(row.revenue||0),0),income=current.reduce((sum,row)=>sum+Number(row.income||0),0),previousRevenue=previous.reduce((sum,row)=>sum+Number(row.revenue||0),0),previousIncome=previous.reduce((sum,row)=>sum+Number(row.income||0),0);
+  return{academicYear,revenue,income,revenueGrowth:growth(revenue,previousRevenue),incomeGrowth:growth(income,previousIncome),incomeRate:revenue?income/revenue*100:null};
+ }),[records,years,mode,selectedTerm,selectedMonth,monthOrder]);
+ const periodDescription=mode==="tot"?`${selectedTerm} across available academic years.`:mode==="mom"?`${MONTH_NAMES[selectedMonth-1]} compared with the same month in each academic year.`:mode==="ytm"?`${MONTH_NAMES[startMonth-1]}–${MONTH_NAMES[selectedMonth-1]} cumulative performance across available academic years.`:"Performance across all available academic years.";
+ const chartTitle=mode==="yoy"?"Academic-Year Comparison":mode==="tot"?`${selectedTerm} Comparison`:mode==="mom"?`${MONTH_NAMES[selectedMonth-1]} Comparison`:"Year-to-Month Comparison";
+ return <section className="commercial-overview-comparison">
+  <div className="comparison-mode-bar">{MODES.map(([key,label])=><button key={key} type="button" className={mode===key?"active":""} onClick={()=>setMode(key)}>{label}</button>)}</div>
+  {mode!=="yoy"&&<section className="comparison-control-card">{mode==="tot"?<label><span>Term</span><select value={selectedTerm} onChange={e=>setSelectedTerm(e.target.value)}>{TERMS.map(term=><option key={term}>{term}</option>)}</select></label>:<label><span>{mode==="ytm"?"Through Month":"Month"}</span><select value={selectedMonth} onChange={e=>setSelectedMonth(Number(e.target.value))}>{monthOrder.map(month=><option key={month} value={month}>{MONTH_NAMES[month-1]}</option>)}</select></label>}</section>}
+  <section className="comparison-summary-card commercial-comparison-table-card"><div className="comparison-card-heading"><div><h2>{schoolLabel}</h2><p>{periodDescription}</p></div><span className="comparison-year-count">{rows.length} academic years</span></div><div className="comparison-table-scroll"><table className="comparison-table commercial-comparison-table"><thead><tr><th>Academic Year</th><th>Commercial Revenue</th><th>Revenue Growth</th><th>School Income</th><th>School Income Growth</th><th>Income Rate</th></tr></thead><tbody>{rows.map(row=><tr key={row.academicYear}><th>{row.academicYear}</th><td className="comparison-primary-value">{formatCurrency(row.revenue)}</td><td><span className={`comparison-growth-value ${growthClass(row.revenueGrowth)}`}>{formatGrowth(row.revenueGrowth)}</span></td><td className="commercial-comparison-income">{formatCurrency(row.income)}</td><td><span className={`comparison-growth-value ${growthClass(row.incomeGrowth)}`}>{formatGrowth(row.incomeGrowth)}</span></td><td>{row.incomeRate===null?"—":`${row.incomeRate.toFixed(1)}%`}</td></tr>)}</tbody></table></div></section>
+  <section className="comparison-chart-card commercial-comparison-chart-card"><div className="comparison-card-heading"><div><h2>{chartTitle}</h2><p>{periodDescription}</p></div></div><div className="commercial-comparison-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{top:18,right:20,left:42,bottom:8}} barCategoryGap="24%"><CartesianGrid stroke="#edf1f5" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="academicYear" axisLine={false} tickLine={false}/><YAxis width={72} tickMargin={8} axisLine={false} tickLine={false} tickFormatter={formatCompactCurrency}/><Tooltip formatter={(value,name)=>[formatCurrency(value),name]}/><Legend/><Bar dataKey="revenue" name="Commercial Revenue" fill="#111827" radius={[7,7,2,2]} maxBarSize={54}/><Bar dataKey="income" name="School Income" fill="#8b5cf6" radius={[7,7,2,2]} maxBarSize={54}/></BarChart></ResponsiveContainer></div></section>
+ </section>
+}
