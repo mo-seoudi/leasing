@@ -6,6 +6,8 @@ import "./commercialOverviewComparison.css";
 const MONTH_NAMES=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const MODES=[["yoy","Year on Year"],["tot","Term on Term"],["mom","Month on Month"],["ytm","Year to Month"]];
 const TERMS=["Term 1","Term 2","Term 3"];
+function TableIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M3 14h18"/><path d="M9 4v16"/></svg>}
+function ChartIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>}
 function monthNumber(record){const match=String(record.month||"").match(/^20\d{2}-(\d{1,2})/);return match?Number(match[1]):0}
 function growth(current,previous){return Number(previous||0)?((Number(current||0)-Number(previous))/Number(previous))*100:null}
 function formatGrowth(value){return value===null||!Number.isFinite(value)?"—":`${value>0?"+":""}${value.toFixed(0)}%`}
@@ -25,7 +27,7 @@ export default function CommercialOverviewComparison({records=[],formatCurrency,
  return <section className="commercial-overview-comparison">
   <div className="commercial-comparison-toolbar">
    <div className="comparison-mode-bar">{MODES.map(([key,label])=><button key={key} type="button" className={mode===key?"active":""} onClick={()=>setMode(key)}>{label}</button>)}</div>
-   <div className="commercial-comparison-view-toggle" role="tablist" aria-label="Performance comparison view"><button type="button" role="tab" aria-selected={viewMode==="table"} className={viewMode==="table"?"active":""} onClick={()=>setViewMode("table")}><span aria-hidden="true">▦</span>Table</button><button type="button" role="tab" aria-selected={viewMode==="chart"} className={viewMode==="chart"?"active":""} onClick={()=>setViewMode("chart")}><span aria-hidden="true">▥</span>Chart</button></div>
+   <div className="commercial-comparison-view-toggle" role="tablist" aria-label="Performance comparison view"><button type="button" role="tab" title="Table view" aria-selected={viewMode==="table"} className={viewMode==="table"?"active":""} onClick={()=>setViewMode("table")}><TableIcon/>Table</button><button type="button" role="tab" title="Chart view" aria-selected={viewMode==="chart"} className={viewMode==="chart"?"active":""} onClick={()=>setViewMode("chart")}><ChartIcon/>Chart</button></div>
   </div>
   {mode!=="yoy"&&<section className="comparison-control-card">{mode==="tot"?<label><span>Term</span><select value={selectedTerm} onChange={e=>setSelectedTerm(e.target.value)}>{TERMS.map(term=><option key={term}>{term}</option>)}</select></label>:<label><span>{mode==="ytm"?"Through Month":"Month"}</span><select value={selectedMonth} onChange={e=>setSelectedMonth(Number(e.target.value))}>{monthOrder.map(month=><option key={month} value={month}>{MONTH_NAMES[month-1]}</option>)}</select></label>}</section>}
   <section className="commercial-comparison-content-card">
