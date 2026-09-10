@@ -1,0 +1,86 @@
+/* Commercial Overview-specific visual polish loaded after shared responsive styles. */
+
+/* Modern segmented control for Performance by school / revenue stream. */
+.dashboard-performance-tabs {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 4px;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  background: #f6f7f9 !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+}
+
+.dashboard-performance-tabs button {
+  min-height: 30px !important;
+  padding: 6px 12px !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: #737373 !important;
+  font-family: inherit !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.dashboard-performance-tabs button:hover {
+  background: rgba(255,255,255,.7) !important;
+  color: #262626 !important;
+}
+
+.dashboard-performance-tabs button.active {
+  background: #ffffff !important;
+  color: #171717 !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,.10), 0 0 0 1px rgba(15,23,42,.04) !important;
+}
+
+.dashboard-performance-tabs button:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Give the Commercial Overview school selector enough room for full school names. */
+.header-filter-control:has(#dashboard-school) {
+  min-width: 190px !important;
+  flex-basis: 190px !important;
+}
+
+#dashboard-school {
+  min-width: 190px !important;
+}
+
+@media (max-width: 1320px) and (min-width: 901px) {
+  .header-filter-control:has(#dashboard-school) {
+    min-width: 180px !important;
+    flex-basis: 180px !important;
+  }
+
+  #dashboard-school {
+    min-width: 180px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-performance-tabs {
+    width: 100%;
+  }
+
+  .dashboard-performance-tabs button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 34px !important;
+  }
+
+  .header-filter-control:has(#dashboard-school),
+  #dashboard-school {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-basis: auto !important;
+  }
+}
