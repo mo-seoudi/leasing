@@ -12,6 +12,7 @@ export function monthNumber(record){const match=String(record.month||"").match(/
 export function monthLabel(value){return MONTH_LABELS[Number(value)]||""}
 export function monthOptions(){return MONTH_ORDER.map(value=>({value,label:MONTH_LABELS[value]}))}
 export function calendarMonthLabel(academicYear,month){const match=String(academicYear||"").match(/^AY(\d{4})-(\d{2})$/),monthValue=Number(month);if(!match||!MONTH_NAMES[monthValue])return MONTH_NAMES[monthValue]||"";const startYear=Number(match[1]),year=monthValue>=9?startYear:startYear+1;return`${MONTH_NAMES[monthValue]} ${year}`}
+export function academicMonthShortLabel(academicYear,month){const match=String(academicYear||"").match(/^AY(\d{4})-(\d{2})$/),monthValue=Number(month);if(!match||!MONTH_LABELS[monthValue])return MONTH_LABELS[monthValue]||"";const startYear=Number(match[1]),year=monthValue>=9?startYear:startYear+1;return`${MONTH_LABELS[monthValue]}-${String(year).slice(-2)}`}
 export function previousAcademicYear(value){const match=String(value||"").match(/^AY(\d{4})-(\d{2})$/);if(!match)return"";const start=Number(match[1])-1;return`AY${start}-${String(start+1).slice(-2)}`}
 export function measureAmount(record,measure){const role=getMetricRole(record),amount=toNumber(record.amount);if(measure==="income")return role==="income"||role==="both"?amount:0;return role==="revenue"||role==="both"?amount:0}
 export function variance(actual,comparison){return toNumber(actual)-toNumber(comparison)}
