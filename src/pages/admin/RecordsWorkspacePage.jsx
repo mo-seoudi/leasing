@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import DataEntryPage from "./DataEntryPage";
@@ -37,15 +36,7 @@ export default function RecordsWorkspacePage() {
 
   return (
     <section className="records-workspace-page">
-      <header className="records-workspace-intro">
-        <div>
-          <span className="records-workspace-kicker">RECORDS</span>
-          <h2>Data Management Workspace</h2>
-          <p>Enter, review and maintain the source records used across the commercial operations platform.</p>
-        </div>
-      </header>
-
-      <nav className="records-primary-tabs" aria-label="Records work areas">
+      <nav className="records-primary-tabs" aria-label="Data management areas">
         {AREAS.map((item) => (
           <button key={item.key} type="button" className={area === item.key ? "active" : ""} onClick={() => setArea(item.key)}>
             {item.label}
