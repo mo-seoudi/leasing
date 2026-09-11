@@ -33,7 +33,7 @@ function getPageDetails(p){
   "/uniform":{section:"Uniform",title:"Uniform Dashboard"},"/uniform/comparison":{section:"Uniform",title:"Performance Comparison"},
   "/photography":{section:"Photography",title:"Photography Dashboard"},"/photography/comparison":{section:"Photography",title:"Performance Comparison"},
   "/transport":{section:"Transport",title:"Transport Dashboard"},"/transport/comparison":{section:"Transport",title:"Performance Comparison"},"/transport/cost-centre":{section:"Transport",title:"Cost Centre"},
-  "/financial-records":{section:"Administration",title:"Financial Records"},"/data-entry":{section:"Administration",title:"Financial Records"},"/supplier-records":{section:"Administration",title:"Supplier & Contract Records"},"/settings":{section:"Administration",title:"Settings"}
+  "/financial-records":{section:"Administration",title:"Data Management"},"/data-entry":{section:"Administration",title:"Data Management"},"/supplier-records":{section:"Administration",title:"Supplier & Contract Records"},"/settings":{section:"Administration",title:"Settings"}
  };
  return pages[p]||{section:"Commercial Operations",title:"Platform"};
 }
