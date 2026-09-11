@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MdPhotoCamera, MdRestaurant, MdSportsTennis } from "react-icons/md";
 import { FaBusSimple, FaShirt } from "react-icons/fa6";
+import { TbReport } from "react-icons/tb";
 import { useAuth } from "../auth/AuthProvider";
 import "./PlatformLayout.css";
 import "./SidebarCompact.css";
@@ -16,7 +17,6 @@ const transportLinks = [{ label:"Transport Dashboard", path:"/transport" },{ lab
 const recordLinks = [{ label:"Financial Records", path:"/financial-records" },{ label:"Suppliers & Contracts", path:"/supplier-records" }];
 
 function DashboardIcon(){return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>}
-function ReportIcon(){return <svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V4M15 20v-7M20 20V7"/><path d="M3 20h19"/></svg>}
 function SupplierIcon(){return <svg viewBox="0 0 24 24"><path d="M4 7.5h16v12H4z"/><path d="M8 7.5V5.8A1.8 1.8 0 0 1 9.8 4h4.4A1.8 1.8 0 0 1 16 5.8v1.7"/><path d="M4 12h16M10 12v2h4v-2"/></svg>}
 function DataEntryIcon(){return <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>}
 function SettingsIcon(){return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 15c1 1 1 2 0 3l-1 1c-1 1-2 1-3 0l-1 1c0 1-1 1-2 1h-1c-1 0-2-1-2-2l-1-1c-1 1-2 1-3 0l-1-1c-1-1-1-2 0-3l-1-1c-1 0-1-1-1-2v-1c0-1 1-2 2-2l1-1c-1-1-1-2 0-3l1-1c1-1 2-1 3 0l1-1c0-1 1-1 2-1h1c1 0 2 1 2 2l1 1c1-1 2-1 3 0l1 1c1 1 1 2 0 3l1 1c1 0 1 1 1 2v1c0 1-1 2-2 2Z"/></svg>}
@@ -62,7 +62,7 @@ export default function PlatformLayout(){
   <aside className={`platform-sidebar ${mobileOpen?"mobile-open":""}`}>
    <div className="sidebar-brand"><div className="brand-mark">CO</div><div className="brand-copy"><strong>ComOps</strong><span>Commercial workspace</span></div><button className="sidebar-collapse-button" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><button className="mobile-close-button" onClick={()=>setMobileOpen(false)}><CloseIcon/></button></div>
    <nav className="sidebar-navigation">
-    <div className="navigation-group"><span className="navigation-label">Workspace</span><NavLink to="/dashboard" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><DashboardIcon/></span><span className="navigation-text">Commercial Overview</span></NavLink><NavLink to="/reporting" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><ReportIcon/></span><span className="navigation-text">Commercial Reporting</span></NavLink><NavLink to="/suppliers" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><SupplierIcon/></span><span className="navigation-text">Supplier Directory</span></NavLink></div>
+    <div className="navigation-group"><span className="navigation-label">Workspace</span><NavLink to="/dashboard" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><DashboardIcon/></span><span className="navigation-text">Commercial Overview</span></NavLink><NavLink to="/reporting" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><TbReport className="stream-react-icon"/></span><span className="navigation-text">Commercial Reporting</span></NavLink><NavLink to="/suppliers" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><SupplierIcon/></span><span className="navigation-text">Supplier Directory</span></NavLink></div>
     <div className="navigation-group"><span className="navigation-label">Revenue Streams</span>{parent("leasing","Leasing",MdSportsTennis,leasingLinks)}{parent("catering","Catering",MdRestaurant,cateringLinks)}{parent("uniform","Uniform",FaShirt,uniformLinks)}{parent("photography","Photography",MdPhotoCamera,photographyLinks)}{parent("transport","Transport",FaBusSimple,transportLinks)}</div>
     <div className="navigation-group navigation-group-bottom"><span className="navigation-label">Administration</span><button className={`navigation-link navigation-parent ${active.records?"module-active":""}`} onClick={()=>openOnly("records")}><span className="navigation-link-content"><span className="navigation-icon"><DataEntryIcon/></span><span className="navigation-text">Records</span></span><ChevronIcon open={open.records}/></button>{!sidebarCollapsed&&open.records&&subMenu(recordLinks)}<NavLink to="/settings" className={({isActive})=>`navigation-link ${isActive?"active":""}`}><span className="navigation-icon"><SettingsIcon/></span><span className="navigation-text">Settings</span></NavLink></div>
    </nav>
