@@ -25,9 +25,10 @@ export function buildMonthlyReport(records,{academicYear,measure="revenue",compa
   return{month,monthLabel:MONTH_LABELS[month],actual,comparison,variance:variance(actual,comparison),variancePercent:variancePercent(actual,comparison),priorYear,yoyPercent:variancePercent(actual,priorYear)};
  });
 }
-export function buildMonthlySchoolStreamBreakdown(records,{academicYear,month,school="",stream=""}={}){
+export function buildMonthlySchoolStreamBreakdown(records,{academicYear,month,school="",schools=[],stream=""}={}){
+ const schoolSelection=Array.isArray(schools)&&schools.length?schools:school?[school]:[];
  const grouped=new Map();
- records.filter(row=>row.academicYear===academicYear&&monthNumber(row)===Number(month)&&(!school||(row.schoolName||row.schoolCode)===school)&&(!stream||row.streamCode===stream)).forEach(row=>{
+ records.filter(row=>row.academicYear===academicYear&&monthNumber(row)===Number(month)&&(!schoolSelection.length||schoolSelection.includes(row.schoolName||row.schoolCode))&&(!stream||row.streamCode===stream)).forEach(row=>{
   const schoolName=row.schoolName||row.schoolCode||"Unknown School",streamName=row.streamName||row.streamCode||"Unknown Stream",key=`${schoolName}__${row.streamCode||streamName}`;
   if(!grouped.has(key))grouped.set(key,{school:schoolName,streamCode:row.streamCode||"",stream:streamName,actualRevenue:0,actualIncome:0,forecastRevenue:0,forecastIncome:0,budgetRevenue:0,budgetIncome:0});
   const item=grouped.get(key),role=getMetricRole(row),amount=toNumber(row.amount),scenario=String(row.scenario||"Actual").toLowerCase();
