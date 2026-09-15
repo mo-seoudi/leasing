@@ -102,8 +102,21 @@ export function getTransportCostAcademicYears(records=[]){return unique(records.
 export function getTransportCostSchools(records=[]){const m=new Map();records.forEach(r=>{if(r.school&&!m.has(r.school))m.set(r.school,{code:r.school,name:r.schoolName||r.school})});return[...m.values()].sort((a,b)=>a.name.localeCompare(b.name))}
 export function filterTransportCostRecords(records=[],{academicYear="",school="",scenario="Actual"}={}){return records.filter(r=>(!academicYear||r.academicYear===academicYear)&&(!school||r.school===school)&&(!scenario||r.scenario===scenario))}
 
-function bucket(){return{tripCosts:0,contractualCosts:0,otherCharges:0,offsets:0,grossCost:0,netCost:0}}
-function addCost(target,r){const amount=Number(r.amount||0);if(r.costGroup==="trips")target.tripCosts+=amount;else if(r.costGroup==="contractual")target.contractualCosts+=amount;else if(r.costGroup==="offset")target.offsets+=amount;else target.otherCharges+=amount;target.grossCost=target.tripCosts+target.contractualCosts+target.otherCharges;target.netCost=target.grossCost-target.offsets;return target}
+function bucket(){return{tripCosts:0,contractualCosts:0,capacityShortfall:0,otherCharges:0,offsets:0,grossCost:0,totalCost:0,netCost:0}}
+function addCost(target,r){
+  const amount=Number(r.amount||0);
+  if(r.costGroup==="trips")target.tripCosts+=amount;
+  else if(r.costGroup==="contractual"){
+    target.contractualCosts+=amount;
+    if(r.categoryCode==="minimum_capacity_shortfall")target.capacityShortfall+=amount;
+  }
+  else if(r.costGroup==="offset")target.offsets+=amount;
+  else target.otherCharges+=amount;
+  target.grossCost=target.tripCosts+target.contractualCosts+target.otherCharges;
+  target.totalCost=target.grossCost-target.offsets;
+  target.netCost=target.totalCost;
+  return target;
+}
 
 export function getTransportCostSummary(records=[]){const total=bucket();records.forEach(r=>addCost(total,r));return{...total,months:unique(records.map(r=>r.month)).length,schools:unique(records.map(r=>r.school)).length}}
 
@@ -116,7 +129,7 @@ export function getMonthlyTransportCostData(records=[]){
 export function getSchoolTransportCostData(records=[]){
   const grouped=new Map();
   records.forEach(r=>{const current=grouped.get(r.school)||{school:r.school,schoolName:r.schoolName,...bucket()};addCost(current,r);grouped.set(r.school,current)});
-  return [...grouped.values()].sort((a,b)=>b.netCost-a.netCost);
+  return [...grouped.values()].sort((a,b)=>b.totalCost-a.totalCost);
 }
 
 export function getCategoryTransportCostData(records=[]){
