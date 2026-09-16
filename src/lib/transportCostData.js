@@ -33,14 +33,11 @@ export async function fetchTransportCostRecords(){
   }));
 }
 
-export async function getMonthlyEntryConflicts({schoolId,month,scenario="Actual",categoryIds=[]}){if(!schoolId||!month||!categoryIds.length)return[];const{data,error}=await supabase.from("transport_cost_records").select("id,category_id,amount,source_invoice_id,category:transport_cost_categories(id,name)").eq("school_id",Number(schoolId)).eq("month",`${month}-01`).eq("scenario",scenario).eq("source_type","invoice").eq("is_deleted",false).in("category_id",categoryIds.map(Number));if(error)throw error;return(data||[]).map(row=>({id:row.id,categoryId:row.category_id,categoryName:row.category?.name||"Cost category",amount:Number(row.amount||0),invoiceId:row.source_invoice_id}))}
-
 export async function saveTransportMonthlyCosts({ schoolId, month, scenario="Actual", values={}, notes="" }){
   const userId = await getCurrentUserId(),academicYear=getAcademicYearFromMonth(month);
   if(!schoolId||!month) throw new Error("Select a school and reporting month.");
   const entries=Object.entries(values).filter(([,value])=>value!==""&&value!==null&&value!==undefined);
   if(!entries.length) throw new Error("Enter an amount for at least one cost category.");
-  const conflicts=await getMonthlyEntryConflicts({schoolId,month,scenario,categoryIds:entries.map(([categoryId])=>categoryId)});if(conflicts.length){const names=[...new Set(conflicts.map(row=>row.categoryName))].join(", ");throw new Error(`Monthly entry blocked to prevent double counting. Posted invoice costs already exist for ${names} in this school, month and scenario. Use the Invoice Register or unpost the relevant invoice before entering a manual total.`)}
   let savedCount=0;
   for(const [categoryId,value] of entries){
     const amount=Number(value);if(!Number.isFinite(amount))continue;
@@ -51,6 +48,36 @@ export async function saveTransportMonthlyCosts({ schoolId, month, scenario="Act
     savedCount+=1;
   }
   return{savedCount,academicYear,term:getFinanceTermFromMonth(month)};
+}
+
+// A manual monthly total is an explicit reporting override for the same
+// school/category/month/scenario. Invoice rows remain in the ledger as evidence
+// and coverage, but are not added on top of the override in reporting totals.
+export function resolveTransportReportingRecords(records=[]){
+  const grouped=new Map();
+  records.forEach(r=>{
+    const key=`${r.schoolId}|${r.categoryId}|${r.month}|${r.scenario}`;
+    const current=grouped.get(key)||{manual:null,invoices:[]};
+    if(r.sourceType==="monthly_total")current.manual=r;else current.invoices.push(r);
+    grouped.set(key,current);
+  });
+  const resolved=[];
+  grouped.forEach(({manual,invoices})=>{
+    if(manual)resolved.push({...manual,invoiceSupportedAmount:invoices.reduce((s,r)=>s+Number(r.amount||0),0),invoiceCount:new Set(invoices.map(r=>r.sourceInvoiceId).filter(Boolean)).size,hasManualOverride:true});
+    else invoices.forEach(r=>resolved.push({...r,invoiceSupportedAmount:Number(r.amount||0),invoiceCount:r.sourceInvoiceId?1:0,hasManualOverride:false}));
+  });
+  return resolved;
+}
+
+export function getTransportCostCoverage(records=[]){
+  const grouped=new Map();
+  records.forEach(r=>{
+    const key=`${r.schoolId}|${r.categoryId}|${r.month}|${r.scenario}`;
+    const current=grouped.get(key)||{key,schoolId:r.schoolId,school:r.school,schoolName:r.schoolName,categoryId:r.categoryId,categoryCode:r.categoryCode,categoryName:r.categoryName,costGroup:r.costGroup,academicYear:r.academicYear,month:r.month,scenario:r.scenario,manualTotal:null,invoiceTotal:0,invoiceIds:new Set()};
+    if(r.sourceType==="monthly_total")current.manualTotal=Number(r.amount||0);else{current.invoiceTotal+=Number(r.amount||0);if(r.sourceInvoiceId)current.invoiceIds.add(r.sourceInvoiceId)}
+    grouped.set(key,current);
+  });
+  return [...grouped.values()].map(x=>{const hasOverride=x.manualTotal!==null,reportedAmount=hasOverride?x.manualTotal:x.invoiceTotal,variance=hasOverride?x.invoiceTotal-x.manualTotal:0,unsupported=hasOverride?Math.max(x.manualTotal-x.invoiceTotal,0):0,coveragePercent=hasOverride&&x.manualTotal>0?(x.invoiceTotal/x.manualTotal)*100:(hasOverride?(x.invoiceTotal===0?0:100):100);return{...x,hasOverride,reportedAmount,variance,unsupported,coveragePercent,invoiceCount:x.invoiceIds.size,status:!hasOverride?"Invoice-backed":Math.abs(variance)<0.005?"Reconciled":variance>0?"Variance":"Partially supported"}}).sort((a,b)=>String(b.month).localeCompare(String(a.month))||a.schoolName.localeCompare(b.schoolName)||a.categoryName.localeCompare(b.categoryName));
 }
 
 export function getTransportCostAcademicYears(records=[]){return unique(records.map(r=>r.academicYear)).sort((a,b)=>a.localeCompare(b))}
@@ -79,9 +106,9 @@ function addCost(target,r){
   target.netCost=target.totalCost;
   return target;
 }
-export function getTransportCostSummary(records=[]){const total=bucket();records.forEach(r=>addCost(total,r));return{...total,months:unique(records.map(r=>r.month)).length,schools:unique(records.map(r=>r.school)).length}}
-export function getMonthlyTransportCostData(records=[]){const grouped=new Map();records.forEach(r=>{const key=`${r.academicYear}|${r.month}`,current=grouped.get(key)||{key,academicYear:r.academicYear,month:r.month,term:getFinanceTermFromMonth(String(r.month).slice(0,7)),...bucket()};addCost(current,r);grouped.set(key,current)});return[...grouped.values()].map(item=>({...item,label:new Intl.DateTimeFormat("en-GB",{month:"short",year:"2-digit"}).format(new Date(`${item.month}T00:00:00`)),monthNumber:Number(String(item.month).slice(5,7))})).sort((a,b)=>{const ay=a.academicYear.localeCompare(b.academicYear);return ay!==0?ay:MONTH_ORDER.indexOf(a.monthNumber)-MONTH_ORDER.indexOf(b.monthNumber)})}
-export function getSchoolTransportCostData(records=[]){const grouped=new Map();records.forEach(r=>{const current=grouped.get(r.school)||{school:r.school,schoolName:r.schoolName,...bucket()};addCost(current,r);grouped.set(r.school,current)});return[...grouped.values()].sort((a,b)=>b.totalCost-a.totalCost)}
-export function getCategoryTransportCostData(records=[]){const grouped=new Map();records.forEach(r=>{const current=grouped.get(r.categoryCode)||{category:r.categoryName,categoryCode:r.categoryCode,costGroup:r.costGroup,displayOrder:r.displayOrder,amount:0};current.amount+=Number(r.amount||0);grouped.set(r.categoryCode,current)});return[...grouped.values()].sort((a,b)=>a.displayOrder-b.displayOrder)}
+export function getTransportCostSummary(records=[]){const total=bucket();resolveTransportReportingRecords(records).forEach(r=>addCost(total,r));return{...total,months:unique(records.map(r=>r.month)).length,schools:unique(records.map(r=>r.school)).length}}
+export function getMonthlyTransportCostData(records=[]){const grouped=new Map();resolveTransportReportingRecords(records).forEach(r=>{const key=`${r.academicYear}|${r.month}`,current=grouped.get(key)||{key,academicYear:r.academicYear,month:r.month,term:getFinanceTermFromMonth(String(r.month).slice(0,7)),...bucket()};addCost(current,r);grouped.set(key,current)});return[...grouped.values()].map(item=>({...item,label:new Intl.DateTimeFormat("en-GB",{month:"short",year:"2-digit"}).format(new Date(`${item.month}T00:00:00`)),monthNumber:Number(String(item.month).slice(5,7))})).sort((a,b)=>{const ay=a.academicYear.localeCompare(b.academicYear);return ay!==0?ay:MONTH_ORDER.indexOf(a.monthNumber)-MONTH_ORDER.indexOf(b.monthNumber)})}
+export function getSchoolTransportCostData(records=[]){const grouped=new Map();resolveTransportReportingRecords(records).forEach(r=>{const current=grouped.get(r.school)||{school:r.school,schoolName:r.schoolName,...bucket()};addCost(current,r);grouped.set(r.school,current)});return[...grouped.values()].sort((a,b)=>b.totalCost-a.totalCost)}
+export function getCategoryTransportCostData(records=[]){const grouped=new Map();resolveTransportReportingRecords(records).forEach(r=>{const current=grouped.get(r.categoryCode)||{category:r.categoryName,categoryCode:r.categoryCode,costGroup:r.costGroup,displayOrder:r.displayOrder,amount:0};current.amount+=Number(r.amount||0);grouped.set(r.categoryCode,current)});return[...grouped.values()].sort((a,b)=>a.displayOrder-b.displayOrder)}
 export function formatCurrency(value){return new Intl.NumberFormat("en-AE",{style:"currency",currency:"AED",maximumFractionDigits:0}).format(Number(value||0))}
 export function formatCompactCurrency(value){return new Intl.NumberFormat("en-AE",{style:"currency",currency:"AED",notation:"compact",maximumFractionDigits:1}).format(Number(value||0))}
