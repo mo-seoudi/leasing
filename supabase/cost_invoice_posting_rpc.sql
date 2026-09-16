@@ -2,6 +2,8 @@
 -- Run after cost_invoice_posting.sql. Safe to rerun.
 -- PostgreSQL functions execute atomically: either the ledger rows and invoice
 -- posting state both change, or neither change is committed.
+-- Manual monthly totals are reporting overrides, not posting conflicts:
+-- invoice lines may coexist with them so invoice coverage can be reconciled.
 
 begin;
 
@@ -14,7 +16,6 @@ as $$
 declare
   v_invoice public.cost_invoices%rowtype;
   v_user_id uuid := auth.uid();
-  v_conflicts text;
 begin
   if v_user_id is null then
     raise exception 'You must be signed in to post invoices.';
@@ -43,23 +44,6 @@ begin
 
   if not exists (select 1 from public.cost_invoice_lines where invoice_id = p_invoice_id) then
     raise exception 'This invoice has no cost lines to post.';
-  end if;
-
-  select string_agg(distinct coalesce(c.name, 'Cost category'), ', ' order by coalesce(c.name, 'Cost category'))
-  into v_conflicts
-  from public.cost_invoice_lines l
-  join public.transport_cost_records r
-    on r.school_id = v_invoice.school_id
-   and r.category_id = l.transport_cost_category_id
-   and r.month = v_invoice.reporting_month
-   and r.scenario = v_invoice.scenario
-   and r.source_type = 'monthly_total'
-   and r.is_deleted = false
-  left join public.transport_cost_categories c on c.id = l.transport_cost_category_id
-  where l.invoice_id = p_invoice_id;
-
-  if v_conflicts is not null then
-    raise exception 'Posting blocked to prevent double counting. Manual monthly totals already exist for % in this school, month and scenario. Remove or replace those manual totals before posting this invoice.', v_conflicts;
   end if;
 
   insert into public.transport_cost_records (
