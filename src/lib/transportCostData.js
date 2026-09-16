@@ -24,12 +24,12 @@ export async function fetchTransportCostOptions(){
 export async function fetchTransportCostRecords(){
   const { data, error } = await supabase
     .from("transport_cost_records")
-    .select(`id, academic_year, month, scenario, amount, notes, source_type, school:schools(id, code, name), category:transport_cost_categories(id, code, name, cost_group, display_order)`)
+    .select(`id, academic_year, month, scenario, amount, notes, source_type, source_invoice_id, source_invoice_line_id, school:schools(id, code, name), category:transport_cost_categories(id, code, name, cost_group, display_order)`)
     .eq("is_deleted",false)
     .order("month",{ascending:true});
   if(error) throw error;
   return (data||[]).map(row=>({
-    id:row.id,schoolId:row.school?.id,school:row.school?.code||"",schoolName:row.school?.name||row.school?.code||"",academicYear:row.academic_year,month:row.month,scenario:row.scenario||"Actual",amount:Number(row.amount||0),notes:row.notes||"",sourceType:row.source_type||"monthly_total",categoryId:row.category?.id,categoryCode:row.category?.code||"",categoryName:row.category?.name||"",costGroup:row.category?.cost_group||"other",displayOrder:Number(row.category?.display_order||0),
+    id:row.id,schoolId:row.school?.id,school:row.school?.code||"",schoolName:row.school?.name||row.school?.code||"",academicYear:row.academic_year,month:row.month,scenario:row.scenario||"Actual",amount:Number(row.amount||0),notes:row.notes||"",sourceType:row.source_type||"monthly_total",sourceInvoiceId:row.source_invoice_id||null,sourceInvoiceLineId:row.source_invoice_line_id||null,categoryId:row.category?.id,categoryCode:row.category?.code||"",categoryName:row.category?.name||"",costGroup:row.category?.cost_group||"other",displayOrder:Number(row.category?.display_order||0),
   }));
 }
 
@@ -41,9 +41,9 @@ export async function saveTransportMonthlyCosts({ schoolId, month, scenario="Act
   let savedCount=0;
   for(const [categoryId,value] of entries){
     const amount=Number(value);if(!Number.isFinite(amount))continue;
-    const {data:existing,error:lookupError}=await supabase.from("transport_cost_records").select("id").eq("school_id",Number(schoolId)).eq("category_id",Number(categoryId)).eq("month",`${month}-01`).eq("scenario",scenario).eq("is_deleted",false).maybeSingle();
+    const {data:existing,error:lookupError}=await supabase.from("transport_cost_records").select("id").eq("school_id",Number(schoolId)).eq("category_id",Number(categoryId)).eq("month",`${month}-01`).eq("scenario",scenario).eq("source_type","monthly_total").eq("is_deleted",false).maybeSingle();
     if(lookupError)throw lookupError;
-    if(existing?.id){const{error}=await supabase.from("transport_cost_records").update({amount,academic_year:academicYear,notes:notes||null,source_type:"monthly_total",updated_by:userId,updated_at:new Date().toISOString()}).eq("id",existing.id);if(error)throw error}
+    if(existing?.id){const{error}=await supabase.from("transport_cost_records").update({amount,academic_year:academicYear,notes:notes||null,updated_by:userId,updated_at:new Date().toISOString()}).eq("id",existing.id);if(error)throw error}
     else{const{error}=await supabase.from("transport_cost_records").insert({school_id:Number(schoolId),category_id:Number(categoryId),academic_year:academicYear,month:`${month}-01`,scenario,amount,notes:notes||null,source_type:"monthly_total",created_by:userId,updated_by:userId});if(error)throw error}
     savedCount+=1;
   }
