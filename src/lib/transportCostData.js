@@ -33,11 +33,14 @@ export async function fetchTransportCostRecords(){
   }));
 }
 
+export async function getMonthlyEntryConflicts({schoolId,month,scenario="Actual",categoryIds=[]}){if(!schoolId||!month||!categoryIds.length)return[];const{data,error}=await supabase.from("transport_cost_records").select("id,category_id,amount,source_invoice_id,category:transport_cost_categories(id,name)").eq("school_id",Number(schoolId)).eq("month",`${month}-01`).eq("scenario",scenario).eq("source_type","invoice").eq("is_deleted",false).in("category_id",categoryIds.map(Number));if(error)throw error;return(data||[]).map(row=>({id:row.id,categoryId:row.category_id,categoryName:row.category?.name||"Cost category",amount:Number(row.amount||0),invoiceId:row.source_invoice_id}))}
+
 export async function saveTransportMonthlyCosts({ schoolId, month, scenario="Actual", values={}, notes="" }){
   const userId = await getCurrentUserId(),academicYear=getAcademicYearFromMonth(month);
   if(!schoolId||!month) throw new Error("Select a school and reporting month.");
   const entries=Object.entries(values).filter(([,value])=>value!==""&&value!==null&&value!==undefined);
   if(!entries.length) throw new Error("Enter an amount for at least one cost category.");
+  const conflicts=await getMonthlyEntryConflicts({schoolId,month,scenario,categoryIds:entries.map(([categoryId])=>categoryId)});if(conflicts.length){const names=[...new Set(conflicts.map(row=>row.categoryName))].join(", ");throw new Error(`Monthly entry blocked to prevent double counting. Posted invoice costs already exist for ${names} in this school, month and scenario. Use the Invoice Register or unpost the relevant invoice before entering a manual total.`)}
   let savedCount=0;
   for(const [categoryId,value] of entries){
     const amount=Number(value);if(!Number.isFinite(amount))continue;
