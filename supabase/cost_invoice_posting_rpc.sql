@@ -37,8 +37,8 @@ begin
     return;
   end if;
 
-  if v_invoice.status = 'Cancelled' then
-    raise exception 'A cancelled invoice cannot be posted.';
+  if v_invoice.status not in ('Approved','Paid') then
+    raise exception 'Only Approved or Paid invoices can be posted to the Transport Cost Centre. Current status: %.', v_invoice.status;
   end if;
 
   if not exists (select 1 from public.cost_invoice_lines where invoice_id = p_invoice_id) then
