@@ -2,6 +2,20 @@ import { supabase } from "./supabase";
 
 const FINANCIAL_RECORDS_PAGE_SIZE = 1000;
 
+function friendlyFinancialError(error, fallback = "Unable to save the financial records.") {
+  const message = String(error?.message || "").toLowerCase();
+  const code = String(error?.code || "");
+  if (code === "23505" || message.includes("duplicate key") || message.includes("unique constraint") || message.includes("financial_records_unique_entry_idx")) {
+    const friendly = new Error("This reporting period already contains financial data. Open the existing record from Find Records to review or edit it.");
+    friendly.code = "FINANCIAL_PERIOD_EXISTS";
+    return friendly;
+  }
+  if (code === "23503" || message.includes("foreign key")) return new Error("One of the selected items is no longer available. Refresh the page and try again.");
+  if (code === "42501" || message.includes("row-level security") || message.includes("permission denied")) return new Error("You do not have permission to make this change.");
+  if (message.includes("network") || message.includes("fetch")) return new Error("The record could not be saved because the connection was interrupted. Please try again.");
+  return new Error(fallback);
+}
+
 export async function fetchDataEntryOptions() {
   const [schoolsResult, streamsResult, metricsResult, programmesResult, providersResult] = await Promise.all([
     supabase.from("schools").select("id, code, name, short_name").eq("is_active", true).order("name"),
@@ -70,13 +84,13 @@ export async function fetchExistingFinancialPeriod({schoolId,revenueStreamId,pro
 
 export async function saveFinancialRecords({schoolId,revenueStreamId,programmeId="",month,scenario,metricValues}) {
   const userId=await getCurrentUserId(),academicYear=getAcademicYearFromMonth(month),term=getFinanceTermFromMonth(month);
-  const {data:stream,error:streamError}=await supabase.from("revenue_streams").select("code").eq("id",Number(revenueStreamId)).single(); if(streamError)throw streamError;
+  const {data:stream,error:streamError}=await supabase.from("revenue_streams").select("code").eq("id",Number(revenueStreamId)).single(); if(streamError)throw friendlyFinancialError(streamError);
   const isLeasing=stream?.code==="leasing"; if(isLeasing&&!programmeId)throw new Error("Select a programme for Leasing financial records."); const resolvedProgrammeId=isLeasing?Number(programmeId):null;
   const rows=Object.entries(metricValues).filter(([,v])=>v!=="").map(([metricId,value])=>({school_id:Number(schoolId),revenue_stream_id:Number(revenueStreamId),metric_id:Number(metricId),academic_year:academicYear,month:`${month}-01`,term,scenario,amount:Number(value),programme_id:resolvedProgrammeId,provider_id:null}));
   if(!rows.length)throw new Error("Enter an amount for at least one metric.");
   const existing=await fetchExistingFinancialPeriod({schoolId,revenueStreamId,programmeId:resolvedProgrammeId||"",month,scenario});
-  if(existing.length){const err=new Error("This reporting period already contains financial data. Open the existing record from Find Records to make changes.");err.code="FINANCIAL_PERIOD_EXISTS";err.existingRecords=existing;throw err;}
-  const {error}=await supabase.from("financial_records").insert(rows.map(row=>({...row,is_deleted:false,created_by:userId,updated_by:userId,deleted_by:null,deleted_at:null}))); if(error)throw error;
+  if(existing.length){const err=new Error("This reporting period already contains financial data. Open the existing record from Find Records to review or edit it.");err.code="FINANCIAL_PERIOD_EXISTS";err.existingRecords=existing;throw err;}
+  const {error}=await supabase.from("financial_records").insert(rows.map(row=>({...row,is_deleted:false,created_by:userId,updated_by:userId,deleted_by:null,deleted_at:null}))); if(error)throw friendlyFinancialError(error);
   return{academicYear,term,savedCount:rows.length};
 }
 
@@ -91,6 +105,6 @@ export async function fetchFinancialRecords({schoolId="",revenueStreamId="",acad
   const rows=[];let from=0,totalCount=0;while(true){const{data,error,count}=await buildFinancialRecordsQuery(filters).range(from,from+FINANCIAL_RECORDS_PAGE_SIZE-1);if(error)throw error;const batch=data||[];if(count!==null&&count!==undefined)totalCount=count;if(!batch.length)break;rows.push(...batch);from+=batch.length;}return{records:rows,totalCount};
 }
 
-export async function updateFinancialRecord(recordId,{amount,scenario,month,programmeId}){const userId=await getCurrentUserId(),changes={updated_by:userId};if(amount!==undefined&&amount!=="")changes.amount=Number(amount);if(scenario)changes.scenario=scenario;if(month){changes.month=`${month}-01`;changes.academic_year=getAcademicYearFromMonth(month);changes.term=getFinanceTermFromMonth(month);}if(programmeId!==undefined){changes.programme_id=programmeId?Number(programmeId):null;changes.provider_id=null;}const{data,error}=await supabase.from("financial_records").update(changes).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw error;return data;}
-export async function archiveFinancialRecord(recordId){const userId=await getCurrentUserId();const{data,error}=await supabase.from("financial_records").update({is_deleted:true,deleted_at:new Date().toISOString(),deleted_by:userId,updated_by:userId}).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw error;return data;}
-export async function restoreFinancialRecord(recordId){const userId=await getCurrentUserId();const{data,error}=await supabase.from("financial_records").update({is_deleted:false,deleted_at:null,deleted_by:null,updated_by:userId}).eq("id",recordId).eq("is_deleted",true).select().single();if(error)throw error;return data;}
+export async function updateFinancialRecord(recordId,{amount,scenario,month,programmeId}){const userId=await getCurrentUserId(),changes={updated_by:userId};if(amount!==undefined&&amount!=="")changes.amount=Number(amount);if(scenario)changes.scenario=scenario;if(month){changes.month=`${month}-01`;changes.academic_year=getAcademicYearFromMonth(month);changes.term=getFinanceTermFromMonth(month);}if(programmeId!==undefined){changes.programme_id=programmeId?Number(programmeId):null;changes.provider_id=null;}const{data,error}=await supabase.from("financial_records").update(changes).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw friendlyFinancialError(error,"Unable to update this financial record. Please try again.");return data;}
+export async function archiveFinancialRecord(recordId){const userId=await getCurrentUserId();const{data,error}=await supabase.from("financial_records").update({is_deleted:true,deleted_at:new Date().toISOString(),deleted_by:userId,updated_by:userId}).eq("id",recordId).eq("is_deleted",false).select().single();if(error)throw friendlyFinancialError(error,"Unable to archive this financial record. Please try again.");return data;}
+export async function restoreFinancialRecord(recordId){const userId=await getCurrentUserId();const{data,error}=await supabase.from("financial_records").update({is_deleted:false,deleted_at:null,deleted_by:null,updated_by:userId}).eq("id",recordId).eq("is_deleted",true).select().single();if(error)throw friendlyFinancialError(error,"Unable to restore this financial record. Please try again.");return data;}
