@@ -32,6 +32,15 @@ export async function fetchDataEntryOptions() {
   return { schools: schoolsResult.data || [], revenueStreams: streamsResult.data || [], metrics: metricsResult.data || [], programmes: programmesResult.data || [], providers: providersResult.data || [] };
 }
 
+export async function fetchRevenueContractTarget({schoolId,revenueStreamId,programmeId="",academicYear}) {
+  if(!schoolId||!revenueStreamId||!academicYear)return null;
+  let query=supabase.from("revenue_contract_targets").select("id, academic_year, contracted_amount, allocation_method, notes, programme_id").eq("school_id",Number(schoolId)).eq("revenue_stream_id",Number(revenueStreamId)).eq("academic_year",academicYear).eq("is_active",true);
+  query=programmeId?query.eq("programme_id",Number(programmeId)):query.is("programme_id",null);
+  const {data,error}=await query.maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+
 async function getCurrentUserId() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw error;
