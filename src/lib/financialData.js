@@ -34,6 +34,9 @@ export async function fetchDataEntryOptions() {
 
 export async function fetchRevenueContractTarget({schoolId,revenueStreamId,programmeId="",academicYear}) {
   if(!schoolId||!revenueStreamId||!academicYear)return null;
+  const {data:stream,error:streamError}=await supabase.from("revenue_streams").select("revenue_model").eq("id",Number(revenueStreamId)).maybeSingle();
+  if(streamError)throw streamError;
+  if(stream?.revenue_model!=="contracted")return null;
   let query=supabase.from("revenue_contract_targets").select("id, academic_year, contracted_amount, allocation_method, notes, programme_id").eq("school_id",Number(schoolId)).eq("revenue_stream_id",Number(revenueStreamId)).eq("academic_year",academicYear).eq("is_active",true);
   query=programmeId?query.eq("programme_id",Number(programmeId)):query.is("programme_id",null);
   const {data,error}=await query.maybeSingle();
