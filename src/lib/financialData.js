@@ -19,7 +19,7 @@ function friendlyFinancialError(error, fallback = "Unable to save the financial 
 export async function fetchDataEntryOptions() {
   const [schoolsResult, streamsResult, metricsResult, programmesResult, providersResult] = await Promise.all([
     supabase.from("schools").select("id, code, name, short_name").eq("is_active", true).order("name"),
-    supabase.from("revenue_streams").select("id, code, name").eq("is_active", true).order("name"),
+    supabase.from("revenue_streams").select("id, code, name, revenue_model").eq("is_active", true).order("name"),
     supabase.from("revenue_metrics").select("id, revenue_stream_id, code, name, display_order").eq("is_active", true).order("display_order"),
     supabase.from("programmes").select("id, name, category, provider_name").order("name"),
     supabase.from("providers").select("id, name").order("name"),
