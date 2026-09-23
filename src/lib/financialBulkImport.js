@@ -57,11 +57,25 @@ export async function checkFinancialImportConflicts(rows){
  return rows.map(r=>{if(r.errors.length)return r;const k=[r.school.id,r.stream.id,r.metric.id,r.programme?.id||"",`${r.month}-01`,r.scenario].join("|");return existing.has(k)?{...r,status:"existing"}:r});
 }
 
-async function userId(){const{data:{user},error}=await supabase.auth.getUser();if(error)throw error;if(!user?.id)throw new Error("You must be signed in to import financial records.");return user.id}
 export async function importFinancialRows(rows,{overwriteExisting=false}={}){
- const uid=await userId();const candidates=rows.filter(r=>!r.errors.length&&(overwriteExisting||r.status!=="existing"));let inserted=0,updated=0,skipped=rows.filter(r=>r.status==="existing"&&!overwriteExisting).length;
- for(const r of candidates){const payload={school_id:r.school.id,revenue_stream_id:r.stream.id,metric_id:r.metric.id,programme_id:r.programme?.id||null,provider_id:null,academic_year:getAcademicYearFromMonth(r.month),month:`${r.month}-01`,term:getFinanceTermFromMonth(r.month),scenario:r.scenario,amount:r.amount,is_deleted:false,updated_by:uid};
-  if(r.status==="existing"&&overwriteExisting){let q=supabase.from("financial_records").update(payload).eq("school_id",r.school.id).eq("revenue_stream_id",r.stream.id).eq("metric_id",r.metric.id).eq("month",`${r.month}-01`).eq("scenario",r.scenario).eq("is_deleted",false);q=r.programme?.id?q.eq("programme_id",r.programme.id):q.is("programme_id",null);const{error}=await q;if(error)throw error;updated++}else{const{error}=await supabase.from("financial_records").insert({...payload,created_by:uid,deleted_by:null,deleted_at:null});if(error)throw error;inserted++}
+ const invalid=rows.filter(r=>r.errors.length).length;
+ if(invalid)throw new Error("Resolve the rows marked Need attention before importing.");
+ const payload=rows.map(r=>({
+  school_id:r.school.id,
+  revenue_stream_id:r.stream.id,
+  metric_id:r.metric.id,
+  programme_id:r.programme?.id||null,
+  month:`${r.month}-01`,
+  scenario:r.scenario,
+  amount:r.amount,
+  academic_year:getAcademicYearFromMonth(r.month),
+  term:getFinanceTermFromMonth(r.month),
+ }));
+ const {data,error}=await supabase.rpc("import_financial_records_bulk",{p_rows:payload,p_overwrite_existing:overwriteExisting});
+ if(error){
+  const message=String(error.message||"");
+  if(message.toLowerCase().includes("permission")||message.toLowerCase().includes("row-level security"))throw new Error("You do not have permission to import these financial records.");
+  throw new Error("The import could not be completed. No records were changed. Please review the file and try again.");
  }
- return{inserted,updated,skipped,invalid:rows.filter(r=>r.errors.length).length};
+ return{inserted:Number(data?.inserted||0),updated:Number(data?.updated||0),skipped:Number(data?.skipped||0),invalid:0};
 }
