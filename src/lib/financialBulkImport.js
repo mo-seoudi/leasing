@@ -10,14 +10,26 @@ const monthValue=v=>{if(v instanceof Date&&!Number.isNaN(v.valueOf()))return `${
 export function downloadFinancialImportTemplate(){
  const rows=[BULK_IMPORT_COLUMNS,["RDXB","Catering","","2026-09","Actual","Sales",""]];
  const ws=XLSX.utils.aoa_to_sheet(rows);ws["!cols"]=[{wch:16},{wch:22},{wch:28},{wch:14},{wch:14},{wch:24},{wch:16}];
- const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Financial Records");
+ const instructions=XLSX.utils.aoa_to_sheet([
+  ["Financial Records Bulk Import"],
+  ["Use one row for each monthly financial metric. Do not change the column headings on the Financial Records sheet."],
+  ["Required","School, Revenue Stream, Month, Scenario, Metric, Amount"],
+  ["Programme","Required only for Leasing."],
+  ["Month","Use YYYY-MM, for example 2026-09."],
+  ["Scenario","Actual, Budget or Forecast."],
+  ["Existing data","Existing records are protected by default. Overwriting must be explicitly authorised in the app before import."],
+  ["Duplicate rows","Do not repeat the same School + Revenue Stream + Programme + Month + Scenario + Metric combination in the file."],
+ ]);instructions["!cols"]=[{wch:20},{wch:110}];
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Financial Records");XLSX.utils.book_append_sheet(wb,instructions,"Instructions");
  XLSX.writeFile(wb,"financial-records-import-template.xlsx");
 }
 
 export async function readFinancialImportFile(file){
- const buffer=await file.arrayBuffer();const wb=XLSX.read(buffer,{type:"array",cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];
- if(!ws)throw new Error("The workbook does not contain a worksheet.");
- const rows=XLSX.utils.sheet_to_json(ws,{defval:"",raw:true});if(!rows.length)throw new Error("The import file does not contain any data rows.");
+ const buffer=await file.arrayBuffer();const wb=XLSX.read(buffer,{type:"array",cellDates:true});const ws=wb.Sheets["Financial Records"]||wb.Sheets[wb.SheetNames[0]];
+ if(!ws)throw new Error("The workbook does not contain a Financial Records worksheet.");
+ const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});const headers=(matrix[0]||[]).map(clean);const missing=BULK_IMPORT_COLUMNS.filter(c=>!headers.includes(c));
+ if(missing.length)throw new Error(`The template is missing required column${missing.length===1?"":"s"}: ${missing.join(", ")}. Download a fresh template and try again.`);
+ const rows=XLSX.utils.sheet_to_json(ws,{defval:"",raw:true}).filter(r=>BULK_IMPORT_COLUMNS.some(c=>clean(r[c])!==""));if(!rows.length)throw new Error("The import file does not contain any data rows.");
  return rows;
 }
 
@@ -26,12 +38,14 @@ export function validateFinancialImportRows(rawRows,options){
  const streams=new Map(options.revenueStreams.flatMap(s=>[[key(s.code),s],[key(s.name),s]]));
  const programmes=new Map(options.programmes.flatMap(p=>[[key(p.name),p]]));
  const metricsByStream=new Map();options.metrics.forEach(m=>{const sid=String(m.revenue_stream_id);if(!metricsByStream.has(sid))metricsByStream.set(sid,new Map());const map=metricsByStream.get(sid);map.set(key(m.code),m);map.set(key(m.name),m)});
- return rawRows.map((r,index)=>{
+ const rows=rawRows.map((r,index)=>{
   const errors=[];const school=schools.get(key(r["School"]));const stream=streams.get(key(r["Revenue Stream"]));const month=monthValue(r["Month"]);const scenario=clean(r["Scenario"]||"Actual");const amount=Number(r["Amount"]);let programme=null,metric=null;
   if(!school)errors.push("School not recognised");if(!stream)errors.push("Revenue stream not recognised");if(!month)errors.push("Month must use YYYY-MM");if(!["Actual","Budget","Forecast"].includes(scenario))errors.push("Scenario must be Actual, Budget or Forecast");if(clean(r["Amount"])===""||!Number.isFinite(amount))errors.push("Amount must be a number");
   if(stream){metric=metricsByStream.get(String(stream.id))?.get(key(r["Metric"]));if(!metric)errors.push("Metric is not valid for this revenue stream");if(stream.code==="leasing"){programme=programmes.get(key(r["Programme"]));if(!programme)errors.push("Programme is required for Leasing")}}
   return{rowNumber:index+2,school,stream,programme,metric,month,scenario,amount,errors,status:errors.length?"invalid":"ready"};
  });
+ const seen=new Map();rows.forEach(r=>{if(r.errors.length||!r.school||!r.stream||!r.metric||!r.month)return;const k=[r.school.id,r.stream.id,r.metric.id,r.programme?.id||"",r.month,r.scenario].join("|");if(seen.has(k)){const first=seen.get(k);r.errors.push(`Duplicate of row ${first.rowNumber} in this file`);r.status="invalid";if(!first.errors.some(e=>e.includes("Duplicate entry in this file"))){first.errors.push(`Duplicate entry in this file (also row ${r.rowNumber})`);first.status="invalid"}}else seen.set(k,r)});
+ return rows;
 }
 
 export async function checkFinancialImportConflicts(rows){
