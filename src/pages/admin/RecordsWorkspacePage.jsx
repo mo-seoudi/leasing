@@ -62,7 +62,7 @@ export default function RecordsWorkspacePage() {
                 {bulkImport ? "← Back to Monthly Entry" : "⇧ Bulk Import"}
               </button>
             </div>
-            {bulkImport ? <FinancialBulkImport /> : <DataEntryPage initialStreamCode={stream} initialView={view} />}
+            {bulkImport ? <FinancialBulkImport onReviewRecords={() => setMonthlyView("register")} /> : <DataEntryPage initialStreamCode={stream} initialView={view} />}
           </>
         ) : (
           <section className="cost-centres-workspace">
