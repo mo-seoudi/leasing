@@ -6,6 +6,7 @@ import PlatformLayout from "../layouts/PlatformLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import V2PilotPage from "../pages/pilot/V2PilotPage";
 import SchoolManagementPage from "../pages/pilot/SchoolManagementPage";
+import RevenueSchoolPilot from "../pages/pilot/RevenueSchoolPilot";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import CommercialReportingPage from "../pages/reporting/CommercialReportingPage";
 import SupplierDirectoryPage from "../pages/suppliers/SupplierDirectoryPage";
@@ -36,6 +37,7 @@ export default function AppRoutes() {
         <Route path="dashboard" element={<Navigate to="/v2-pilot" replace />} />
         <Route path="v2-pilot" element={<V2PilotPage />} />
         <Route path="v2-pilot/schools/manage" element={<SchoolManagementPage />} />
+        <Route path="v2-pilot/revenue-school" element={<RevenueSchoolPilot />} />
         <Route path="reporting" element={<CommercialReportingPage />} />
         <Route path="suppliers" element={<SupplierDirectoryPage />} />
         <Route path="catering" element={<CateringDashboardPage />} />
