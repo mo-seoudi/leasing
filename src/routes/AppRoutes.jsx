@@ -4,6 +4,7 @@ import ProtectedRoute from "../auth/ProtectedRoute";
 import PlatformLayout from "../layouts/PlatformLayout";
 
 import LoginPage from "../pages/auth/LoginPage";
+import V2PilotPage from "../pages/pilot/V2PilotPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import CommercialReportingPage from "../pages/reporting/CommercialReportingPage";
 import SupplierDirectoryPage from "../pages/suppliers/SupplierDirectoryPage";
@@ -32,6 +33,7 @@ export default function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><PlatformLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="v2-pilot" element={<V2PilotPage />} />
         <Route path="reporting" element={<CommercialReportingPage />} />
         <Route path="suppliers" element={<SupplierDirectoryPage />} />
         <Route path="catering" element={<CateringDashboardPage />} />
