@@ -32,8 +32,8 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<ProtectedRoute><PlatformLayout /></ProtectedRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route index element={<Navigate to="/v2-pilot" replace />} />
+        <Route path="dashboard" element={<Navigate to="/v2-pilot" replace />} />
         <Route path="v2-pilot" element={<V2PilotPage />} />
         <Route path="v2-pilot/schools/manage" element={<SchoolManagementPage />} />
         <Route path="reporting" element={<CommercialReportingPage />} />
