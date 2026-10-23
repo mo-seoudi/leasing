@@ -32,3 +32,4 @@ export default function RevenueSchoolPilot(){
   {(!revenueFound||!commissionFound)&&<p className="rsp-caution">Some financial metrics are not present for this selection: {!revenueFound?"revenue ":""}{!commissionFound?"commission":""}. Zeros in the table may indicate missing records rather than confirmed zero activity.</p>}
   </>}
  </div>;
+}
