@@ -1,0 +1,17 @@
+.comops-header-selection{display:flex;align-items:center;justify-content:flex-end;gap:clamp(14px,2.6vw,42px);width:100%;min-width:0}
+.comops-selected-heading{display:flex;flex:1 1 auto;min-width:110px;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center}
+.comops-selected-heading strong{font-size:clamp(14px,1.18vw,19px);font-weight:700;color:#242b36;line-height:1.2}
+.comops-selected-heading span{font-size:clamp(13px,1.05vw,17px);font-weight:600;color:#444b56;line-height:1.2}
+.comops-carousel-pair{display:flex;flex:0 0 auto;gap:9px;align-items:center}
+.comops-carousel{display:flex;flex-direction:column;align-items:center;justify-content:center;width:116px;min-width:0;gap:3px}
+.comops-carousel-label{font-size:9px;font-weight:650;letter-spacing:.02em;color:#858d9b}
+.comops-carousel-controls{display:flex;align-items:center;justify-content:space-between;gap:2px;width:100%;height:28px;padding:2px 3px;border:1px solid #e3e8ef;border-radius:8px;background:#fff}
+.comops-carousel-controls button{width:23px;height:22px;border:0;border-radius:5px;background:transparent;color:#6b7280;font-size:19px;line-height:1;cursor:pointer}
+.comops-carousel-controls button:hover:not(:disabled){background:#f0f3f7;color:#242b36}
+.comops-carousel-controls button:disabled{opacity:.35;cursor:default}
+.comops-carousel-controls strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#303844;font-size:10px;font-weight:700}
+.comops-carousel-dots{display:flex;justify-content:center;gap:3px;height:4px;max-width:100%;overflow:hidden}
+.comops-carousel-dots i{width:3px;height:3px;flex:0 0 3px;border-radius:50%;background:#d8e0e9}
+.comops-carousel-dots i.active{background:#8298b3}
+@media(max-width:1150px){.comops-header-selection{gap:12px}.comops-carousel{width:100px}.comops-selected-heading strong{font-size:13px}.comops-selected-heading span{font-size:12px}}
+@media(max-width:850px){.comops-header-selection{flex-wrap:wrap;justify-content:center;gap:10px}.comops-selected-heading{flex:1 1 100%}.comops-carousel-pair{justify-content:center}.comops-selected-heading strong{font-size:17px}.comops-selected-heading span{font-size:14px}}
