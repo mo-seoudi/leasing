@@ -25,7 +25,7 @@ export default function SharedCarouselHeader({controls}) {
  const selects=extract(controls);
  const school=selects.find(s=>/school/i.test(String(s.props.id||"")));
  const year=selects.find(s=>/year|academic/i.test(String(s.props.id||"")));
- if(!school&&!year)return <div className="header-page-controls">{controls}</div>;
+ if((!school&&!year)||selects.some(s=>s!==school&&s!==year))return <div className="header-page-controls">{controls}</div>;
  const schoolOptions=school?Children.toArray(school.props.children).filter(isValidElement):[];
  const currentSchool=schoolOptions.find(o=>String(o.props.value??"")===String(school.props.value??""));
  const schoolValue=String(currentSchool?.props.children??"All Schools");
