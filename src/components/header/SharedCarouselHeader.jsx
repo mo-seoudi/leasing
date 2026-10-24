@@ -39,6 +39,6 @@ export default function SharedCarouselHeader({controls}) {
   const yearValue = optionsFor(year).find(option=>option.value===String(year?.props.value ?? ""));
   return <div className="comops-header-selection">
     <div className="comops-selected-heading"><strong>{schoolValue?.label || "All Schools"}</strong><span>{yearValue?.label || "All Academic Years"}</span></div>
-    <div className="comops-carousel-pair">{school && <Carousel label="School" select={school}/ >}{year && <Carousel label="Academic Year" select={year}/>}</div>
+    <div className="comops-carousel-pair">{school && <Carousel label="School" select={school}/>}{year && <Carousel label="Academic Year" select={year}/>}</div>
   </div>;
 }
