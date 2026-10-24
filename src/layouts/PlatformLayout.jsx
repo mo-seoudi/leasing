@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SharedCarouselHeader from "../components/header/SharedCarouselHeader";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { MdPhotoCamera, MdRestaurant, MdSportsTennis } from "react-icons/md";
 import { FaBusSimple, FaShirt } from "react-icons/fa6";
@@ -68,6 +69,6 @@ export default function PlatformLayout(){
    </nav>
    <div className="sidebar-footer"><div className="user-avatar">{getInitials(userName)}</div><div className="user-details"><strong>{userName}</strong><span>{formatRole(role)}</span></div></div>
   </aside>
-  <div className="platform-main"><header className="platform-header"><div className="header-left"><button className="mobile-menu-button" onClick={()=>setMobileOpen(true)}><MenuIcon/></button><button className="header-sidebar-toggle" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><div>{pageDetails.section&&<div className="breadcrumb"><span>Commercial Operations</span><span className="breadcrumb-divider">/</span><span>{pageDetails.section}</span></div>}<h1 style={pageDetails.section?{marginTop:"3px"}:undefined}>{pageDetails.title}</h1></div></div><div className={`header-actions ${headerControls?"has-page-controls":""}`}>{headerControls&&<div className="header-page-controls">{headerControls}</div>}</div></header><main className="platform-content"><Outlet context={{setHeaderControls}}/></main></div>
+  <div className="platform-main"><header className="platform-header"><div className="header-left"><button className="mobile-menu-button" onClick={()=>setMobileOpen(true)}><MenuIcon/></button><button className="header-sidebar-toggle" onClick={toggle}><CollapseIcon collapsed={sidebarCollapsed}/></button><div>{pageDetails.section&&<div className="breadcrumb"><span>Commercial Operations</span><span className="breadcrumb-divider">/</span><span>{pageDetails.section}</span></div>}<h1 style={pageDetails.section?{marginTop:"3px"}:undefined}>{pageDetails.title}</h1></div></div><div className={`header-actions ${headerControls?"has-page-controls":""}`}>{headerControls&&<SharedCarouselHeader controls={headerControls}/>}</div></header><main className="platform-content"><Outlet context={{setHeaderControls}}/></main></div>
  </div>;
 }
