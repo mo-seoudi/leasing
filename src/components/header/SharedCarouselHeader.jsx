@@ -13,6 +13,11 @@ function schoolCode(value) {
 }
 function carouselForSelect(select,label) {
  const options=Children.toArray(select.props.children).filter(isValidElement).filter(option=>option.type==="option").map(option=>({value:String(option.props.value??""),label:String(option.props.children??"")}));
+ // Academic years must navigate chronologically, regardless of source option order.
+ if(/academic|year/i.test(label))options.sort((a,b)=>{
+  const year=value=>{const match=String(value).match(/(?:19|20)\d{2}/);return match?Number(match[0]):-1};
+  return year(a.value||a.label)-year(b.value||b.label);
+ });
  const current=String(select.props.value??"");
  const index=options.findIndex(option=>option.value===current);
  const selected=options[Math.max(index,0)];
