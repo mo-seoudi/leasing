@@ -10,7 +10,7 @@ function carouselForSelect(select,label) {
  const selected=options[Math.max(index,0)];
  const move=direction=>{if(!options.length)return;const next=options[(Math.max(index,0)+direction+options.length)%options.length];select.props.onChange?.({target:{value:next.value}})};
  const isYear=/academic|year/i.test(label);
- const display=isYear?(selected?.label||"—").replace(/^AY\s*/i,"AY"):(selected?.value||"All");
+ const display=isYear?(selected?.label||"—").replace(/^AY\s*/i,"AY"):(selected?.value?(/^[A-Z0-9]{2,8}$/.test(selected.value)?selected.value:(Object.entries(schoolNames).find(([,name])=>name===selected.value)?.[0]||selected.value)):"All");
  return <div className="shared-carousel-control" key={label} aria-label={label}><span className="shared-carousel-label">{label}</span><div className="shared-carousel-navigation"><button type="button" aria-label={`Previous ${label}`} onClick={()=>move(-1)} disabled={!options.length}>‹</button><span title={selected?.label}>{display}</span><button type="button" aria-label={`Next ${label}`} onClick={()=>move(1)} disabled={!options.length}>›</button></div><div className="shared-carousel-dots" aria-hidden="true">{options.slice(0,9).map((option,i)=><i key={option.value} className={i===index?"active":""}/>)}</div></div>;
 }
 function extract(node,out=[]) {
