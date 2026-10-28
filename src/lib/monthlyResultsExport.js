@@ -1,80 +1,103 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
-const MONEY_FORMAT = '#,##0.00;[Red](#,##0.00);–';
-const MONTH_ORDER = [9,10,11,12,1,2,3,4,5,6,7,8];
-const safeName = value => String(value || "All").replace(/[^a-z0-9_-]/gi, "_").slice(0,45);
-const monthDate = value => { const match=String(value||"").match(/^(\d{4})-(\d{2})/); return match ? new Date(Number(match[1]),Number(match[2])-1,1) : null; };
-const monthSort = (a,b) => { const ay=String(a.academicYear).localeCompare(String(b.academicYear));if(ay)return ay;return MONTH_ORDER.indexOf(Number(a.month.slice(5,7)))-MONTH_ORDER.indexOf(Number(b.month.slice(5,7))); };
+const MONTH_ORDER=[9,10,11,12,1,2,3,4,5,6,7,8];
+const MONEY_FORMAT='#,##0.00;[Red](#,##0.00);–';
+const safeName=value=>String(value||"All").replace(/[^a-z0-9_-]/gi,"_").slice(0,45);
+const monthSort=(a,b)=>String(a.academicYear).localeCompare(String(b.academicYear))||MONTH_ORDER.indexOf(Number(a.month.slice(5,7)))-MONTH_ORDER.indexOf(Number(b.month.slice(5,7)));
+const BORDER={top:{style:"thin",color:{argb:"FFD9E0E7"}},bottom:{style:"thin",color:{argb:"FFD9E0E7"}},left:{style:"thin",color:{argb:"FFD9E0E7"}},right:{style:"thin",color:{argb:"FFD9E0E7"}}};
+const FILL=argb=>({type:"pattern",pattern:"solid",fgColor:{argb}});
+const FONT={name:"Aptos",size:10,color:{argb:"FF344054"}};
 
-/**
- * Download a school-by-school financial matrix. Only the filtered records supplied
- * by the dashboard are included. Metric amounts come from source records, not
- * formatted table cells or estimated commission rates.
- */
-export function exportMonthlyResults({title,records=[],metrics=[],academicYear="",scenario="Actual",yearBasis=""}) {
-  if(!records.length || !metrics.length) return;
+/** Export source amounts as a formatted Excel financial report. */
+export async function exportMonthlyResults({title,records=[],metrics=[],academicYear="",scenario="Actual",yearBasis=""}) {
+  if(!records.length||!metrics.length)return;
   const schools=[...new Set(records.map(r=>r.schoolCode||r.school).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  if(!schools.length) return;
-  const months=new Map();
-  const values=new Map();
+  if(!schools.length)return;
+  const months=new Map(),values=new Map();
   records.forEach(record=>{
-    const school=record.schoolCode||record.school;
-    const month=String(record.month||"").slice(0,7);
-    const ay=record.academicYear||"";
+    const school=record.schoolCode||record.school,month=String(record.month||"").slice(0,7),ay=record.academicYear||"";
     if(!school||!/^\d{4}-\d{2}$/.test(month))return;
-    const rowKey=`${ay}|${month}`;
-    months.set(rowKey,{academicYear:ay,month});
     const metric=metrics.find(m=>m.codes.includes(String(record.metricCode||record.incomeTypeCode||record.categoryCode||"").toLowerCase()));
     if(!metric)return;
+    const rowKey=`${ay}|${month}`;
+    months.set(rowKey,{academicYear:ay,month});
     const key=`${rowKey}|${school}|${metric.key}`;
     values.set(key,(values.get(key)||0)+Number(record.amount||0));
   });
   const ordered=[...months.values()].sort(monthSort);
   if(!ordered.length)return;
-  const matrix=[[],[],[]];
-  const width=1+schools.length*metrics.length+metrics.length;
-  matrix[0][0]=title+" — Monthly Results";
-  matrix[1][0]=[academicYear||"All Academic Years",scenario,yearBasis].filter(Boolean).join(" | ");
-  matrix[2][0]="Month";
-  const merges=[{s:{r:0,c:0},e:{r:0,c:width-1}},{s:{r:1,c:0},e:{r:1,c:width-1}}];
-  const headerRow=["Month"];
-  const subheaderRow=[""];
-  schools.forEach(school=>{
-    headerRow.push(school,...Array(metrics.length-1).fill(""));
-    metrics.forEach(m=>subheaderRow.push(m.label));
-    const start=1+schools.indexOf(school)*metrics.length;
-    if(metrics.length>1)merges.push({s:{r:3,c:start},e:{r:3,c:start+metrics.length-1}});
-  });
-  headerRow.push("TOTAL",...Array(metrics.length-1).fill(""));
-  metrics.forEach(m=>subheaderRow.push(m.label));
-  if(metrics.length>1)merges.push({s:{r:3,c:width-metrics.length},e:{r:3,c:width-1}});
-  matrix.push(headerRow,subheaderRow);
-  const totals=new Array(width).fill(0);
-  ordered.forEach(({academicYear:ay,month})=>{
-    const date=monthDate(month),row=[date];
-    metrics.forEach(()=>{});
-    schools.forEach(school=>metrics.forEach(m=>{
-      const amount=values.get(`${ay}|${month}|${school}|${m.key}`)||0;
-      row.push(amount);
-      totals[row.length-1]+=amount;
-    }));
-    metrics.forEach((m,i)=>{
-      const sum=schools.reduce((acc,school)=>acc+(values.get(`${ay}|${month}|${school}|${m.key}`)||0),0);
-      row.push(sum);totals[row.length-1]+=sum;
-    });
-    matrix.push(row);
-  });
-  matrix.push(["TOTAL",...totals.slice(1)]);
-  const sheet=XLSX.utils.aoa_to_sheet(matrix);
-  sheet["!merges"]=merges;
-  sheet["!cols"]=[{wch:17},...Array.from({length:width-1},()=>({wch:17}))];
-  sheet["!freeze"]={xSplit:1,ySplit:5};
-  sheet["!autofilter"]={ref:`A5:${XLSX.utils.encode_col(width-1)}${matrix.length}`};
-  for(let r=5;r<matrix.length-1;r++){
-    const cell=sheet[`A${r+1}`];if(cell&&cell.t==="d")cell.z="mmm yyyy";
-    for(let c=1;c<width;c++){const x=sheet[XLSX.utils.encode_cell({r,c})];if(x&&x.t==="n")x.z=MONEY_FORMAT;}
+  // Only show right-hand consolidated totals when multiple schools are in scope.
+  const includeSchoolTotals=schools.length>1;
+  const width=1+schools.length*metrics.length+(includeSchoolTotals?metrics.length:0);
+  const workbook=new ExcelJS.Workbook();
+  workbook.creator="Commercial Operations Dashboard";
+  workbook.created=new Date();
+  const sheet=workbook.addWorksheet("Monthly Results",{views:[{state:"frozen",xSplit:1,ySplit:5,showGridLines:false}]});
+  sheet.getColumn(1).width=18;
+  for(let c=2;c<=width;c++)sheet.getColumn(c).width=19;
+  sheet.mergeCells(1,1,1,width);
+  sheet.getCell(1,1).value=`${title} | Monthly Results`;
+  sheet.mergeCells(2,1,2,width);
+  sheet.getCell(2,1).value=[academicYear||"All Academic Years",scenario,yearBasis].filter(Boolean).join("  •  ");
+  sheet.getRow(1).height=30;sheet.getRow(2).height=24;sheet.getRow(3).height=12;
+  sheet.getCell(4,1).value="Month";
+  sheet.mergeCells(4,1,5,1);
+  let col=2;
+  for(const school of schools){
+    const start=col;
+    metrics.forEach(metric=>{sheet.getCell(5,col++).value=metric.label;});
+    if(col-start>1)sheet.mergeCells(4,start,4,col-1);
+    sheet.getCell(4,start).value=school;
   }
-  for(let c=1;c<width;c++){const x=sheet[XLSX.utils.encode_cell({r:matrix.length-1,c})];if(x)x.z=MONEY_FORMAT;}
-  const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,sheet,"Monthly Results");
-  XLSX.writeFile(book,`${safeName(title)}_Monthly_Results_${safeName(academicYear)}.xlsx`);
+  if(includeSchoolTotals){
+    const start=col;
+    metrics.forEach(metric=>{sheet.getCell(5,col++).value=metric.label;});
+    if(col-start>1)sheet.mergeCells(4,start,4,col-1);
+    sheet.getCell(4,start).value="ALL SCHOOLS";
+  }
+  sheet.getRow(4).height=25;sheet.getRow(5).height=32;
+  const columnTotals=Array(width+1).fill(0);
+  ordered.forEach(({academicYear:ay,month},index)=>{
+    const row=sheet.getRow(6+index);
+    // Store month as an explicit display label to avoid locale-dependent dates.
+    const [year,number]=month.split("-").map(Number);
+    row.getCell(1).value=new Intl.DateTimeFormat("en-GB",{month:"short"}).format(new Date(year,number-1,1))+"-"+year;
+    let c=2;
+    for(const school of schools)for(const metric of metrics){
+      const amount=values.get(`${ay}|${month}|${school}|${metric.key}`)||0;
+      row.getCell(c).value=amount;columnTotals[c]+=amount;c++;
+    }
+    if(includeSchoolTotals)for(const metric of metrics){
+      const amount=schools.reduce((sum,school)=>sum+(values.get(`${ay}|${month}|${school}|${metric.key}`)||0),0);
+      row.getCell(c).value=amount;columnTotals[c]+=amount;c++;
+    }
+    row.height=22;
+  });
+  const lastRow=6+ordered.length;
+  sheet.getCell(lastRow,1).value="TOTAL";
+  for(let c=2;c<=width;c++)sheet.getCell(lastRow,c).value=columnTotals[c];
+  sheet.getRow(lastRow).height=27;
+  for(let r=1;r<=lastRow;r++)for(let c=1;c<=width;c++){
+    const cell=sheet.getCell(r,c);
+    cell.font={...FONT};
+    cell.alignment={vertical:"middle",horizontal:c===1?"left":"right"};
+    if(r>=4)cell.border=BORDER;
+    if(r>=6&&c>1)cell.numFmt=MONEY_FORMAT;
+    if(r===1){cell.fill=FILL("FF17324D");cell.font={...FONT,size:15,bold:true,color:{argb:"FFFFFFFF"}};cell.alignment={vertical:"middle",horizontal:"left"};}
+    else if(r===2){cell.fill=FILL("FFEAF1F6");cell.font={...FONT,italic:true,color:{argb:"FF475467"}};cell.alignment={vertical:"middle",horizontal:"left"};}
+    else if(r===4){cell.fill=FILL("FF244C68");cell.font={...FONT,bold:true,color:{argb:"FFFFFFFF"}};cell.alignment={vertical:"middle",horizontal:"center"};}
+    else if(r===5){cell.fill=FILL("FFE8F0F5");cell.font={...FONT,bold:true,color:{argb:"FF344054"}};cell.alignment={vertical:"middle",horizontal:"center",wrapText:true};}
+    else if(r===lastRow){cell.fill=FILL("FFE0E7EE");cell.font={...FONT,bold:true,color:{argb:"FF101828"}};}
+    else if(r%2===1){cell.fill=FILL("FFF8FAFC");}
+    if(includeSchoolTotals&&r>=6&&c>1+schools.length*metrics.length){
+      cell.fill=FILL(r===lastRow?"FFD3DEE8":"FFEFF5F9");
+      cell.font={...FONT,bold:true,color:{argb:"FF17324D"}};
+    }
+  }
+  const buffer=await workbook.xlsx.writeBuffer();
+  const url=URL.createObjectURL(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+  const anchor=document.createElement("a");
+  anchor.href=url;anchor.download=`${safeName(title)}_Monthly_Results_${safeName(academicYear)}.xlsx`;
+  document.body.appendChild(anchor);anchor.click();anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
