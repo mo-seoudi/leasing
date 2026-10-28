@@ -196,3 +196,8 @@
   .dashboard-results-pagination { justify-content:flex-start; overflow-x:auto; }
   .dashboard-results-pagination > span { display:none; }
 }
+
+.dashboard-table-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.dashboard-export-button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:transparent;color:#667085;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.dashboard-export-button:hover,.dashboard-export-button:focus-visible{background:#f2f7fa;border-color:#d8e5ed;color:#1679a7}
+.dashboard-export-button:focus-visible{outline:2px solid #1679a7;outline-offset:2px}
